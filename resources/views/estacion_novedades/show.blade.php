@@ -5,6 +5,10 @@
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Detalle de Novedad</h6>
         <div>
+            <a href="{{ route('estacion-novedades.export.emergencias', $novedad) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel"></i> Exportar Emergencias
+             </a>
+
             <a href="{{ route('estacion-novedades.pdf', $novedad) }}" class="btn btn-danger btn-sm" target="_blank">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
             </a>

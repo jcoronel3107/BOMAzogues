@@ -349,6 +349,14 @@ Route::get('notificaciones/marcar-leida/{id}', function($id) {
     return back();
 })->name('notificaciones.markAsRead')->middleware('auth');
 
+/* --------------------------------------- Dashboard Novedades    ----------------------- */
+Route::get('dashboard-novedades', 'DashboardNovedadesController@index')->name('dashboard.novedades')->middleware('auth');
+Route::get('dashboard-novedades/datos', 'DashboardNovedadesController@getChartData')->name('dashboard.novedades.datos')->middleware('auth');
+
+
+/*-----------------Exportar Novedades Excel---------------------------------*/
+Route::get('estacion-novedades/export/excel', 'EstacionNovedadController@exportExcel')->name('estacion-novedades.export.excel')->middleware('auth');
+Route::get('estacion-novedades/{id}/export/emergencias', 'EstacionNovedadController@exportEmergencias')->name('estacion-novedades.export.emergencias')->middleware('auth');
 /* ----------------------------------------------------------------------------------------------
 /                                   Rutas Menu Principal
 /

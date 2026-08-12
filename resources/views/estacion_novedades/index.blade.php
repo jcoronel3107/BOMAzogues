@@ -9,6 +9,9 @@
                 <i class="fas fa-plus"></i> Nueva Novedad
             </a>
         @endcan
+        <a href="{{ route('estacion-novedades.export.excel') }}" class="btn btn-success btn-sm">
+            <i class="fas fa-file-excel"></i> Exportar Excel
+        </a>
     </div>
     <div class="card-body">
         @if(session('success'))

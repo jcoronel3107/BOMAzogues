@@ -15,6 +15,9 @@ use App\Notifications\NovedadEnRevision;
 use App\Notifications\NovedadAprobada;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\NovedadesExport;
+use App\Exports\EmergenciasExport;
 
 class EstacionNovedadController extends Controller
 {
@@ -131,8 +134,6 @@ class EstacionNovedadController extends Controller
         return redirect()->route('estacion-novedades.index')
             ->with('success', 'Novedad creada exitosamente.');
     }
-
-    
 
     public function show($id)
     {
@@ -337,8 +338,6 @@ class EstacionNovedadController extends Controller
             ->with('error', 'Error: ' . $e->getMessage());
     }
 }
-
-
     // Aprobar
     public function aprobar($id)
 {
@@ -667,5 +666,22 @@ class EstacionNovedadController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
         }
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filtro = [
+            'estado' => $request->estado,
+            'fecha_desde' => $request->fecha_desde,
+            'fecha_hasta' => $request->fecha_hasta,
+            'estacion_id' => $request->estacion_id,
+        ];
+
+        return Excel::download(new NovedadesExport($filtro), 'novedades_' . date('Y-m-d') . '.xlsx');
+    }
+
+    public function exportEmergencias($id)
+    {
+        return Excel::download(new EmergenciasExport($id), 'emergencias_novedad_' . $id . '_' . date('Y-m-d') . '.xlsx');
     }
 }

@@ -151,7 +151,19 @@
             </div>
         </div>
     </li>
-
+<!-- Nav Item - Dashboard Novedades -->
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseDashboard" aria-expanded="true" aria-controls="collapseDashboard">
+        <i class="fas fa-fw fa-chart-pie"></i>
+        <span>Dashboard</span>
+    </a>
+    <div id="collapseDashboard" class="collapse" aria-labelledby="headingDashboard" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Estadísticas:</h6>
+            <a class="collapse-item" href="{{ route('dashboard.novedades') }}">Novedades</a>
+        </div>
+    </div>
+</li>
 
 
 

@@ -3,6 +3,12 @@ Super-Admin	✅	✅	✅	✅	✅	✅
 Elaborador	✅	✅	✅	✅	❌	❌
 Revisor	❌	❌	❌	✅	✅	❌
 Aprobador	❌	❌	❌	✅	❌	✅
+Notificaciones:
+Evento	            Quien recibe	Canal
+Enviar a revisión	Elaborador	Database
+Enviar a revisión	Revisores, Aprobadores, Admins	Database
+Aprobar	Elaborador	Database
+Aprobar	Revisores,  Aprobadores, Admins	Database
 
 Resumen del módulo novedades completo:
 
