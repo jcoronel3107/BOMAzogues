@@ -1,4 +1,26 @@
+Rol	Crear	Editar	Eliminar	Ver	Revisar	Aprobar
+Super-Admin	✅	✅	✅	✅	✅	✅
+Elaborador	✅	✅	✅	✅	❌	❌
+Revisor	❌	❌	❌	✅	✅	❌
+Aprobador	❌	❌	❌	✅	❌	✅
 
+Resumen del módulo novedades completo:
+
+✅ Tablas: estacion_novedades, estacion_emergencias, estacion_vehiculos, estacion_personal
+✅ Modelos: EstacionNovedad, EstacionEmergencia, EstacionVehiculo, EstacionPersonal
+✅ Controlador: EstacionNovedadController (CRUD completo)
+✅ Vistas: index, create, show, edit
+✅ Rutas: listado, crear, ver, editar, eliminar, enviar a revisión, aprobar
+✅ Sidebar: Enlace en Addons → Novedades
+Flujo de trabajo del módulo:
+
+    Crear Novedad → Estado: "elaboracion"
+
+    Editar → Solo si está en "elaboracion"
+
+    Enviar a Revisión → Estado: "revision"
+
+    Aprobar → Estado: "aprobado" (bloquea edición/eliminación)
 
 System for the Control and Registration of Incidents to which a Firefighters Institution attends
 

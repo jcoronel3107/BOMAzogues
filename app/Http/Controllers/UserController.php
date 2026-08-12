@@ -124,7 +124,8 @@ class UserController extends Controller
         return redirect("/user");
     }
 
-    public function update2(Request $request) {
+    public function update2(Request $request) 
+    {
         //
         $user = $request->user_id;
   
@@ -187,6 +188,45 @@ class UserController extends Controller
         return view( "user.profile",compact('Listpersonnel_employee','sidebar'));
 
     }
+
+    public function update(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+    
+    $rules = [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'cargo' => 'nullable|string',
+        'status' => 'nullable|string',
+        'password' => 'nullable|min:8|confirmed',
+    ];
+    
+    // Solo aplicar unique si el email o nombre cambiaron
+    if ($request->email != $user->email) {
+        $rules['email'] = 'required|email|max:255|unique:users,email,' . $id;
+    }
+    if ($request->name != $user->name) {
+        $rules['name'] = 'required|string|max:255|unique:users,name,' . $id;
+    }
+    
+    $request->validate($rules);
+    
+    $data = [
+        'name' => $request->name,
+        'email' => $request->email,
+        'cargo' => $request->cargo,
+        'status' => $request->status,
+    ];
+    
+    if($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
+    }
+    
+    $user->update($data);
+    
+    return redirect()->route('profile.edit', $id)->with('success', 'Usuario actualizado correctamente');
+}
+
 
     public function downloadPDF(Request $request) {
         

@@ -252,8 +252,11 @@ Route::get('profile/edit/{id}',   					'UserController@edit')->name('profile.edi
 Route::put('users/changerol',						'UserController@CambiaRoldeUsuario')->name('changerol')->middleware('role:admin|Super-Admin');
 Route::put('users/createpermiso',					'UserController@createpermiso')->name('createpermiso')->middleware('role:admin|Super-Admin');
 Route::put('users/cambiapermisosarol/',				'UserController@CambiaPermisosRol')->name('changepermissions')->middleware('role:admin|Super-Admin');
+
 Route::get('profile/perfil', 						'ProfileController@index')->name('profile.index')->middleware('auth');
-Route::put('profile/perfil', 						'ProfileController@update')->name('profile.update')->middleware('auth');
+Route::put('profile/edit/{id}', 'UserController@update')->name('profile.update')->middleware('role:admin|Super-Admin');
+
+
 Route::put('profile/pass', 							'ProfileController@pass')->name('profile.pass')->middleware('auth');
 Route::put('profile/avatar', 						'ProfileController@update_avatar')->name('profile.avatar')->middleware('auth');
 Route::get('users/permisos',						'UserController@permisos')->middleware('role:admin|Super-Admin');
@@ -309,11 +312,19 @@ Route::get('/downloadPDFmovilizacion/{id}', 		'MovilizacionController@downloadPD
 Route::get('/sendReportMovilizacion/{id}',			'MailController@SendMailsMovilizacion')->middleware('role:inspector|admin|Super-Admin');
 Route::get('/sendReportPrevencion/{id}',			'MailController@SendMailsPrevencion')->middleware('role:inspector|admin|Super-Admin');
 Route::get('/consultaentrefechasmov',	        	'MovilizacionController@consultaentrefechas')->name('consultaentrefechasmov')->middleware('role:inspector|admin|Super-Admin');
-// Rutas para Inspecciones
+
+/* --------------------------------------- Sub modulo Inspecciones    ----------------------- */
 Route::resource('inspeccion', 'InspeccionController')->middleware('auth');
 
 Route::get('inspeccion/{id}/pdf', [App\Http\Controllers\InspeccionController::class, 'exportPdf'])->name('inspeccion.pdf')->middleware('auth');
 
+/* --------------------------------------- Sub modulo Novedades    ----------------------- */
+
+// Rutas para Novedades de Estación
+Route::resource('estacion-novedades', 'EstacionNovedadController')->middleware('auth');
+Route::post('estacion-novedades/{id}/enviar-revision', 'EstacionNovedadController@enviarRevision')->name('estacion-novedades.enviar-revision')->middleware('auth');
+Route::post('estacion-novedades/{id}/aprobar', 'EstacionNovedadController@aprobar')->name('estacion-novedades.aprobar')->middleware('auth');
+Route::get('estacion-novedades/{id}/pdf', 'EstacionNovedadController@exportPdf')->name('estacion-novedades.pdf')->middleware('auth');
 Route::get('/test-pdf', function() {
     $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
     $pdf->setPrintHeader(false);
@@ -323,6 +334,20 @@ Route::get('/test-pdf', function() {
     return $pdf->Output('test.pdf', 'D');
 });
 
+/* --------------------------------------- Rutas para notificaciones    ----------------------- */
+
+Route::get('notificaciones/marcar-todas-leidas', function() {
+    auth()->user()->unreadNotifications->markAsRead();
+    return back()->with('success', 'Todas las notificaciones marcadas como leídas');
+})->name('notificaciones.markAllAsRead')->middleware('auth');
+
+Route::get('notificaciones/marcar-leida/{id}', function($id) {
+    $notification = auth()->user()->notifications()->find($id);
+    if ($notification) {
+        $notification->markAsRead();
+    }
+    return back();
+})->name('notificaciones.markAsRead')->middleware('auth');
 
 /* ----------------------------------------------------------------------------------------------
 /                                   Rutas Menu Principal

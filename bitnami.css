@@ -14,4 +14,27 @@ table {
   font-size: 30px;
 }
 
+/* Notificaciones */
+.dropdown-list {
+    max-height: 400px;
+    overflow-y: auto;
+    width: 350px;
+}
+
+.badge-counter {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 10px;
+    padding: 3px 6px;
+}
+
+.dropdown-item {
+    white-space: normal;
+    padding: 10px 15px;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
 
