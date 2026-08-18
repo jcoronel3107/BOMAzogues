@@ -1,32 +1,47 @@
-Rol	Crear	Editar	Eliminar	Ver	Revisar	Aprobar
-Super-Admin	✅	✅	✅	✅	✅	✅
-Elaborador	✅	✅	✅	✅	❌	❌
-Revisor	❌	❌	❌	✅	✅	❌
-Aprobador	❌	❌	❌	✅	❌	✅
-Notificaciones:
-Evento	            Quien recibe	Canal
-Enviar a revisión	Elaborador	Database
-Enviar a revisión	Revisores, Aprobadores, Admins	Database
-Aprobar	Elaborador	Database
-Aprobar	Revisores,  Aprobadores, Admins	Database
+  Módulo de Movilizaciones
 
-Resumen del módulo novedades completo:
+    Tabla: movilizacions con todos los campos
 
-✅ Tablas: estacion_novedades, estacion_emergencias, estacion_vehiculos, estacion_personal
-✅ Modelos: EstacionNovedad, EstacionEmergencia, EstacionVehiculo, EstacionPersonal
-✅ Controlador: EstacionNovedadController (CRUD completo)
-✅ Vistas: index, create, show, edit
-✅ Rutas: listado, crear, ver, editar, eliminar, enviar a revisión, aprobar
-✅ Sidebar: Enlace en Addons → Novedades
-Flujo de trabajo del módulo:
+    Modelo: Movilizacion con relaciones y métodos
 
-    Crear Novedad → Estado: "elaboracion"
+    Controlador: CRUD completo + Autorizar + Rechazar + Finalizar
 
-    Editar → Solo si está en "elaboracion"
+    Vistas: Index, Create, Show, Edit
 
-    Enviar a Revisión → Estado: "revision"
+    Flujo: Pendiente → Aprobado/Rechazado → Finalizado
 
-    Aprobar → Estado: "aprobado" (bloquea edición/eliminación)
+    Integrantes: Listado dinámico de personal en la comisión
+
+    Cálculos: KM recorridos automáticos
+
+📋 Campos incluidos
+Sección	Campos
+Datos principales	Fecha salida, Hora salida, Motivo, Lugar origen, Destino
+Conductor	Nombres, Cédula, Cargo
+Vehículo	Marca, Placa, KM salida, KM retorno
+Comisión	Lista de integrantes (nombre, cédula, cargo)
+Control	Estado, Observaciones, Usuario creador, editor, autorizador
+🔄 Flujo de trabajo
+
+    Crear → estado: pendiente
+
+    Autorizar → estado: aprobado
+
+    Finalizar → estado: finalizado (con fecha de retorno y km de retorno)
+
+    Rechazar → estado: rechazado
+
+📊 Módulos completos del sistema
+
+    ✅ Novedades de Estación (CRUD + PDF + Excel + Dashboard)
+
+    ✅ Movilizaciones de Unidades (CRUD + Autorización + Finalización)
+
+    ✅ Inspecciones (CRUD + PDF)
+
+    ✅ Usuarios (Edición + Roles)
+
+    ✅ Notificaciones (Campanita + Base de datos)
 
 System for the Control and Registration of Incidents to which a Firefighters Institution attends
 
