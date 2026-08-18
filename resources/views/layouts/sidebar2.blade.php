@@ -164,7 +164,20 @@
         </div>
     </div>
 </li>
-
+<!-- Nav Item - Movilizaciones -->
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMovilizaciones" aria-expanded="true" aria-controls="collapseMovilizaciones">
+        <i class="fas fa-fw fa-truck-moving"></i>
+        <span>Movilizaciones</span>
+    </a>
+    <div id="collapseMovilizaciones" class="collapse" aria-labelledby="headingMovilizaciones" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Gestión de Movilizaciones:</h6>
+            <a class="collapse-item" href="{{ route('movilizaciones.index') }}">Lista de Movilizaciones</a>
+            <a class="collapse-item" href="{{ route('movilizaciones.create') }}">Nueva Movilización</a>
+        </div>
+    </div>
+</li>
 
 
     </div>
