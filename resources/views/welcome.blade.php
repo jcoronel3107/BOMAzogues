@@ -2,7 +2,7 @@
 
 @section( "cabeza" )
 
-<title>Incidentes2 - BCBVC</title>
+<title>FireControl - BCBVA</title>
 
 @endsection
 
