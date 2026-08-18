@@ -14,12 +14,14 @@
         "laravel/ui": "^3.4",
         "laravelcollective/html": "^6.3",
         "maatwebsite/excel": "^3.1",
+        "nette/schema": "1.2.5",
         "setasign/fpdf": "^1.9",
         "simplesoftwareio/simple-qrcode": "^4.0",
         "spatie/geocoder": "^3.9",
         "spatie/laravel-activitylog": "^3.16",
         "spatie/laravel-cookie-consent": "^2.12",
-        "spatie/laravel-permission": "^3.16"
+        "spatie/laravel-permission": "^3.16",
+        "symfony/css-selector": "6.0"
     },
     "require-dev": {
         "facade/ignition": "^2.17",

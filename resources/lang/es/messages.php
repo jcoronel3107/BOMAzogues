@@ -3,7 +3,7 @@
 //resources/lang/en/messages.php
 
 return [
-    'name_app' => 'Incidentes',
+    'name_app' => 'FireControl',
     'event' => 'Eventos',
     'flood' => 'Inundación',
     'rescue' => 'Rescate',
@@ -25,7 +25,7 @@ return [
     'Parameterization' => 'Parametrización',
     'language' => 'Idioma',
     'Current Month Events' => 'Eventos Mes Actual',
-    'Incidents' => 'Incidentes',
+    'Incidents' => 'FireControl',
     'Firefighter station' => 'Estación de Bomberos',
     'Service Station' => 'Estación de Servicio',
     'Parishes' => 'Parroquias',

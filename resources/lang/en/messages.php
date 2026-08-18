@@ -3,7 +3,7 @@
 //resources/lang/en/messages.php
 
 return [
-    'name_app' => 'Incidents',
+    'name_app' => 'FireControl',
     'event' => 'Events',
     'flood' => 'Flood',
     'rescue' => 'Rescue',
@@ -46,7 +46,7 @@ return [
     'Service Commission Information Registry'=>'Service Commission Information Registry',
     'Mobilization Information Registry'=>'Mobilization Information Registry',
     'Check Mobilization Information'=>'Check Mobilization Information',
-    'Incident'=>'Incidents',
+    'Incident'=>'FireControl',
     'Station'=>'Station',
     'Date'=>'Date',
     'Address'=>'Address',

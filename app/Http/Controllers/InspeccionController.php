@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Inspeccion;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\InspeccionCreada;
 use Illuminate\Support\Str;
 
 class InspeccionController extends Controller
@@ -246,4 +250,34 @@ class InspeccionController extends Controller
             return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
         }
     }
+
+    public function enviarCorreo($id)
+{
+    try {
+        $inspeccion = Inspeccion::with(['inspector'])->findOrFail($id);
+        
+        // Log para verificar que llegamos hasta aquí
+        \Log::info('Intentando enviar correo para inspección ID: ' . $id);
+        
+        if ($inspeccion->inspector) {
+            $inspeccion->inspector->notify(new InspeccionCreada($inspeccion, Auth::user()));
+            \Log::info('Correo enviado al inspector: ' . $inspeccion->inspector->name);
+        } else {
+            \Log::warning('No hay inspector asignado para la inspección ID: ' . $id);
+        }
+        
+        // Enviar a los administradores
+        $admins = User::role(['Super-Admin', 'admin'])->get();
+        if ($admins->count() > 0) {
+            Notification::send($admins, new InspeccionCreada($inspeccion, Auth::user()));
+            \Log::info('Correo enviado a ' . $admins->count() . ' administradores');
+        }
+        
+        return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
+        
+    } catch (\Exception $e) {
+        \Log::error('Error al enviar correo: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
+    }
+}
 }

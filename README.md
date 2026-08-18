@@ -1,4 +1,47 @@
+  Módulo de Movilizaciones
 
+    Tabla: movilizacions con todos los campos
+
+    Modelo: Movilizacion con relaciones y métodos
+
+    Controlador: CRUD completo + Autorizar + Rechazar + Finalizar
+
+    Vistas: Index, Create, Show, Edit
+
+    Flujo: Pendiente → Aprobado/Rechazado → Finalizado
+
+    Integrantes: Listado dinámico de personal en la comisión
+
+    Cálculos: KM recorridos automáticos
+
+📋 Campos incluidos
+Sección	Campos
+Datos principales	Fecha salida, Hora salida, Motivo, Lugar origen, Destino
+Conductor	Nombres, Cédula, Cargo
+Vehículo	Marca, Placa, KM salida, KM retorno
+Comisión	Lista de integrantes (nombre, cédula, cargo)
+Control	Estado, Observaciones, Usuario creador, editor, autorizador
+🔄 Flujo de trabajo
+
+    Crear → estado: pendiente
+
+    Autorizar → estado: aprobado
+
+    Finalizar → estado: finalizado (con fecha de retorno y km de retorno)
+
+    Rechazar → estado: rechazado
+
+📊 Módulos completos del sistema
+
+    ✅ Novedades de Estación (CRUD + PDF + Excel + Dashboard)
+
+    ✅ Movilizaciones de Unidades (CRUD + Autorización + Finalización)
+
+    ✅ Inspecciones (CRUD + PDF)
+
+    ✅ Usuarios (Edición + Roles)
+
+    ✅ Notificaciones (Campanita + Base de datos)
 
 System for the Control and Registration of Incidents to which a Firefighters Institution attends
 

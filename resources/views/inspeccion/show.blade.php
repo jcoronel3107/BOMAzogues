@@ -5,6 +5,13 @@
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Detalle de Inspección</h6>
         <div>
+            <!-- Botón Enviar Correo -->
+            <a href="{{ route('inspeccion.enviar-correo', $inspeccion) }}" class="btn btn-info btn-sm" title="Enviar por Correo">
+                <i class="fas fa-envelope"></i> Enviar Correo
+            </a>
+            <a href="{{ route('inspeccion.pdf', $inspeccion) }}" class="btn btn-danger btn-sm" target="_blank">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
             <a href="{{ route('inspeccion.edit', $inspeccion) }}" class="btn btn-warning btn-sm">
                 <i class="fas fa-edit"></i> Editar
             </a>
@@ -13,7 +20,28 @@
             </a>
         </div>
     </div>
+
     <div class="card-body">
+        <!-- Mensaje de éxito -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        <!-- Mensaje de error -->
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-md-6">
                 <table class="table table-bordered">

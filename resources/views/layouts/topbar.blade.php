@@ -21,6 +21,71 @@
             </div>
         
     </ul>
+
+    <!-- ====== NOTIFICACIONES ====== -->
+    <ul class="navbar-nav">
+        <div class="topbar-divider d-none d-sm-block"></div>
+    </ul>
+    <ul class="navbar-nav">
+        <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw"></i>
+                <!-- Contador de notificaciones no leídas -->
+                @if(auth()->user()->unreadNotifications->count() > 0)
+                    <span class="badge badge-danger badge-counter">{{ auth()->user()->unreadNotifications->count() }}</span>
+                @endif
+            </a>
+            <!-- Dropdown - Notificaciones -->
+            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                <h6 class="dropdown-header">
+                    Notificaciones
+                    <span class="float-right">
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <a href="{{ route('notificaciones.markAllAsRead') }}" class="text-white small">
+                                <i class="fas fa-check-double"></i> Marcar todas
+                            </a>
+                        @endif
+                    </span>
+                </h6>
+                
+                <!-- Notificaciones no leídas -->
+                @forelse(auth()->user()->unreadNotifications as $notification)
+                    <a class="dropdown-item d-flex align-items-center" href="{{ $notification->data['url'] ?? '#' }}">
+                        <div>
+                            <div class="small text-gray-500">{{ $notification->created_at->diffForHumans() }}</div>
+                            <span class="font-weight-bold">{{ $notification->data['mensaje'] ?? 'Nueva notificación' }}</span>
+                            <div class="small text-muted">{{ $notification->data['codigo'] ?? '' }}</div>
+                        </div>
+                    </a>
+                @empty
+                    <a class="dropdown-item d-flex align-items-center" href="#">
+                        <div class="text-center w-100">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                            <p class="text-gray-500 mt-2">No hay notificaciones pendientes</p>
+                        </div>
+                    </a>
+                @endforelse
+                
+                <!-- Notificaciones leídas (opcional) -->
+                @if(auth()->user()->readNotifications->count() > 0)
+                    <div class="dropdown-divider"></div>
+                    <h6 class="dropdown-header">
+                        Leídas
+                    </h6>
+                    @foreach(auth()->user()->readNotifications->take(5) as $notification)
+                        <a class="dropdown-item d-flex align-items-center text-muted" href="{{ $notification->data['url'] ?? '#' }}">
+                            <div>
+                                <div class="small text-gray-500">{{ $notification->created_at->diffForHumans() }}</div>
+                                <span>{{ $notification->data['mensaje'] ?? 'Notificación leída' }}</span>
+                            </div>
+                        </a>
+                    @endforeach
+                @endif
+            </div>
+        </li>
+    </ul>
+    <!-- ====== FIN NOTIFICACIONES ====== -->
+
     <ul class="navbar-nav"><!-- Topbar NavItem Lenguaje -->
         <div class="topbar-divider d-none d-sm-block"></div>
         <!--Comprobamos si el status esta a true y existe más de un lenguaje-->

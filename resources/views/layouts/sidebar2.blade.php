@@ -129,6 +129,57 @@
     <hr class="sidebar-divider"><!--   Divider -->
     <div class="sidebar-heading"><!--  Heading -->
       Addons
+          <!-- Divider -->
+    <hr class="sidebar-divider">
+    
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Addons
+    </div>
+
+    <!-- Nav Item - Novedades de Estación -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNovedades" aria-expanded="true" aria-controls="collapseNovedades">
+            <i class="fas fa-fw fa-clipboard-list"></i>
+            <span>Novedades</span>
+        </a>
+        <div id="collapseNovedades" class="collapse" aria-labelledby="headingNovedades" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestión de Novedades:</h6>
+                <a class="collapse-item" href="{{ url('/estacion-novedades') }}">Lista de Novedades</a>
+                <a class="collapse-item" href="{{ url('/estacion-novedades/create') }}">Nueva Novedad</a>
+            </div>
+        </div>
+    </li>
+<!-- Nav Item - Dashboard Novedades -->
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseDashboard" aria-expanded="true" aria-controls="collapseDashboard">
+        <i class="fas fa-fw fa-chart-pie"></i>
+        <span>Dashboard</span>
+    </a>
+    <div id="collapseDashboard" class="collapse" aria-labelledby="headingDashboard" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Estadísticas:</h6>
+            <a class="collapse-item" href="{{ route('dashboard.novedades') }}">Novedades</a>
+        </div>
+    </div>
+</li>
+<!-- Nav Item - Movilizaciones -->
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMovilizaciones" aria-expanded="true" aria-controls="collapseMovilizaciones">
+        <i class="fas fa-fw fa-truck-moving"></i>
+        <span>Movilizaciones</span>
+    </a>
+    <div id="collapseMovilizaciones" class="collapse" aria-labelledby="headingMovilizaciones" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Gestión de Movilizaciones:</h6>
+            <a class="collapse-item" href="{{ route('movilizaciones.index') }}">Lista de Movilizaciones</a>
+            <a class="collapse-item" href="{{ route('movilizaciones.create') }}">Nueva Movilización</a>
+        </div>
+    </div>
+</li>
+
+
     </div>
     <hr class="sidebar-divider"><!--   Divider -->
     <li class="nav-item"><!--          Nav Item - Pages Collapse Menu estadisticas-->

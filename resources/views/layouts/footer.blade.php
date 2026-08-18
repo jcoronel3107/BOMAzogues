@@ -3,7 +3,7 @@
         
         <div class="copyright text-center my-auto">
           <details>
-            <summary>Copyright &copy {{ date('Y') }} .: B.C.B.V.C :.</summary>
+            <summary>Copyright &copy {{ date('Y') }} .: By JotaCe:.</summary>
             <span>- By JotaCe  - </span>
           </details>
           
