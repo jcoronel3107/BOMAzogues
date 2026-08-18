@@ -8,7 +8,10 @@
             <a href="{{ route('estacion-novedades.export.emergencias', $novedad) }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel"></i> Exportar Emergencias
              </a>
-
+            <!-- Botón Enviar Correo -->
+            <a href="{{ route('estacion-novedades.enviar-correo', $novedad) }}" class="btn btn-info btn-sm" title="Enviar por Correo">
+                <i class="fas fa-envelope"></i> Enviar Correo
+            </a>
             <a href="{{ route('estacion-novedades.pdf', $novedad) }}" class="btn btn-danger btn-sm" target="_blank">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
             </a>

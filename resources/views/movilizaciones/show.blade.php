@@ -5,6 +5,10 @@
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Detalle de Movilización</h6>
         <div>
+            <!-- Botón Enviar Correo -->
+            <a href="{{ route('movilizaciones.enviar-correo', $movilizacion) }}" class="btn btn-info btn-sm" title="Enviar por Correo">
+                <i class="fas fa-envelope"></i> Enviar Correo
+            </a>
             <a href="{{ route('movilizaciones.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>

@@ -20,7 +20,8 @@
         "spatie/geocoder": "^3.9",
         "spatie/laravel-activitylog": "^3.16",
         "spatie/laravel-cookie-consent": "^2.12",
-        "spatie/laravel-permission": "^3.16"
+        "spatie/laravel-permission": "^3.16",
+        "symfony/css-selector": "6.0"
     },
     "require-dev": {
         "facade/ignition": "^2.17",

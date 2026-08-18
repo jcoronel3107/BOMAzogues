@@ -23,18 +23,19 @@ class NovedadEnRevision extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database']; // Solo guardar en base de datos
+        return ['mail', 'database'];
     }
 
     public function toMail($notifiable)
     {
         $url = url('/estacion-novedades/' . $this->novedad->id);
+        $codigo = 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT);
         
         return (new MailMessage)
-            ->subject('Nueva Novedad en Revisión - NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT))
+            ->subject('🔔 Nueva Novedad en Revisión - ' . $codigo)
             ->greeting('Hola ' . $notifiable->name . '!')
             ->line('Se ha enviado una novedad a revisión.')
-            ->line('**Código:** NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT))
+            ->line('**Código:** ' . $codigo)
             ->line('**Estación:** ' . ($this->novedad->estacion->nombre ?? 'N/A'))
             ->line('**Fecha:** ' . $this->novedad->fecha->format('d/m/Y'))
             ->line('**Elaborado por:** ' . ($this->novedad->usuarioElabora->name ?? 'N/A'))
@@ -48,20 +49,7 @@ class NovedadEnRevision extends Notification implements ShouldQueue
         return [
             'novedad_id' => $this->novedad->id,
             'codigo' => 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT),
-            'estacion' => $this->novedad->estacion->nombre ?? 'N/A',
-            'fecha' => $this->novedad->fecha->format('d/m/Y'),
-            'elaborado_por' => $this->novedad->usuarioElabora->name ?? 'N/A',
-            'mensaje' => 'La novedad NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT) . ' ha sido enviada a revisión por ' . ($this->novedad->usuarioElabora->name ?? 'N/A'),
-            'url' => '/estacion-novedades/' . $this->novedad->id,
-        ];
-    }
-
-    public function toBroadcast($notifiable)
-    {
-        return [
-            'novedad_id' => $this->novedad->id,
-            'codigo' => 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT),
-            'mensaje' => 'Novedad NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT) . ' enviada a revisión',
+            'mensaje' => 'La novedad ha sido enviada a revisión por ' . ($this->usuario->name ?? 'N/A'),
             'url' => '/estacion-novedades/' . $this->novedad->id,
         ];
     }

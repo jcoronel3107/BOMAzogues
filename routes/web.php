@@ -333,7 +333,10 @@ Route::get('/test-pdf', function() {
     $pdf->writeHTML('<h1>Test PDF</h1><p>Funciona correctamente!</p>', true, false, true, false, '');
     return $pdf->Output('test.pdf', 'D');
 });
-
+// Rutas para enviar correos
+Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');
+Route::get('movilizaciones/{id}/enviar-correo', 'MovilizacionController@enviarCorreo')->name('movilizaciones.enviar-correo')->middleware('auth');
+Route::get('inspeccion/{id}/enviar-correo', 'InspeccionController@enviarCorreo')->name('inspeccion.enviar-correo')->middleware('auth');
 /* --------------------------------------- Rutas para notificaciones    ----------------------- */
 
 Route::get('notificaciones/marcar-todas-leidas', function() {

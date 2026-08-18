@@ -15,22 +15,19 @@ use App\Notifications\NovedadEnRevision;
 use App\Notifications\NovedadAprobada;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\NovedadesExport;
-use App\Exports\EmergenciasExport;
 
 class EstacionNovedadController extends Controller
 {
-   public function __construct()
-{
-    $this->middleware('auth');
-    $this->middleware('can:ver novedades')->only(['index', 'show']);
-    $this->middleware('can:crear novedades')->only(['create', 'store']);
-    $this->middleware('can:editar novedades')->only(['edit', 'update']);
-    $this->middleware('can:eliminar novedades')->only(['destroy']);
-    $this->middleware('can:revisar novedades')->only(['enviarRevision']);
-    $this->middleware('can:aprobar novedades')->only(['aprobar']);
-}
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('can:ver novedades')->only(['index', 'show']);
+        $this->middleware('can:crear novedades')->only(['create', 'store']);
+        $this->middleware('can:editar novedades')->only(['edit', 'update']);
+        $this->middleware('can:eliminar novedades')->only(['destroy']);
+        $this->middleware('can:revisar novedades')->only(['enviarRevision']);
+        $this->middleware('can:aprobar novedades')->only(['aprobar']);
+    }
 
     public function index()
     {
@@ -108,10 +105,6 @@ class EstacionNovedadController extends Controller
                 }
             }
         }
-       
-
-
-
 
         // Guardar personal
         if ($request->has('personal')) {
@@ -271,143 +264,86 @@ class EstacionNovedadController extends Controller
 
     // Enviar a revisión
     public function enviarRevision($id)
-{
-    try {
-        $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
+    {
+        try {
+            $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
 
-        if ($novedad->estado !== 'elaboracion') {
+            if ($novedad->estado !== 'elaboracion') {
+                return redirect()->route('estacion-novedades.index')
+                    ->with('error', 'Esta novedad no puede enviarse a revisión.');
+            }
+
+            $novedad->estado = 'revision';
+            $novedad->fecha_revision = now();
+            $novedad->usuario_revisa_id = Auth::id();
+            $novedad->save();
+
+            // Enviar notificaciones
+            try {
+                // 1. Notificar al usuario que elaboró
+                if ($novedad->usuarioElabora && $novedad->usuarioElabora->id != Auth::id()) {
+                    $novedad->usuarioElabora->notify(new NovedadEnRevision($novedad, Auth::user()));
+                }
+
+                // 2. Notificar a los revisores
+                $revisores = User::role(['Revisor', 'Aprobador', 'Super-Admin', 'admin'])->get();
+                if ($revisores->count() > 0) {
+                    Notification::send($revisores, new NovedadEnRevision($novedad, Auth::user()));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error al enviar notificaciones: ' . $e->getMessage());
+            }
+
             return redirect()->route('estacion-novedades.index')
-                ->with('error', 'Esta novedad no puede enviarse a revisión.');
+                ->with('success', 'Novedad enviada a revisión exitosamente.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('estacion-novedades.index')
+                ->with('error', 'Error: ' . $e->getMessage());
         }
-
-        $novedad->estado = 'revision';
-        $novedad->fecha_revision = now();
-        $novedad->usuario_revisa_id = Auth::id();
-        $novedad->save();
-
-        // ============================================
-        // INSERTAR NOTIFICACIÓN EN BASE DE DATOS
-        // ============================================
-        
-        // 1. Notificar al usuario que elaboró
-        if ($novedad->usuarioElabora) {
-            $data = [
-                'mensaje' => '🔔 Novedad NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . ' enviada a revisión por ' . Auth::user()->name,
-                'url' => '/estacion-novedades/' . $novedad->id,
-                'codigo' => 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT),
-            ];
-            
-            DB::table('notifications')->insert([
-                'id' => 'novedad-' . uniqid(),
-                'type' => 'App\Notifications\NovedadEnRevision',
-                'notifiable_type' => 'App\User',
-                'notifiable_id' => $novedad->usuarioElabora->id,
-                'data' => json_encode($data),
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // 2. Notificar a los revisores
-        $revisores = User::role(['Revisor', 'Aprobador', 'Super-Admin', 'admin'])->get();
-        foreach ($revisores as $revisor) {
-            $data = [
-                'mensaje' => '🔔 Novedad NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . ' enviada a revisión por ' . Auth::user()->name,
-                'url' => '/estacion-novedades/' . $novedad->id,
-                'codigo' => 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT),
-            ];
-            
-            DB::table('notifications')->insert([
-                'id' => 'novedad-' . uniqid(),
-                'type' => 'App\Notifications\NovedadEnRevision',
-                'notifiable_type' => 'App\User',
-                'notifiable_id' => $revisor->id,
-                'data' => json_encode($data),
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        return redirect()->route('estacion-novedades.index')
-            ->with('success', 'Novedad enviada a revisión exitosamente.');
-
-    } catch (\Exception $e) {
-        return redirect()->route('estacion-novedades.index')
-            ->with('error', 'Error: ' . $e->getMessage());
     }
-}
+
     // Aprobar
     public function aprobar($id)
-{
-    try {
-        $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
+    {
+        try {
+            $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
 
-        if ($novedad->estado !== 'revision') {
+            if ($novedad->estado !== 'revision') {
+                return redirect()->route('estacion-novedades.index')
+                    ->with('error', 'Esta novedad no está en estado de revisión.');
+            }
+
+            $novedad->estado = 'aprobado';
+            $novedad->fecha_aprobacion = now();
+            $novedad->usuario_aprueba_id = Auth::id();
+            $novedad->bloqueado = true;
+            $novedad->save();
+
+            // Enviar notificaciones
+            try {
+                // Notificar al usuario que elaboró
+                if ($novedad->usuarioElabora) {
+                    $novedad->usuarioElabora->notify(new NovedadAprobada($novedad, Auth::user()));
+                }
+
+                // Notificar a los revisores y aprobadores
+                $usuarios = User::role(['Revisor', 'Aprobador', 'Super-Admin', 'admin'])->get();
+                if ($usuarios->count() > 0) {
+                    Notification::send($usuarios, new NovedadAprobada($novedad, Auth::user()));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error al enviar notificaciones: ' . $e->getMessage());
+            }
+
             return redirect()->route('estacion-novedades.index')
-                ->with('error', 'Esta novedad no está en estado de revisión.');
+                ->with('success', 'Novedad aprobada exitosamente.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('estacion-novedades.index')
+                ->with('error', 'Error al aprobar: ' . $e->getMessage());
         }
-
-        $novedad->estado = 'aprobado';
-        $novedad->fecha_aprobacion = now();
-        $novedad->usuario_aprueba_id = Auth::id();
-        $novedad->bloqueado = true;
-        $novedad->save();
-
-        // ============================================
-        // INSERTAR NOTIFICACIÓN DE APROBACIÓN
-        // ============================================
-        
-        // Notificar al usuario que elaboró
-        if ($novedad->usuarioElabora) {
-            $data = [
-                'mensaje' => '✅ Novedad NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . ' ha sido aprobada por ' . Auth::user()->name,
-                'url' => '/estacion-novedades/' . $novedad->id,
-                'codigo' => 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT),
-            ];
-            
-            DB::table('notifications')->insert([
-                'id' => 'aprobado-' . uniqid(),
-                'type' => 'App\Notifications\NovedadAprobada',
-                'notifiable_type' => 'App\User',
-                'notifiable_id' => $novedad->usuarioElabora->id,
-                'data' => json_encode($data),
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Notificar a revisores y aprobadores
-        $usuarios = User::role(['Revisor', 'Aprobador', 'Super-Admin', 'admin'])->get();
-        foreach ($usuarios as $usuario) {
-            $data = [
-                'mensaje' => '✅ Novedad NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . ' ha sido aprobada por ' . Auth::user()->name,
-                'url' => '/estacion-novedades/' . $novedad->id,
-                'codigo' => 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT),
-            ];
-            
-            DB::table('notifications')->insert([
-                'id' => 'aprobado-' . uniqid(),
-                'type' => 'App\Notifications\NovedadAprobada',
-                'notifiable_type' => 'App\User',
-                'notifiable_id' => $usuario->id,
-                'data' => json_encode($data),
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        return redirect()->route('estacion-novedades.index')
-            ->with('success', 'Novedad aprobada exitosamente.');
-
-    } catch (\Exception $e) {
-        return redirect()->route('estacion-novedades.index')
-            ->with('error', 'Error al aprobar: ' . $e->getMessage());
     }
-}
 
     public function exportPdf($id)
     {
@@ -508,7 +444,6 @@ class EstacionNovedadController extends Controller
                 $pdf->Cell(180, 8, 'EMERGENCIAS ATENDIDAS', 0, 1, 'L');
                 $pdf->SetFont('Arial', 'B', 10);
                 
-                // Encabezados
                 $pdf->Cell(10, 6, '#', 1, 0, 'C');
                 $pdf->Cell(30, 6, 'Tipo', 1, 0, 'C');
                 $pdf->Cell(40, 6, 'Lugar', 1, 0, 'C');
@@ -538,7 +473,6 @@ class EstacionNovedadController extends Controller
                 $pdf->Cell(180, 8, 'NOVEDADES DE VEHICULOS', 0, 1, 'L');
                 $pdf->SetFont('Arial', 'B', 10);
                 
-                // Encabezados
                 $pdf->Cell(10, 6, '#', 1, 0, 'C');
                 $pdf->Cell(30, 6, 'Vehículo', 1, 0, 'C');
                 $pdf->Cell(25, 6, 'Estado', 1, 0, 'C');
@@ -566,7 +500,6 @@ class EstacionNovedadController extends Controller
                 $pdf->Cell(180, 8, 'PERSONAL', 0, 1, 'L');
                 $pdf->SetFont('Arial', 'B', 10);
                 
-                // Encabezados
                 $pdf->Cell(10, 6, '#', 1, 0, 'C');
                 $pdf->Cell(35, 6, 'Nombre', 1, 0, 'C');
                 $pdf->Cell(30, 6, 'Cargo', 1, 0, 'C');
@@ -587,17 +520,15 @@ class EstacionNovedadController extends Controller
                 }
             }
 
-            // SECCION DE FIRMAS
+            // FIRMAS
             $pdf->Ln(8);
             $pdf->SetDrawColor(0, 0, 0);
             $pdf->SetFont('Arial', 'B', 12);
             $pdf->Cell(180, 8, 'FIRMAS DE RESPONSABLES', 0, 1, 'C');
             $pdf->Ln(5);
 
-            // Líneas de firma
             $pdf->SetFont('Arial', '', 11);
 
-            // Elaborado por
             $pdf->Cell(60, 10, '', 0, 0);
             $pdf->Cell(60, 10, '_________________________', 0, 0);
             $pdf->Cell(60, 10, '', 0, 1);
@@ -614,7 +545,6 @@ class EstacionNovedadController extends Controller
             $pdf->Cell(60, 10, '', 0, 1);
             $pdf->Ln(5);
 
-            // Revisado por
             $pdf->Cell(60, 10, '', 0, 0);
             $pdf->Cell(60, 10, '_________________________', 0, 0);
             $pdf->Cell(60, 10, '', 0, 1);
@@ -631,7 +561,6 @@ class EstacionNovedadController extends Controller
             $pdf->Cell(60, 10, '', 0, 1);
             $pdf->Ln(5);
 
-            // Aprobado por
             $pdf->Cell(60, 10, '', 0, 0);
             $pdf->Cell(60, 10, '_________________________', 0, 0);
             $pdf->Cell(60, 10, '', 0, 1);
@@ -652,7 +581,6 @@ class EstacionNovedadController extends Controller
             $pdf->SetFont('Arial', 'I', 8);
             $pdf->Cell(180, 5, 'Documento generado por el Sistema de Incidentes - ' . date('Y'), 0, 0, 'C');
 
-            // Guardar en archivo temporal
             $tempFile = storage_path('app/temp_pdf_' . uniqid() . '.pdf');
             $pdf->Output('F', $tempFile);
             
@@ -666,22 +594,5 @@ class EstacionNovedadController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
         }
-    }
-
-    public function exportExcel(Request $request)
-    {
-        $filtro = [
-            'estado' => $request->estado,
-            'fecha_desde' => $request->fecha_desde,
-            'fecha_hasta' => $request->fecha_hasta,
-            'estacion_id' => $request->estacion_id,
-        ];
-
-        return Excel::download(new NovedadesExport($filtro), 'novedades_' . date('Y-m-d') . '.xlsx');
-    }
-
-    public function exportEmergencias($id)
-    {
-        return Excel::download(new EmergenciasExport($id), 'emergencias_novedad_' . $id . '_' . date('Y-m-d') . '.xlsx');
     }
 }

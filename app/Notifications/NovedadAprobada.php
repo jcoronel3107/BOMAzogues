@@ -23,21 +23,22 @@ class NovedadAprobada extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database']; // Solo guardar en base de datos
+        return ['mail', 'database'];
     }
 
     public function toMail($notifiable)
     {
         $url = url('/estacion-novedades/' . $this->novedad->id);
+        $codigo = 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT);
         
         return (new MailMessage)
-            ->subject('Novedad Aprobada - NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT))
+            ->subject('✅ Novedad Aprobada - ' . $codigo)
             ->greeting('Hola ' . $notifiable->name . '!')
             ->line('La novedad ha sido aprobada.')
-            ->line('**Código:** NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT))
+            ->line('**Código:** ' . $codigo)
             ->line('**Estación:** ' . ($this->novedad->estacion->nombre ?? 'N/A'))
             ->line('**Fecha:** ' . $this->novedad->fecha->format('d/m/Y'))
-            ->line('**Aprobado por:** ' . ($this->novedad->usuarioAprueba->name ?? 'N/A'))
+            ->line('**Aprobado por:** ' . ($this->usuario->name ?? 'N/A'))
             ->action('Ver Novedad', $url)
             ->line('La novedad ha sido aprobada y queda bloqueada para edición.')
             ->salutation('Saludos, ' . config('app.name'));
@@ -48,20 +49,7 @@ class NovedadAprobada extends Notification implements ShouldQueue
         return [
             'novedad_id' => $this->novedad->id,
             'codigo' => 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT),
-            'estacion' => $this->novedad->estacion->nombre ?? 'N/A',
-            'fecha' => $this->novedad->fecha->format('d/m/Y'),
-            'aprobado_por' => $this->novedad->usuarioAprueba->name ?? 'N/A',
-            'mensaje' => 'La novedad NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT) . ' ha sido aprobada por ' . ($this->novedad->usuarioAprueba->name ?? 'N/A'),
-            'url' => '/estacion-novedades/' . $this->novedad->id,
-        ];
-    }
-
-    public function toBroadcast($notifiable)
-    {
-        return [
-            'novedad_id' => $this->novedad->id,
-            'codigo' => 'NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT),
-            'mensaje' => 'Novedad NOV-' . str_pad($this->novedad->id, 6, '0', STR_PAD_LEFT) . ' ha sido aprobada',
+            'mensaje' => 'La novedad ha sido aprobada por ' . ($this->usuario->name ?? 'N/A'),
             'url' => '/estacion-novedades/' . $this->novedad->id,
         ];
     }
