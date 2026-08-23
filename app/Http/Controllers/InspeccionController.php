@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Inspeccion;
 use App\User;
 use Illuminate\Http\Request;
@@ -43,7 +42,7 @@ class InspeccionController extends Controller
             'cargo_inspector' => 'nullable|string|max:255',
             'observaciones' => 'nullable|string',
             'recomendaciones' => 'nullable|string',
-            'estado' => 'required|in:pendiente,en_progreso,completada,aprobada,rechazada',
+            'estado' => 'required|in:pendiente,en_progreso,completada,aprobada,rechazada,ratificado',
             'nivel_riesgo' => 'nullable|in:bajo,medio,alto,critico',
             'fecha_proxima_inspeccion' => 'nullable|date|after:fecha_inspeccion',
             'cumple_normativas' => 'nullable|boolean',
@@ -65,6 +64,7 @@ class InspeccionController extends Controller
             'nivel_riesgo' => $request->nivel_riesgo,
             'fecha_proxima_inspeccion' => $request->fecha_proxima_inspeccion,
             'cumple_normativas' => $request->has('cumple_normativas'),
+            'usuario_crea_id' => Auth::id(),
         ]);
 
         return redirect()->route('inspeccion.index')
@@ -97,7 +97,7 @@ class InspeccionController extends Controller
             'cargo_inspector' => 'nullable|string|max:255',
             'observaciones' => 'nullable|string',
             'recomendaciones' => 'nullable|string',
-            'estado' => 'required|in:pendiente,en_progreso,completada,aprobada,rechazada',
+            'estado' => 'required|in:pendiente,en_progreso,completada,aprobada,rechazada,ratificado',
             'nivel_riesgo' => 'nullable|in:bajo,medio,alto,critico',
             'fecha_proxima_inspeccion' => 'nullable|date|after:fecha_inspeccion',
             'cumple_normativas' => 'nullable|boolean',
@@ -133,7 +133,64 @@ class InspeccionController extends Controller
             ->with('success', 'Inspección eliminada exitosamente');
     }
 
-        public function exportPdf($id)
+    // ============================================
+    // NUEVA FUNCIONALIDAD: RATIFICAR INSPECCIÓN
+    // ============================================
+    public function ratificar($id)
+    {
+        try {
+            $inspeccion = Inspeccion::findOrFail($id);
+            
+            // Validar que el usuario tenga el permiso
+            if (!auth()->user()->can('ratificar inspecciones')) {
+                return redirect()->route('inspeccion.index')
+                    ->with('error', 'No tienes permiso para ratificar inspecciones.');
+            }
+            
+            // Validar que la inspección esté en estado aprobada
+            if (!$inspeccion->puedeRatificar()) {
+                return redirect()->route('inspeccion.index')
+                    ->with('error', 'Solo se pueden ratificar inspecciones aprobadas.');
+            }
+            
+            $inspeccion->estado = Inspeccion::ESTADO_RATIFICADO;
+             $inspeccion->usuario_ratifica_id = Auth::id();
+            $inspeccion->fecha_ratificacion = now();
+            $inspeccion->save();
+            
+            return redirect()->route('inspeccion.index')
+                ->with('success', 'Inspección ratificada exitosamente.');
+                
+        } catch (\Exception $e) {
+            return redirect()->route('inspeccion.index')
+                ->with('error', 'Error al ratificar: ' . $e->getMessage());
+        }
+    }
+
+    public function asignar($id)
+    {
+        $inspeccion = Inspeccion::findOrFail($id);
+        $inspeccion->estado = Inspeccion::ESTADO_EN_PROGRESO;
+        $inspeccion->usuario_asigna_id = Auth::id();
+        $inspeccion->fecha_asignacion = now();
+        $inspeccion->save();
+        
+        return redirect()->route('inspeccion.index')
+            ->with('success', 'Inspección asignada exitosamente.');
+    }
+
+    public function aprobar($id)
+    {
+        $inspeccion = Inspeccion::findOrFail($id);
+        $inspeccion->estado = Inspeccion::ESTADO_APROBADA;
+        $inspeccion->usuario_aprueba_id = Auth::id();
+        $inspeccion->fecha_aprobacion = now();
+        $inspeccion->save();
+        
+        return redirect()->route('inspeccion.index')
+            ->with('success', 'Inspección aprobada exitosamente.');
+    }
+    public function exportPdf($id)
     {
         try {
             $inspeccion = Inspeccion::with('inspector')->findOrFail($id);
@@ -214,7 +271,6 @@ class InspeccionController extends Controller
                 $pdf->SetFont('Arial', 'B', 12);
                 $pdf->Cell(180, 8, 'OBSERVACIONES', 0, 1, 'L');
                 $pdf->SetFont('Arial', '', 11);
-                // Usar MultiCell para texto largo
                 $pdf->MultiCell(180, 6, $inspeccion->observaciones, 0, 'L');
                 $pdf->Ln(2);
             }
@@ -252,32 +308,31 @@ class InspeccionController extends Controller
     }
 
     public function enviarCorreo($id)
-{
-    try {
-        $inspeccion = Inspeccion::with(['inspector'])->findOrFail($id);
-        
-        // Log para verificar que llegamos hasta aquí
-        \Log::info('Intentando enviar correo para inspección ID: ' . $id);
-        
-        if ($inspeccion->inspector) {
-            $inspeccion->inspector->notify(new InspeccionCreada($inspeccion, Auth::user()));
-            \Log::info('Correo enviado al inspector: ' . $inspeccion->inspector->name);
-        } else {
-            \Log::warning('No hay inspector asignado para la inspección ID: ' . $id);
+    {
+        try {
+            $inspeccion = Inspeccion::with(['inspector'])->findOrFail($id);
+            
+            \Log::info('Intentando enviar correo para inspección ID: ' . $id);
+            
+            if ($inspeccion->inspector) {
+                $inspeccion->inspector->notify(new InspeccionCreada($inspeccion, Auth::user()));
+                \Log::info('Correo enviado al inspector: ' . $inspeccion->inspector->name);
+            } else {
+                \Log::warning('No hay inspector asignado para la inspección ID: ' . $id);
+            }
+            
+            // Enviar a los administradores
+            $admins = User::role(['Super-Admin', 'admin'])->get();
+            if ($admins->count() > 0) {
+                Notification::send($admins, new InspeccionCreada($inspeccion, Auth::user()));
+                \Log::info('Correo enviado a ' . $admins->count() . ' administradores');
+            }
+            
+            return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al enviar correo: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
         }
-        
-        // Enviar a los administradores
-        $admins = User::role(['Super-Admin', 'admin'])->get();
-        if ($admins->count() > 0) {
-            Notification::send($admins, new InspeccionCreada($inspeccion, Auth::user()));
-            \Log::info('Correo enviado a ' . $admins->count() . ' administradores');
-        }
-        
-        return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
-        
-    } catch (\Exception $e) {
-        \Log::error('Error al enviar correo: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
     }
-}
 }

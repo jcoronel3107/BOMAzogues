@@ -1,0 +1,6 @@
+Módulo de Novedades de Estación - Flujo completo
+Estado	Responsable	Fecha	Descripción
+Elaboración	Usuario que elaboró	fecha_elaboracion	Creación de la novedad
+Revisión	Usuario que revisó	fecha_revision	Enviado a revisión
+Aprobado	Usuario que aprobó	fecha_aprobacion	Aprobado por supervisor
+Ratificado	Usuario que ratificó	fecha_ratificacion	Ratificado por autoridad superior

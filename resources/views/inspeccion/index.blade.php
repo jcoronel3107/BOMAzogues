@@ -45,7 +45,8 @@
                                     'en_progreso' => 'info',
                                     'completada' => 'primary',
                                     'aprobada' => 'success',
-                                    'rechazada' => 'danger'
+                                    'rechazada' => 'danger',
+                                    'ratificado' => 'success'
                                 ];
                             @endphp
                             <span class="badge badge-{{ $estados[$inspeccion->estado] ?? 'secondary' }}">
@@ -87,8 +88,19 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                <!-- Botón Ratificar - Solo para usuarios con permiso y estado aprobada -->
+                                @can('ratificar inspecciones')
+                                    @if($inspeccion->estado == 'aprobada')
+                                        <form action="{{ route('inspeccion.ratificar', $inspeccion) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm" title="Ratificar" onclick="return confirm('¿Estás seguro de ratificar esta inspección?')">
+                                                <i class="fas fa-stamp"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
                             </div>
-                        </td>
+                         </td>
                     </tr>
                     @endforeach
                 </tbody>

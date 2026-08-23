@@ -1,0 +1,7 @@
+👥 Roles y sus permisos
+Rol	       Crear	Editar	        Ver	Aprobar	Ratificar
+Inspector	✅	✅(enpendiente)	✅	❌	❌
+Supervisor	✅	✅	        ✅	✅	❌
+Aprobador	✅	✅	         ✅	✅	❌
+Ratificador	❌	❌	        ✅	❌	✅
+Super-Admin	✅	✅	      ✅	✅	✅

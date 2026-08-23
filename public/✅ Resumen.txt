@@ -1,0 +1,8 @@
+✅ Resumen
+Estado	Significado
+Pendiente	📝 Creada, esperando inicio
+En Progreso	🔄 En ejecución
+Completada	✅ Inspección finalizada, esperando aprobación
+Aprobada	👍 Aprobada por supervisor, esperando ratificación
+Ratificado	🏆 Validada por autoridad superior (DOCUMENTO FINAL)
+
