@@ -639,4 +639,38 @@ class EstacionNovedadController extends Controller
         }
     }
 
+    public function enviarCorreo($id)
+{
+    try {
+        $novedad = EstacionNovedad::with([
+            'estacion',
+            'usuarioElabora',
+            'usuarioRevisa',
+            'usuarioAprueba',
+            'usuarioRatifica'
+        ])->findOrFail($id);
+        
+        // Log para verificar
+        \Log::info('Intentando enviar correo para novedad ID: ' . $id);
+        
+        // Enviar correo al usuario que elaboró
+        if ($novedad->usuarioElabora) {
+            $novedad->usuarioElabora->notify(new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+            \Log::info('Correo enviado al elaborador: ' . $novedad->usuarioElabora->name);
+        }
+        
+        // Enviar a los revisores
+        $revisores = User::role(['Revisor', 'Aprobador', 'Ratificador', 'Super-Admin', 'admin'])->get();
+        if ($revisores->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($revisores, new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+            \Log::info('Correo enviado a ' . $revisores->count() . ' revisores');
+        }
+        
+        return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
+        
+    } catch (\Exception $e) {
+        \Log::error('Error al enviar correo: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
+    }
+}
 }
