@@ -182,13 +182,6 @@
 										<option value="1">Estación1</option>
 										<option value="2">Estación2</option>
 										<option value="3">Estación3</option>
-										<option value="4">Estación4</option>
-										<option value="5">Estación5</option>
-										<option value="6">Estación6</option>
-										<option value="7">Estación7</option>
-										<option value="8">Estación8</option>
-										<option value="9">Estación9</option>
-										<option value="10">Estación10</option>
 									</select>
 								</div>
 							</div>

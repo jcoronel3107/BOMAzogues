@@ -30,13 +30,13 @@ class EstacionNovedadController extends Controller
     }
 
     public function index()
-    {
-        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
-            ->latest()
-            ->paginate(15);
-        
-        return view('estacion_novedades.index', compact('novedades'));
-    }
+{
+    $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba', 'usuarioRatifica'])
+        ->latest()
+        ->paginate(15);
+    
+    return view('estacion_novedades.index', compact('novedades'));
+}
 
     public function create()
     {
@@ -49,19 +49,21 @@ class EstacionNovedadController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'fecha' => 'required|date',
-            'estacion_id' => 'required|exists:stations,id',
-            'observaciones' => 'nullable|string',
+         $request->validate([
+        'fecha' => 'required|date',
+        'estacion_id' => 'required|exists:stations,id',
+        'observaciones' => 'nullable|string',
         ]);
 
         $novedad = EstacionNovedad::create([
-            'fecha' => $request->fecha,
-            'estacion_id' => $request->estacion_id,
-            'usuario_elabora_id' => Auth::id(),
-            'estado' => 'elaboracion',
-            'fecha_elaboracion' => now(),
-            'observaciones' => $request->observaciones,
+        'fecha' => $request->fecha,
+        'estacion_id' => $request->estacion_id,
+        'usuario_elabora_id' => Auth::id(),
+        'usuario_crea_id' => Auth::id(),
+        'estado' => 'elaboracion',
+        'fecha_elaboracion' => now(),
+        'fecha_creacion' => now(),
+        'observaciones' => $request->observaciones,
         ]);
 
         // Guardar emergencias
@@ -125,7 +127,7 @@ class EstacionNovedadController extends Controller
         }
 
         return redirect()->route('estacion-novedades.index')
-            ->with('success', 'Novedad creada exitosamente.');
+            ->with('success', 'Novedad creada exitosamente. Código: NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT));
     }
 
     public function show($id)
@@ -267,11 +269,15 @@ class EstacionNovedadController extends Controller
     {
         try {
             $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
-
-            if ($novedad->estado !== 'elaboracion') {
+        if ($novedad->estado !== EstacionNovedad::ESTADO_ELABORACION) {
+        return redirect()->route('estacion-novedades.index')
+            ->with('error', 'Esta novedad no puede enviarse a revisión.');
+        }
+            
+        /*if ($novedad->estado !== 'elaboracion') {
                 return redirect()->route('estacion-novedades.index')
                     ->with('error', 'Esta novedad no puede enviarse a revisión.');
-            }
+            } */
 
             $novedad->estado = 'revision';
             $novedad->fecha_revision = now();
@@ -308,11 +314,15 @@ class EstacionNovedadController extends Controller
     {
         try {
             $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
-
+            if ($novedad->estado !== EstacionNovedad::ESTADO_REVISION) {
+        return redirect()->route('estacion-novedades.index')
+            ->with('error', 'Esta novedad no está en estado de revisión.');
+            }
+            /*
             if ($novedad->estado !== 'revision') {
                 return redirect()->route('estacion-novedades.index')
                     ->with('error', 'Esta novedad no está en estado de revisión.');
-            }
+            }*/
 
             $novedad->estado = 'aprobado';
             $novedad->fecha_aprobacion = now();
@@ -595,4 +605,72 @@ class EstacionNovedadController extends Controller
             return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
         }
     }
+
+    // Ratificar novedad
+    public function ratificar($id)
+    {
+        try {
+            $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
+            
+            // Validar que el usuario tenga el permiso
+            if (!auth()->user()->can('ratificar novedades')) {
+                return redirect()->route('estacion-novedades.index')
+                    ->with('error', 'No tienes permiso para ratificar novedades.');
+            }
+            
+            // Validar que la novedad esté en estado aprobado
+            if (!$novedad->puedeRatificar()) {
+                return redirect()->route('estacion-novedades.index')
+                    ->with('error', 'Solo se pueden ratificar novedades aprobadas.');
+            }
+            
+            $novedad->estado = EstacionNovedad::ESTADO_RATIFICADO;
+            $novedad->usuario_ratifica_id = Auth::id();
+            $novedad->fecha_ratificacion = now();
+            $novedad->bloqueado = true;
+            $novedad->save();
+            
+            return redirect()->route('estacion-novedades.index')
+                ->with('success', 'Novedad ratificada exitosamente.');
+                
+        } catch (\Exception $e) {
+            return redirect()->route('estacion-novedades.index')
+                ->with('error', 'Error al ratificar: ' . $e->getMessage());
+        }
+    }
+
+    public function enviarCorreo($id)
+{
+    try {
+        $novedad = EstacionNovedad::with([
+            'estacion',
+            'usuarioElabora',
+            'usuarioRevisa',
+            'usuarioAprueba',
+            'usuarioRatifica'
+        ])->findOrFail($id);
+        
+        // Log para verificar
+        \Log::info('Intentando enviar correo para novedad ID: ' . $id);
+        
+        // Enviar correo al usuario que elaboró
+        if ($novedad->usuarioElabora) {
+            $novedad->usuarioElabora->notify(new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+            \Log::info('Correo enviado al elaborador: ' . $novedad->usuarioElabora->name);
+        }
+        
+        // Enviar a los revisores
+        $revisores = User::role(['Revisor', 'Aprobador', 'Ratificador', 'Super-Admin', 'admin'])->get();
+        if ($revisores->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($revisores, new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+            \Log::info('Correo enviado a ' . $revisores->count() . ' revisores');
+        }
+        
+        return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
+        
+    } catch (\Exception $e) {
+        \Log::error('Error al enviar correo: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
+    }
+}
 }

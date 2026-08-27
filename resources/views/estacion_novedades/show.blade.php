@@ -35,6 +35,19 @@
                     </form>
                 @endif
             @endcan
+
+            @can('ratificar novedades')
+                @if($novedad->estado == 'aprobado')
+                    <form action="{{ route('estacion-novedades.ratificar', $novedad) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de ratificar esta novedad?')">
+                            <i class="fas fa-stamp"></i> Ratificar
+                        </button>
+                    </form>
+                @endif
+            @endcan
+
+            
             <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
@@ -114,6 +127,80 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Flujo de estados -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-primary">Flujo de la Novedad</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Estado</th>
+                                    <th>Responsable</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Elaboración -->
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-secondary">Elaboración</span>
+                                        @if($novedad->estado == 'elaboracion')
+                                            <span class="badge badge-warning">Actual</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $novedad->usuarioElabora->name ?? 'N/A' }}</td>
+                                    <td>{{ $novedad->fecha_elaboracion ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : 'N/A' }}</td>
+                                </tr>
+
+                                <!-- Revisión -->
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-info">Revisión</span>
+                                        @if($novedad->estado == 'revision')
+                                            <span class="badge badge-warning">Actual</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $novedad->usuarioRevisa->name ?? 'N/A' }}</td>
+                                    <td>{{ $novedad->fecha_revision ? $novedad->fecha_revision->format('d/m/Y H:i') : 'N/A' }}</td>
+                                </tr>
+
+                                <!-- Aprobación -->
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-success">Aprobado</span>
+                                        @if($novedad->estado == 'aprobado')
+                                            <span class="badge badge-warning">Actual</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $novedad->usuarioAprueba->name ?? 'N/A' }}</td>
+                                    <td>{{ $novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                                </tr>
+
+                                <!-- Ratificación -->
+                                <tr>
+                                    <td>
+                                        <span class="badge badge-success">Ratificado</span>
+                                        @if($novedad->estado == 'ratificado')
+                                            <span class="badge badge-warning">Actual</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $novedad->usuarioRatifica->name ?? 'N/A' }}</td>
+                                    <td>{{ $novedad->fecha_ratificacion ? $novedad->fecha_ratificacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            /*================================
+
+
+            */=================================
+
+
+            
         </div>
 
         <!-- Emergencias -->

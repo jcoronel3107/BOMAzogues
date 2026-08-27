@@ -9,9 +9,6 @@
                 <i class="fas fa-plus"></i> Nueva Novedad
             </a>
         @endcan
-        <a href="{{ route('estacion-novedades.export.excel') }}" class="btn btn-success btn-sm">
-            <i class="fas fa-file-excel"></i> Exportar Excel
-        </a>
     </div>
     <div class="card-body">
         @if(session('success'))
@@ -56,7 +53,8 @@
                                 $estados = [
                                     'elaboracion' => 'warning',
                                     'revision' => 'info',
-                                    'aprobado' => 'success'
+                                    'aprobado' => 'success',
+                                    'ratificado' => 'success'
                                 ];
                             @endphp
                             <span class="badge badge-{{ $estados[$novedad->estado] ?? 'secondary' }}">
@@ -101,6 +99,16 @@
                                             @csrf
                                             <button type="submit" class="btn btn-success btn-sm" title="Aprobar" onclick="return confirm('¿Estás seguro de aprobar esta novedad?')">
                                                 <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endcan
+                                @can('ratificar novedades')
+                                    @if($novedad->estado == 'aprobado')
+                                        <form action="{{ route('estacion-novedades.ratificar', $novedad) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-sm" title="Ratificar" onclick="return confirm('¿Estás seguro de ratificar esta novedad?')">
+                                                <i class="fas fa-stamp"></i>
                                             </button>
                                         </form>
                                     @endif

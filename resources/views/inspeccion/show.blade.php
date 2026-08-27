@@ -18,6 +18,16 @@
             <a href="{{ route('inspeccion.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
+            @can('ratificar inspecciones')
+                @if($inspeccion->estado == 'aprobada')
+                    <form action="{{ route('inspeccion.ratificar', $inspeccion) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de ratificar esta inspección?')">
+                            <i class="fas fa-stamp"></i> Ratificar
+                        </button>
+                    </form>
+                @endif
+            @endcan
         </div>
     </div>
 
@@ -94,7 +104,8 @@
                                     'en_progreso' => 'info',
                                     'completada' => 'primary',
                                     'aprobada' => 'success',
-                                    'rechazada' => 'danger'
+                                    'rechazada' => 'danger',
+                                    'ratificado' => 'success'
                                 ];
                             @endphp
                             <span class="badge badge-{{ $estados[$inspeccion->estado] ?? 'secondary' }}">
@@ -143,6 +154,74 @@
                 </table>
             </div>
         </div>
+
+        <!-- Flujo de estados -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h5 class="text-primary">Flujo de la Inspección</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Estado</th>
+                                <th>Responsable</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Creación -->
+                            <tr>
+                                <td>
+                                    <span class="badge badge-secondary">Creación</span>
+                                    @if($inspeccion->estado == 'pendiente')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $inspeccion->usuarioCrea->name ?? 'N/A' }}</td>
+                                <td>{{ $inspeccion->created_at ? $inspeccion->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+
+                            <!-- Asignación (En Progreso) -->
+                            <tr>
+                                <td>
+                                    <span class="badge badge-info">En Progreso</span>
+                                    @if($inspeccion->estado == 'en_progreso')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $inspeccion->usuarioAsigna->name ?? 'N/A' }}</td>
+                                <td>{{ $inspeccion->fecha_asignacion ? $inspeccion->fecha_asignacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+
+                            <!-- Aprobación -->
+                            <tr>
+                                <td>
+                                    <span class="badge badge-success">Aprobada</span>
+                                    @if($inspeccion->estado == 'aprobada')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $inspeccion->usuarioAprueba->name ?? 'N/A' }}</td>
+                                <td>{{ $inspeccion->fecha_aprobacion ? $inspeccion->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+
+                            <!-- Ratificación -->
+                            <tr>
+                                <td>
+                                    <span class="badge badge-success">Ratificado</span>
+                                    @if($inspeccion->estado == 'ratificado')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $inspeccion->usuarioRatifica->name ?? 'N/A' }}</td>
+                                <td>{{ $inspeccion->fecha_ratificacion ? $inspeccion->fecha_ratificacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
 
         <div class="row mt-3">
             <div class="col-md-12">

@@ -1,0 +1,36 @@
+Diagrama del Flujo
+text
+
+1. PENDIENTE (Creación)
+        ↓
+2. EN PROGRESO (En ejecución)
+        ↓
+3. COMPLETADA (Finalizada la inspección)
+        ↓
+4. APROBADA (Aprobada por supervisor)
+        ↓
+5. RATIFICADO (Ratificada por autoridad superior) ← NUEVO
+        ↓
+   FINALIZADO (Proceso completado)
+
+📝 Explicación de cada estado
+#	Estado	Descripción	Quién lo hace	Acción permitida
+1	PENDIENTE	La inspección ha sido creada pero aún no se ha iniciado.	Inspector / Usuario	Editar, Eliminar, Asignar inspector
+2	EN PROGRESO	La inspección está en ejecución.	Inspector	Registrar avances, Observaciones
+3	COMPLETADA	La inspección ha sido finalizada por el inspector.	Inspector	Ver resultados, Enviar a aprobación
+4	APROBADA	La inspección ha sido revisada y aprobada por el supervisor.	Supervisor / Aprobador	Ratificar, Ver resultados
+5	RATIFICADO	La inspección ha sido ratificada por la autoridad superior (NUEVO).	Ratificador / Super-Admin	✅ Documento final, No se puede editar
+👥 Roles y sus permisos
+Rol	      Crear	Editar	Ver	Aprobar	Ratificar
+Inspector	✅	✅ (en pendiente)	✅	❌	❌
+Supervisor	✅	✅	✅	✅	❌
+Aprobador	✅	✅	✅	✅	❌
+Ratificador	❌	❌	✅	❌	✅
+Super-Admin	✅	✅	✅	✅	✅
+🎯 Acciones permitidas por estado
+Estado	Editar	Eliminar	Aprobar	Ratificar
+Pendiente	✅	✅	❌	❌
+En Progreso	❌	❌	❌	❌
+Completada	❌	❌	✅	❌
+Aprobada	❌	❌	❌	✅
+Ratificado	❌	❌	❌	❌

@@ -17,10 +17,13 @@ class EstacionNovedad extends Model
         'usuario_elabora_id',
         'usuario_revisa_id',
         'usuario_aprueba_id',
+        'usuario_ratifica_id',
         'estado',
         'fecha_elaboracion',
         'fecha_revision',
         'fecha_aprobacion',
+        'fecha_ratificacion',
+        'fecha_creacion',
         'observaciones',
         'bloqueado',
     ];
@@ -30,10 +33,49 @@ class EstacionNovedad extends Model
         'fecha_elaboracion' => 'datetime',
         'fecha_revision' => 'datetime',
         'fecha_aprobacion' => 'datetime',
+        'fecha_ratificacion' => 'datetime',
+        'fecha_creacion' => 'datetime',
         'bloqueado' => 'boolean',
     ];
 
-    // Relaciones
+    // === ESTADOS DE LA NOVEDAD ===
+    const ESTADO_ELABORACION = 'elaboracion';
+    const ESTADO_REVISION = 'revision';
+    const ESTADO_APROBADO = 'aprobado';
+    const ESTADO_RATIFICADO = 'ratificado';
+
+    public static function getEstados()
+    {
+        return [
+            self::ESTADO_ELABORACION => 'Elaboración',
+            self::ESTADO_REVISION    => 'Revisión',
+            self::ESTADO_APROBADO    => 'Aprobado',
+            self::ESTADO_RATIFICADO  => 'Ratificado',
+        ];
+    }
+
+    public function getEstadoColor()
+    {
+        $colores = [
+            self::ESTADO_ELABORACION => 'warning',
+            self::ESTADO_REVISION    => 'info',
+            self::ESTADO_APROBADO    => 'success',
+            self::ESTADO_RATIFICADO  => 'success',
+        ];
+        return $colores[$this->estado] ?? 'secondary';
+    }
+
+    public function puedeRatificar()
+    {
+        return $this->estado === self::ESTADO_APROBADO;
+    }
+
+    public function estaRatificada()
+    {
+        return $this->estado === self::ESTADO_RATIFICADO;
+    }
+
+    // === RELACIONES ===
     public function estacion()
     {
         return $this->belongsTo(Station::class, 'estacion_id');
@@ -54,6 +96,16 @@ class EstacionNovedad extends Model
         return $this->belongsTo(User::class, 'usuario_aprueba_id');
     }
 
+    public function usuarioRatifica()
+    {
+        return $this->belongsTo(User::class, 'usuario_ratifica_id');
+    }
+
+    public function usuarioCrea()
+    {
+        return $this->belongsTo(User::class, 'usuario_crea_id');
+    }
+
     public function emergencias()
     {
         return $this->hasMany(EstacionEmergencia::class, 'estacion_novedad_id');
@@ -69,30 +121,19 @@ class EstacionNovedad extends Model
         return $this->hasMany(EstacionPersonal::class, 'estacion_novedad_id');
     }
 
-    // Scopes
-    public function scopePendientes($query)
-    {
-        return $query->where('estado', '!=', 'aprobado');
-    }
-
-    public function scopePorEstacion($query, $estacionId)
-    {
-        return $query->where('estacion_id', $estacionId);
-    }
-
-    // Métodos
+    // === MÉTODOS ===
     public function puedeEditar()
     {
-        return $this->estado !== 'aprobado' && !$this->bloqueado;
+        return $this->estado !== self::ESTADO_APROBADO && $this->estado !== self::ESTADO_RATIFICADO && !$this->bloqueado;
     }
 
     public function puedeAprobar()
     {
-        return $this->estado === 'revision' && !$this->bloqueado;
+        return $this->estado === self::ESTADO_REVISION && !$this->bloqueado;
     }
 
     public function puedeRevisar()
     {
-        return $this->estado === 'elaboracion' && !$this->bloqueado;
+        return $this->estado === self::ESTADO_ELABORACION && !$this->bloqueado;
     }
 }

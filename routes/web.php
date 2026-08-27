@@ -317,7 +317,8 @@ Route::get('/consultaentrefechasmov',	        	'MovilizacionController@consultae
 Route::resource('inspeccion', 'InspeccionController')->middleware('auth');
 
 Route::get('inspeccion/{id}/pdf', [App\Http\Controllers\InspeccionController::class, 'exportPdf'])->name('inspeccion.pdf')->middleware('auth');
-
+// Ratificar inspección
+Route::post('inspeccion/{id}/ratificar', 'InspeccionController@ratificar')->name('inspeccion.ratificar')->middleware('auth');
 /* --------------------------------------- Sub modulo Novedades    ----------------------- */
 
 // Rutas para Novedades de Estación
@@ -333,6 +334,9 @@ Route::get('/test-pdf', function() {
     $pdf->writeHTML('<h1>Test PDF</h1><p>Funciona correctamente!</p>', true, false, true, false, '');
     return $pdf->Output('test.pdf', 'D');
 });
+
+Route::post('estacion-novedades/{id}/ratificar', 'EstacionNovedadController@ratificar')->name('estacion-novedades.ratificar')->middleware('auth');
+
 // Rutas para enviar correos
 Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');
 Route::get('movilizaciones/{id}/enviar-correo', 'MovilizacionController@enviarCorreo')->name('movilizaciones.enviar-correo')->middleware('auth');
