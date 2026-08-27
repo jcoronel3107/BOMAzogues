@@ -28,17 +28,7 @@
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE1/">{!! trans('messages.Station1') !!}</a>
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE2/">{!! trans('messages.Station2') !!}</a>
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE3/">{!! trans('messages.Station3') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE4/">{!! trans('messages.Station4') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE5/">{!! trans('messages.Station5') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE6/">{!! trans('messages.Station6') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE7/">{!! trans('messages.Station7') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE8/">{!! trans('messages.Station8') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE9/">{!! trans('messages.Station9') !!}</a>
-            <!-- COLOCAR LAS ESTACIONES 10 - 11 - 12 y 13 -->
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE10/">{!! trans('messages.Station10') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE11/">{!! trans('messages.Station11') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE12/">{!! trans('messages.Station12') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE13/">{!! trans('messages.Station13') !!}</a>
+           
           </div>
         </div>
       </li>
@@ -75,10 +65,7 @@
   </div>
   <hr class="sidebar-divider"><!--   Divider --> 
   <li class="nav-item"><!--          Nav Item - Utilities Collapse Prevencion-->
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrevencion" aria-expanded="true" aria-controls="collapsePrevencion">
-          <i class="fas fa-clipboard-check"></i>
-          <span>{!! trans('messages.Mobilization')!!}</span>
-        </a>
+        
         <div id="collapsePrevencion" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">{!! trans('messages.Choices') !!}</h6>
@@ -101,31 +88,9 @@
         </div>
   </li>
   <hr class="sidebar-divider"><!--   Divider --> 
-  <div class="sidebar-heading"><!-- Heading Menu Talento Humano -->
-      {!! trans('messages.human talent administrative unit') !!}
-  </div>
+  
     
-  <hr class="sidebar-divider"><!-- Divider -->
-
-  <li class="nav-item"><!-- Nav Item - Utilities Collapse Menu UATH-->
-      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUath" aria-expanded="true" aria-controls="collapseUath">
-        <i class="fas fa-clipboard-check"></i>
-        <span>{!! trans('messages.Reservations')!!}</span>
-      </a>
-      <div id="collapseUath" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
-        <div class="bg-white py-2 collapse-inner rounded">
-          <h6 class="collapse-header">{!! trans('messages.Choices') !!}</h6>
-         
-            <a rel="nofollow noopener noreferrer" class="collapse-item" href="/uath">{!! trans('messages.Index') !!}</a>         
-            <a class="collapse-item" href="solicitud">{!! trans('messages.Request') !!}</a>
-          
-            <a class="collapse-item" href="/administrar">{!! trans('messages.Approve') !!}</a>
-            <a rel="nofollow noopener noreferrer" class="collapse-item" href="administrar">{!! trans('messages.Index') !!}</a>  
-        
-        </div>
-      </div>
-   
-  </li>
+  
     <hr class="sidebar-divider"><!--   Divider -->
     <div class="sidebar-heading"><!--  Heading -->
       Addons
