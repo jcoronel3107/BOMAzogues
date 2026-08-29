@@ -73,7 +73,7 @@ class AdminReservationsController extends Controller
                 'solicitud_id' => $solicitud->id
             ]);
             $destinatario = $request->email;
-            //Mail::to($destinatario,"Sistema Incidentes2 - Modulo Reservación")->send(new ConfirmacionReceived($solicitud));
+            //Mail::to($destinatario,"Sistema FireControl - Modulo Reservación")->send(new ConfirmacionReceived($solicitud));
            
             return back()->with('message', 'Solicitud Actualizada con Exito!. Se envio la notificacion a: '.$destinatario);
         }

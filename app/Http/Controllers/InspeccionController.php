@@ -286,7 +286,7 @@ class InspeccionController extends Controller
             // Pie de página
             $pdf->SetY(-15);
             $pdf->SetFont('Arial', 'I', 8);
-            $pdf->Cell(180, 5, 'Documento generado por el Sistema de Incidentes - ' . date('Y'), 0, 0, 'C');
+            $pdf->Cell(180, 5, 'Documento generado por el Sistema FireControl - ' . date('Y'), 0, 0, 'C');
             
             // Guardar en archivo temporal
             $tempFile = storage_path('app/temp_pdf_' . uniqid() . '.pdf');

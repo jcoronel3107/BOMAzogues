@@ -589,7 +589,7 @@ class EstacionNovedadController extends Controller
             // Pie de página
             $pdf->SetY(-15);
             $pdf->SetFont('Arial', 'I', 8);
-            $pdf->Cell(180, 5, 'Documento generado por el Sistema de Incidentes - ' . date('Y'), 0, 0, 'C');
+            $pdf->Cell(180, 5, 'Documento generado por el Sistema FireControl - ' . date('Y'), 0, 0, 'C');
 
             $tempFile = storage_path('app/temp_pdf_' . uniqid() . '.pdf');
             $pdf->Output('F', $tempFile);
