@@ -335,7 +335,6 @@ Route::get('/test-pdf', function() {
     return $pdf->Output('test.pdf', 'D');
 });
 
-Route::post('estacion-novedades/{id}/ratificar', 'EstacionNovedadController@ratificar')->name('estacion-novedades.ratificar')->middleware('auth');
 
 // Rutas para enviar correos
 Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');

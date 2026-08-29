@@ -606,38 +606,7 @@ class EstacionNovedadController extends Controller
         }
     }
 
-    // Ratificar novedad
-    public function ratificar($id)
-    {
-        try {
-            $novedad = EstacionNovedad::with(['estacion', 'usuarioElabora'])->findOrFail($id);
-            
-            // Validar que el usuario tenga el permiso
-            if (!auth()->user()->can('ratificar novedades')) {
-                return redirect()->route('estacion-novedades.index')
-                    ->with('error', 'No tienes permiso para ratificar novedades.');
-            }
-            
-            // Validar que la novedad esté en estado aprobado
-            if (!$novedad->puedeRatificar()) {
-                return redirect()->route('estacion-novedades.index')
-                    ->with('error', 'Solo se pueden ratificar novedades aprobadas.');
-            }
-            
-            $novedad->estado = EstacionNovedad::ESTADO_RATIFICADO;
-            $novedad->usuario_ratifica_id = Auth::id();
-            $novedad->fecha_ratificacion = now();
-            $novedad->bloqueado = true;
-            $novedad->save();
-            
-            return redirect()->route('estacion-novedades.index')
-                ->with('success', 'Novedad ratificada exitosamente.');
-                
-        } catch (\Exception $e) {
-            return redirect()->route('estacion-novedades.index')
-                ->with('error', 'Error al ratificar: ' . $e->getMessage());
-        }
-    }
+    
 
     public function enviarCorreo($id)
 {

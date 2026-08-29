@@ -42,15 +42,13 @@ class EstacionNovedad extends Model
     const ESTADO_ELABORACION = 'elaboracion';
     const ESTADO_REVISION = 'revision';
     const ESTADO_APROBADO = 'aprobado';
-    const ESTADO_RATIFICADO = 'ratificado';
-
+    
     public static function getEstados()
     {
         return [
             self::ESTADO_ELABORACION => 'Elaboración',
             self::ESTADO_REVISION    => 'Revisión',
             self::ESTADO_APROBADO    => 'Aprobado',
-            self::ESTADO_RATIFICADO  => 'Ratificado',
         ];
     }
 
@@ -60,19 +58,8 @@ class EstacionNovedad extends Model
             self::ESTADO_ELABORACION => 'warning',
             self::ESTADO_REVISION    => 'info',
             self::ESTADO_APROBADO    => 'success',
-            self::ESTADO_RATIFICADO  => 'success',
         ];
         return $colores[$this->estado] ?? 'secondary';
-    }
-
-    public function puedeRatificar()
-    {
-        return $this->estado === self::ESTADO_APROBADO;
-    }
-
-    public function estaRatificada()
-    {
-        return $this->estado === self::ESTADO_RATIFICADO;
     }
 
     // === RELACIONES ===
@@ -124,7 +111,7 @@ class EstacionNovedad extends Model
     // === MÉTODOS ===
     public function puedeEditar()
     {
-        return $this->estado !== self::ESTADO_APROBADO && $this->estado !== self::ESTADO_RATIFICADO && !$this->bloqueado;
+        return $this->estado !== self::ESTADO_APROBADO && !$this->bloqueado;
     }
 
     public function puedeAprobar()
