@@ -36,16 +36,7 @@
                 @endif
             @endcan
 
-            @can('ratificar novedades')
-                @if($novedad->estado == 'aprobado')
-                    <form action="{{ route('estacion-novedades.ratificar', $novedad) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de ratificar esta novedad?')">
-                            <i class="fas fa-stamp"></i> Ratificar
-                        </button>
-                    </form>
-                @endif
-            @endcan
+           
 
             
             <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary btn-sm">
@@ -178,17 +169,7 @@
                                     <td>{{ $novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
                                 </tr>
 
-                                <!-- Ratificación -->
-                                <tr>
-                                    <td>
-                                        <span class="badge badge-success">Ratificado</span>
-                                        @if($novedad->estado == 'ratificado')
-                                            <span class="badge badge-warning">Actual</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $novedad->usuarioRatifica->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_ratificacion ? $novedad->fecha_ratificacion->format('d/m/Y H:i') : 'N/A' }}</td>
-                                </tr>
+                                
                             </tbody>
                         </table>
                     </div>

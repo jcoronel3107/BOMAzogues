@@ -53,8 +53,7 @@
                                 $estados = [
                                     'elaboracion' => 'warning',
                                     'revision' => 'info',
-                                    'aprobado' => 'success',
-                                    'ratificado' => 'success'
+                                    'aprobado' => 'success'
                                 ];
                             @endphp
                             <span class="badge badge-{{ $estados[$novedad->estado] ?? 'secondary' }}">
@@ -68,6 +67,9 @@
                                 </a>
                                 <a href="{{ route('estacion-novedades.pdf', $novedad) }}" class="btn btn-danger btn-sm" title="Exportar PDF">
                                     <i class="fas fa-file-pdf"></i>
+                                </a>
+                                <a href="{{ route('estacion-novedades.enviar-correo', $novedad) }}" class="btn btn-info btn-sm" title="Enviar Correo">
+                                    <i class="fas fa-envelope"></i>
                                 </a>
                                 @can('editar novedades')
                                     @if($novedad->puedeEditar())
@@ -99,16 +101,6 @@
                                             @csrf
                                             <button type="submit" class="btn btn-success btn-sm" title="Aprobar" onclick="return confirm('¿Estás seguro de aprobar esta novedad?')">
                                                 <i class="fas fa-check"></i>
-                                            </button>
-                                        </form>
-                                    @endif
-                                @endcan
-                                @can('ratificar novedades')
-                                    @if($novedad->estado == 'aprobado')
-                                        <form action="{{ route('estacion-novedades.ratificar', $novedad) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-sm" title="Ratificar" onclick="return confirm('¿Estás seguro de ratificar esta novedad?')">
-                                                <i class="fas fa-stamp"></i>
                                             </button>
                                         </form>
                                     @endif
