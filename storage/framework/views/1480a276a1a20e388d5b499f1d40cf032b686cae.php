@@ -1,39 +1,68 @@
-@extends('layouts.plantilla')
 
-@section('cuerpo')
+
+<?php $__env->startSection('cuerpo'); ?>
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Editar Novedad - NOV-{{ str_pad($novedad->id, 6, '0', STR_PAD_LEFT) }}</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Editar Novedad - NOV-<?php echo e(str_pad($novedad->id, 6, '0', STR_PAD_LEFT)); ?></h6>
     </div>
     <div class="card-body">
-        <form action="{{ route('estacion-novedades.update', $novedad) }}" method="POST" id="formNovedad">
-            @csrf
-            @method('PUT')
+        <form action="<?php echo e(route('estacion-novedades.update', $novedad)); ?>" method="POST" id="formNovedad">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
 
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Fecha <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('Y-m-d') : $novedad->fecha) }}" required>
-                        @error('fecha')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <input type="date" name="fecha" class="form-control <?php $__errorArgs = ['fecha'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('fecha', $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('Y-m-d') : $novedad->fecha)); ?>" required>
+                        <?php $__errorArgs = ['fecha'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <span class="invalid-feedback"><?php echo e($message); ?></span>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Estación <span class="text-danger">*</span></label>
-                        <select name="estacion_id" class="form-control @error('estacion_id') is-invalid @enderror" required>
+                        <select name="estacion_id" class="form-control <?php $__errorArgs = ['estacion_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
                             <option value="">Seleccione...</option>
-                            @foreach($estaciones as $estacion)
-                                <option value="{{ $estacion->id }}" {{ old('estacion_id', $novedad->estacion_id) == $estacion->id ? 'selected' : '' }}>
-                                    {{ $estacion->nombre }}
+                            <?php $__currentLoopData = $estaciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $estacion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($estacion->id); ?>" <?php echo e(old('estacion_id', $novedad->estacion_id) == $estacion->id ? 'selected' : ''); ?>>
+                                    <?php echo e($estacion->nombre); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('estacion_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <?php $__errorArgs = ['estacion_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <span class="invalid-feedback"><?php echo e($message); ?></span>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </div>
@@ -42,7 +71,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>Observaciones Generales</label>
-                        <textarea name="observaciones" class="form-control" rows="2">{{ old('observaciones', $novedad->observaciones) }}</textarea>
+                        <textarea name="observaciones" class="form-control" rows="2"><?php echo e(old('observaciones', $novedad->observaciones)); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -57,45 +86,45 @@
                         <i class="fas fa-plus"></i> Agregar Emergencia
                     </button>
                     <div id="emergencias-container">
-                        @foreach($novedad->emergencias as $key => $emergencia)
-                            <div class="card mb-2 p-3" id="emergencia-{{ $key }}">
+                        <?php $__currentLoopData = $novedad->emergencias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $emergencia): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="card mb-2 p-3" id="emergencia-<?php echo e($key); ?>">
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Tipo Emergencia</label>
-                                            <select name="emergencias[{{ $key }}][tipo]" class="form-control">
-                                                <option value="incendio" {{ $emergencia->tipo_emergencia == 'incendio' ? 'selected' : '' }}>Incendio</option>
-                                                <option value="rescate" {{ $emergencia->tipo_emergencia == 'rescate' ? 'selected' : '' }}>Rescate</option>
-                                                <option value="inundacion" {{ $emergencia->tipo_emergencia == 'inundacion' ? 'selected' : '' }}>Inundación</option>
-                                                <option value="transito" {{ $emergencia->tipo_emergencia == 'transito' ? 'selected' : '' }}>Tránsito</option>
-                                                <option value="fuga" {{ $emergencia->tipo_emergencia == 'fuga' ? 'selected' : '' }}>Fuga</option>
-                                                <option value="salud" {{ $emergencia->tipo_emergencia == 'salud' ? 'selected' : '' }}>Salud</option>
-                                                <option value="otro" {{ $emergencia->tipo_emergencia == 'otro' ? 'selected' : '' }}>Otro</option>
+                                            <select name="emergencias[<?php echo e($key); ?>][tipo]" class="form-control">
+                                                <option value="incendio" <?php echo e($emergencia->tipo_emergencia == 'incendio' ? 'selected' : ''); ?>>Incendio</option>
+                                                <option value="rescate" <?php echo e($emergencia->tipo_emergencia == 'rescate' ? 'selected' : ''); ?>>Rescate</option>
+                                                <option value="inundacion" <?php echo e($emergencia->tipo_emergencia == 'inundacion' ? 'selected' : ''); ?>>Inundación</option>
+                                                <option value="transito" <?php echo e($emergencia->tipo_emergencia == 'transito' ? 'selected' : ''); ?>>Tránsito</option>
+                                                <option value="fuga" <?php echo e($emergencia->tipo_emergencia == 'fuga' ? 'selected' : ''); ?>>Fuga</option>
+                                                <option value="salud" <?php echo e($emergencia->tipo_emergencia == 'salud' ? 'selected' : ''); ?>>Salud</option>
+                                                <option value="otro" <?php echo e($emergencia->tipo_emergencia == 'otro' ? 'selected' : ''); ?>>Otro</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Lugar</label>
-                                            <input type="text" name="emergencias[{{ $key }}][lugar]" class="form-control" value="{{ $emergencia->lugar }}">
+                                            <input type="text" name="emergencias[<?php echo e($key); ?>][lugar]" class="form-control" value="<?php echo e($emergencia->lugar); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Hora Ingreso</label>
-                                            <input type="time" name="emergencias[{{ $key }}][hora_ingreso]" class="form-control" value="{{ $emergencia->hora_ingreso }}">
+                                            <input type="time" name="emergencias[<?php echo e($key); ?>][hora_ingreso]" class="form-control" value="<?php echo e($emergencia->hora_ingreso); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Hora Salida</label>
-                                            <input type="time" name="emergencias[{{ $key }}][hora_salida]" class="form-control" value="{{ $emergencia->hora_salida }}">
+                                            <input type="time" name="emergencias[<?php echo e($key); ?>][hora_salida]" class="form-control" value="<?php echo e($emergencia->hora_salida); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>&nbsp;</label>
-                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarEmergencia({{ $key }})">
+                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarEmergencia(<?php echo e($key); ?>)">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -105,12 +134,12 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Descripción</label>
-                                            <textarea name="emergencias[{{ $key }}][descripcion]" class="form-control" rows="2">{{ $emergencia->descripcion }}</textarea>
+                                            <textarea name="emergencias[<?php echo e($key); ?>][descripcion]" class="form-control" rows="2"><?php echo e($emergencia->descripcion); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
@@ -125,41 +154,41 @@
                         <i class="fas fa-plus"></i> Agregar Novedad de Vehículo
                     </button>
                     <div id="vehiculos-container">
-                        @foreach($novedad->vehiculos as $key => $vehiculo)
-                            <div class="card mb-2 p-3" id="vehiculo-{{ $key }}">
+                        <?php $__currentLoopData = $novedad->vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="card mb-2 p-3" id="vehiculo-<?php echo e($key); ?>">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Vehículo</label>
-                                            <select name="vehiculos[{{ $key }}][vehiculo_id]" class="form-control">
+                                            <select name="vehiculos[<?php echo e($key); ?>][vehiculo_id]" class="form-control">
                                                 <option value="">Seleccione...</option>
-                                                @foreach($vehiculos as $v)
-                                                    <option value="{{ $v->id }}" {{ $vehiculo->vehiculo_id == $v->id ? 'selected' : '' }}>{{ $v->placa }} - {{ $v->marca }} {{ $v->modelo }}</option>
-                                                @endforeach
+                                                <?php $__currentLoopData = $vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($v->id); ?>" <?php echo e($vehiculo->vehiculo_id == $v->id ? 'selected' : ''); ?>><?php echo e($v->placa); ?> - <?php echo e($v->marca); ?> <?php echo e($v->modelo); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Estado</label>
-                                            <select name="vehiculos[{{ $key }}][estado]" class="form-control">
-                                                <option value="operativo" {{ $vehiculo->estado == 'operativo' ? 'selected' : '' }}>Operativo</option>
-                                                <option value="mantenimiento" {{ $vehiculo->estado == 'mantenimiento' ? 'selected' : '' }}>Mantenimiento</option>
-                                                <option value="averiado" {{ $vehiculo->estado == 'averiado' ? 'selected' : '' }}>Averiado</option>
-                                                <option value="fuera_servicio" {{ $vehiculo->estado == 'fuera_servicio' ? 'selected' : '' }}>Fuera de Servicio</option>
+                                            <select name="vehiculos[<?php echo e($key); ?>][estado]" class="form-control">
+                                                <option value="operativo" <?php echo e($vehiculo->estado == 'operativo' ? 'selected' : ''); ?>>Operativo</option>
+                                                <option value="mantenimiento" <?php echo e($vehiculo->estado == 'mantenimiento' ? 'selected' : ''); ?>>Mantenimiento</option>
+                                                <option value="averiado" <?php echo e($vehiculo->estado == 'averiado' ? 'selected' : ''); ?>>Averiado</option>
+                                                <option value="fuera_servicio" <?php echo e($vehiculo->estado == 'fuera_servicio' ? 'selected' : ''); ?>>Fuera de Servicio</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Tipo Novedad</label>
-                                            <input type="text" name="vehiculos[{{ $key }}][tipo_novedad]" class="form-control" value="{{ $vehiculo->tipo_novedad }}">
+                                            <input type="text" name="vehiculos[<?php echo e($key); ?>][tipo_novedad]" class="form-control" value="<?php echo e($vehiculo->tipo_novedad); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>&nbsp;</label>
-                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarVehiculo({{ $key }})">
+                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarVehiculo(<?php echo e($key); ?>)">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -169,19 +198,19 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Fecha Reporte</label>
-                                            <input type="date" name="vehiculos[{{ $key }}][fecha_reporte]" class="form-control" value="{{ $vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('Y-m-d') : date('Y-m-d', strtotime($vehiculo->fecha_reporte)) }}">
+                                            <input type="date" name="vehiculos[<?php echo e($key); ?>][fecha_reporte]" class="form-control" value="<?php echo e($vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('Y-m-d') : date('Y-m-d', strtotime($vehiculo->fecha_reporte))); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Fecha Solución</label>
-                                            <input type="date" name="vehiculos[{{ $key }}][fecha_solucion]" class="form-control" value="{{ $vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('Y-m-d') : date('Y-m-d', strtotime($vehiculo->fecha_solucion))) : '' }}">
+                                            <input type="date" name="vehiculos[<?php echo e($key); ?>][fecha_solucion]" class="form-control" value="<?php echo e($vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('Y-m-d') : date('Y-m-d', strtotime($vehiculo->fecha_solucion))) : ''); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Kilometraje</label>
-                                            <input type="number" name="vehiculos[{{ $key }}][kilometraje]" class="form-control" value="{{ $vehiculo->kilometraje }}">
+                                            <input type="number" name="vehiculos[<?php echo e($key); ?>][kilometraje]" class="form-control" value="<?php echo e($vehiculo->kilometraje); ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -189,12 +218,12 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Descripción</label>
-                                            <textarea name="vehiculos[{{ $key }}][descripcion]" class="form-control" rows="2">{{ $vehiculo->descripcion }}</textarea>
+                                            <textarea name="vehiculos[<?php echo e($key); ?>][descripcion]" class="form-control" rows="2"><?php echo e($vehiculo->descripcion); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
@@ -209,53 +238,53 @@
                         <i class="fas fa-plus"></i> Agregar Personal
                     </button>
                     <div id="personal-container">
-                        @foreach($novedad->personal as $key => $persona)
-                            <div class="card mb-2 p-3" id="personal-{{ $key }}">
+                        <?php $__currentLoopData = $novedad->personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $persona): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="card mb-2 p-3" id="personal-<?php echo e($key); ?>">
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Funcionario</label>
-                                            <select name="personal[{{ $key }}][user_id]" class="form-control">
+                                            <select name="personal[<?php echo e($key); ?>][user_id]" class="form-control">
                                                 <option value="">Seleccione...</option>
-                                                @foreach($personal as $p)
-                                                    <option value="{{ $p->id }}" {{ $persona->user_id == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
-                                                @endforeach
+                                                <?php $__currentLoopData = $personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($p->id); ?>" <?php echo e($persona->user_id == $p->id ? 'selected' : ''); ?>><?php echo e($p->name); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Cargo</label>
-                                            <input type="text" name="personal[{{ $key }}][cargo]" class="form-control" value="{{ $persona->cargo }}">
+                                            <input type="text" name="personal[<?php echo e($key); ?>][cargo]" class="form-control" value="<?php echo e($persona->cargo); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Turno</label>
-                                            <select name="personal[{{ $key }}][turno]" class="form-control">
-                                                <option value="mañana" {{ $persona->turno == 'mañana' ? 'selected' : '' }}>Mañana</option>
-                                                <option value="tarde" {{ $persona->turno == 'tarde' ? 'selected' : '' }}>Tarde</option>
-                                                <option value="noche" {{ $persona->turno == 'noche' ? 'selected' : '' }}>Noche</option>
-                                                <option value="descanso" {{ $persona->turno == 'descanso' ? 'selected' : '' }}>Descanso</option>
+                                            <select name="personal[<?php echo e($key); ?>][turno]" class="form-control">
+                                                <option value="mañana" <?php echo e($persona->turno == 'mañana' ? 'selected' : ''); ?>>Mañana</option>
+                                                <option value="tarde" <?php echo e($persona->turno == 'tarde' ? 'selected' : ''); ?>>Tarde</option>
+                                                <option value="noche" <?php echo e($persona->turno == 'noche' ? 'selected' : ''); ?>>Noche</option>
+                                                <option value="descanso" <?php echo e($persona->turno == 'descanso' ? 'selected' : ''); ?>>Descanso</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label>Estado</label>
-                                            <select name="personal[{{ $key }}][estado]" class="form-control">
-                                                <option value="presente" {{ $persona->estado == 'presente' ? 'selected' : '' }}>Presente</option>
-                                                <option value="ausente" {{ $persona->estado == 'ausente' ? 'selected' : '' }}>Ausente</option>
-                                                <option value="permiso" {{ $persona->estado == 'permiso' ? 'selected' : '' }}>Permiso</option>
-                                                <option value="licencia" {{ $persona->estado == 'licencia' ? 'selected' : '' }}>Licencia</option>
-                                                <option value="comision" {{ $persona->estado == 'comision' ? 'selected' : '' }}>Comisión</option>
+                                            <select name="personal[<?php echo e($key); ?>][estado]" class="form-control">
+                                                <option value="presente" <?php echo e($persona->estado == 'presente' ? 'selected' : ''); ?>>Presente</option>
+                                                <option value="ausente" <?php echo e($persona->estado == 'ausente' ? 'selected' : ''); ?>>Ausente</option>
+                                                <option value="permiso" <?php echo e($persona->estado == 'permiso' ? 'selected' : ''); ?>>Permiso</option>
+                                                <option value="licencia" <?php echo e($persona->estado == 'licencia' ? 'selected' : ''); ?>>Licencia</option>
+                                                <option value="comision" <?php echo e($persona->estado == 'comision' ? 'selected' : ''); ?>>Comisión</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-1">
                                         <div class="form-group">
                                             <label>&nbsp;</label>
-                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarPersonal({{ $key }})">
+                                            <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarPersonal(<?php echo e($key); ?>)">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -265,12 +294,12 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Observaciones</label>
-                                            <textarea name="personal[{{ $key }}][observaciones]" class="form-control" rows="1">{{ $persona->observaciones }}</textarea>
+                                            <textarea name="personal[<?php echo e($key); ?>][observaciones]" class="form-control" rows="1"><?php echo e($persona->observaciones); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
@@ -285,43 +314,43 @@
                         <i class="fas fa-plus"></i> Agregar Integrante
                     </button>
                     <div id="integrantes-guardia-container">
-                        @if($novedad->integrantes_guardia)
-                            @foreach($novedad->integrantes_guardia as $key => $integrante)
-                                <div class="card mb-2 p-3" id="integrante-guardia-{{ $key }}">
+                        <?php if($novedad->integrantes_guardia): ?>
+                            <?php $__currentLoopData = $novedad->integrantes_guardia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $integrante): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="card mb-2 p-3" id="integrante-guardia-<?php echo e($key); ?>">
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>Nombres y Apellidos</label>
-                                                <input type="text" name="integrantes_guardia[{{ $key }}][nombre]" class="form-control" value="{{ $integrante['nombre'] ?? '' }}">
+                                                <input type="text" name="integrantes_guardia[<?php echo e($key); ?>][nombre]" class="form-control" value="<?php echo e($integrante['nombre'] ?? ''); ?>">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label>Cédula</label>
-                                                <input type="text" name="integrantes_guardia[{{ $key }}][cedula]" class="form-control" value="{{ $integrante['cedula'] ?? '' }}">
+                                                <input type="text" name="integrantes_guardia[<?php echo e($key); ?>][cedula]" class="form-control" value="<?php echo e($integrante['cedula'] ?? ''); ?>">
                                             </div>
                                         </div>
                                         <div class="col-md-2">
                                             <div class="form-group">
                                                 <label>Cargo</label>
-                                                <select name="integrantes_guardia[{{ $key }}][cargo]" class="form-control">
+                                                <select name="integrantes_guardia[<?php echo e($key); ?>][cargo]" class="form-control">
                                                     <option value="">Seleccione...</option>
-                                                    <option value="Bombero" {{ ($integrante['cargo'] ?? '') == 'Bombero' ? 'selected' : '' }}>Bombero</option>
-                                                    <option value="Teniente" {{ ($integrante['cargo'] ?? '') == 'Teniente' ? 'selected' : '' }}>Teniente</option>
-                                                    <option value="Capitán" {{ ($integrante['cargo'] ?? '') == 'Capitán' ? 'selected' : '' }}>Capitán</option>
-                                                    <option value="Mayor" {{ ($integrante['cargo'] ?? '') == 'Mayor' ? 'selected' : '' }}>Mayor</option>
-                                                    <option value="Comandante" {{ ($integrante['cargo'] ?? '') == 'Comandante' ? 'selected' : '' }}>Comandante</option>
-                                                    <option value="Paramédico" {{ ($integrante['cargo'] ?? '') == 'Paramédico' ? 'selected' : '' }}>Paramédico</option>
-                                                    <option value="Conductor" {{ ($integrante['cargo'] ?? '') == 'Conductor' ? 'selected' : '' }}>Conductor</option>
-                                                    <option value="Operador Radio" {{ ($integrante['cargo'] ?? '') == 'Operador Radio' ? 'selected' : '' }}>Operador Radio</option>
-                                                    <option value="Administrativo" {{ ($integrante['cargo'] ?? '') == 'Administrativo' ? 'selected' : '' }}>Administrativo</option>
+                                                    <option value="Bombero" <?php echo e(($integrante['cargo'] ?? '') == 'Bombero' ? 'selected' : ''); ?>>Bombero</option>
+                                                    <option value="Teniente" <?php echo e(($integrante['cargo'] ?? '') == 'Teniente' ? 'selected' : ''); ?>>Teniente</option>
+                                                    <option value="Capitán" <?php echo e(($integrante['cargo'] ?? '') == 'Capitán' ? 'selected' : ''); ?>>Capitán</option>
+                                                    <option value="Mayor" <?php echo e(($integrante['cargo'] ?? '') == 'Mayor' ? 'selected' : ''); ?>>Mayor</option>
+                                                    <option value="Comandante" <?php echo e(($integrante['cargo'] ?? '') == 'Comandante' ? 'selected' : ''); ?>>Comandante</option>
+                                                    <option value="Paramédico" <?php echo e(($integrante['cargo'] ?? '') == 'Paramédico' ? 'selected' : ''); ?>>Paramédico</option>
+                                                    <option value="Conductor" <?php echo e(($integrante['cargo'] ?? '') == 'Conductor' ? 'selected' : ''); ?>>Conductor</option>
+                                                    <option value="Operador Radio" <?php echo e(($integrante['cargo'] ?? '') == 'Operador Radio' ? 'selected' : ''); ?>>Operador Radio</option>
+                                                    <option value="Administrativo" <?php echo e(($integrante['cargo'] ?? '') == 'Administrativo' ? 'selected' : ''); ?>>Administrativo</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-2">
                                             <div class="form-group">
                                                 <label>&nbsp;</label>
-                                                <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegranteGuardia({{ $key }})">
+                                                <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegranteGuardia(<?php echo e($key); ?>)">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
@@ -331,13 +360,13 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Observaciones del Integrante</label>
-                                                <input type="text" name="integrantes_guardia[{{ $key }}][observaciones]" class="form-control" value="{{ $integrante['observaciones'] ?? '' }}" placeholder="Observaciones">
+                                                <input type="text" name="integrantes_guardia[<?php echo e($key); ?>][observaciones]" class="form-control" value="<?php echo e($integrante['observaciones'] ?? ''); ?>" placeholder="Observaciones">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        @endif
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -348,7 +377,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Actualizar Novedad
                 </button>
-                <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary">
+                <a href="<?php echo e(route('estacion-novedades.index')); ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Cancelar
                 </a>
             </div>
@@ -357,10 +386,10 @@
 </div>
 
 <script>
-let emergenciaCount = {{ count($novedad->emergencias) }};
-let vehiculoCount = {{ count($novedad->vehiculos) }};
-let personalCount = {{ count($novedad->personal) }};
-let integranteGuardiaCount = {{ isset($novedad->integrantes_guardia) ? count($novedad->integrantes_guardia) : 0 }};
+let emergenciaCount = <?php echo e(count($novedad->emergencias)); ?>;
+let vehiculoCount = <?php echo e(count($novedad->vehiculos)); ?>;
+let personalCount = <?php echo e(count($novedad->personal)); ?>;
+let integranteGuardiaCount = <?php echo e(isset($novedad->integrantes_guardia) ? count($novedad->integrantes_guardia) : 0); ?>;
 
 // Funciones para Emergencias
 function agregarEmergencia() {
@@ -443,9 +472,9 @@ function agregarVehiculo() {
                     <label>Vehículo</label>
                     <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
                         <option value="">Seleccione...</option>
-                        @foreach($vehiculos as $vehiculo)
-                            <option value="{{ $vehiculo->id }}">{{ $vehiculo->placa }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($vehiculo->id); ?>"><?php echo e($vehiculo->placa); ?> - <?php echo e($vehiculo->marca); ?> <?php echo e($vehiculo->modelo); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
             </div>
@@ -479,7 +508,7 @@ function agregarVehiculo() {
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Fecha Reporte</label>
-                    <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="{{ date('Y-m-d') }}">
+                    <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="<?php echo e(date('Y-m-d')); ?>">
                 </div>
             </div>
             <div class="col-md-4">
@@ -526,9 +555,9 @@ function agregarPersonal() {
                     <label>Funcionario</label>
                     <select name="personal[${personalCount}][user_id]" class="form-control">
                         <option value="">Seleccione...</option>
-                        @foreach($personal as $persona)
-                            <option value="{{ $persona->id }}">{{ $persona->name }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $persona): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($persona->id); ?>"><?php echo e($persona->name); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
             </div>
@@ -651,4 +680,5 @@ function eliminarIntegranteGuardia(id) {
     if (element) element.remove();
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.plantilla', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Desarrollo\htdocs\resources\views/estacion_novedades/edit.blade.php ENDPATH**/ ?>

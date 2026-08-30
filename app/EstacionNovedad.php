@@ -26,6 +26,7 @@ class EstacionNovedad extends Model
         'fecha_creacion',
         'observaciones',
         'bloqueado',
+        'integrantes_guardia',  // <-- Agregar este campo
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class EstacionNovedad extends Model
         'fecha_ratificacion' => 'datetime',
         'fecha_creacion' => 'datetime',
         'bloqueado' => 'boolean',
+        'integrantes_guardia' => 'array',  // <-- Agregar este cast
     ];
 
     // === ESTADOS DE LA NOVEDAD ===

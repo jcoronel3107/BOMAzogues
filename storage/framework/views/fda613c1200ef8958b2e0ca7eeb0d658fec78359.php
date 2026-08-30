@@ -1,45 +1,45 @@
-@extends('layouts.plantilla')
 
-@section('cuerpo')
+
+<?php $__env->startSection('cuerpo'); ?>
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Detalle de Novedad</h6>
         <div>
-            <a href="{{ route('estacion-novedades.export.emergencias', $novedad) }}" class="btn btn-success btn-sm">
+            <a href="<?php echo e(route('estacion-novedades.export.emergencias', $novedad)); ?>" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel"></i> Exportar Emergencias
              </a>
             <!-- Botón Enviar Correo -->
-            <a href="{{ route('estacion-novedades.enviar-correo', $novedad) }}" class="btn btn-info btn-sm" title="Enviar por Correo">
+            <a href="<?php echo e(route('estacion-novedades.enviar-correo', $novedad)); ?>" class="btn btn-info btn-sm" title="Enviar por Correo">
                 <i class="fas fa-envelope"></i> Enviar Correo
             </a>
-            <a href="{{ route('estacion-novedades.pdf', $novedad) }}" class="btn btn-danger btn-sm" target="_blank">
+            <a href="<?php echo e(route('estacion-novedades.pdf', $novedad)); ?>" class="btn btn-danger btn-sm" target="_blank">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
             </a>
-            @can('revisar novedades')
-                @if($novedad->estado == 'elaboracion')
-                    <form action="{{ route('estacion-novedades.enviar-revision', $novedad) }}" method="POST" class="d-inline">
-                        @csrf
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('revisar novedades')): ?>
+                <?php if($novedad->estado == 'elaboracion'): ?>
+                    <form action="<?php echo e(route('estacion-novedades.enviar-revision', $novedad)); ?>" method="POST" class="d-inline">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn btn-primary btn-sm">
                             <i class="fas fa-paper-plane"></i> Enviar a Revisión
                         </button>
                     </form>
-                @endif
-            @endcan
-            @can('aprobar novedades')
-                @if($novedad->estado == 'revision')
-                    <form action="{{ route('estacion-novedades.aprobar', $novedad) }}" method="POST" class="d-inline">
-                        @csrf
+                <?php endif; ?>
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('aprobar novedades')): ?>
+                <?php if($novedad->estado == 'revision'): ?>
+                    <form action="<?php echo e(route('estacion-novedades.aprobar', $novedad)); ?>" method="POST" class="d-inline">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de aprobar esta novedad?')">
                             <i class="fas fa-check"></i> Aprobar
                         </button>
                     </form>
-                @endif
-            @endcan
+                <?php endif; ?>
+            <?php endif; ?>
 
            
 
             
-            <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary btn-sm">
+            <a href="<?php echo e(route('estacion-novedades.index')); ?>" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
         </div>
@@ -47,7 +47,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
-                <h5>NOV-{{ str_pad($novedad->id, 6, '0', STR_PAD_LEFT) }}</h5>
+                <h5>NOV-<?php echo e(str_pad($novedad->id, 6, '0', STR_PAD_LEFT)); ?></h5>
                 <hr>
             </div>
         </div>
@@ -57,55 +57,56 @@
                 <table class="table table-bordered">
                     <tr>
                         <th width="200">Fecha</th>
-                        <td>{{ $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('d/m/Y') : date('d/m/Y', strtotime($novedad->fecha)) }}</td>
+                        <td><?php echo e($novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('d/m/Y') : date('d/m/Y', strtotime($novedad->fecha))); ?></td>
                     </tr>
                     <tr>
                         <th>Estación</th>
-                        <td>{{ $novedad->estacion->nombre ?? 'N/A' }}</td>
+                        <td><?php echo e($novedad->estacion->nombre ?? 'N/A'); ?></td>
                     </tr>
                     <tr>
                         <th>Estado</th>
                         <td>
-                            @php
+                            <?php
                                 $estados = [
                                     'elaboracion' => 'warning',
                                     'revision' => 'info',
                                     'aprobado' => 'success'
                                 ];
-                            @endphp
-                            <span class="badge badge-{{ $estados[$novedad->estado] ?? 'secondary' }}">
-                                {{ ucfirst($novedad->estado) }}
+                            ?>
+                            <span class="badge badge-<?php echo e($estados[$novedad->estado] ?? 'secondary'); ?>">
+                                <?php echo e(ucfirst($novedad->estado)); ?>
+
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <th>Elaborado por</th>
-                        <td>{{ $novedad->usuarioElabora->name ?? 'N/A' }}</td>
+                        <td><?php echo e($novedad->usuarioElabora->name ?? 'N/A'); ?></td>
                     </tr>
                     <tr>
                         <th>Fecha Elaboración</th>
-                        <td>{{ $novedad->fecha_elaboracion instanceof \Carbon\Carbon ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_elaboracion)) }}</td>
+                        <td><?php echo e($novedad->fecha_elaboracion instanceof \Carbon\Carbon ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_elaboracion))); ?></td>
                     </tr>
-                    @if($novedad->usuarioRevisa)
+                    <?php if($novedad->usuarioRevisa): ?>
                         <tr>
                             <th>Revisado por</th>
-                            <td>{{ $novedad->usuarioRevisa->name }}</td>
+                            <td><?php echo e($novedad->usuarioRevisa->name); ?></td>
                         </tr>
                         <tr>
                             <th>Fecha Revisión</th>
-                            <td>{{ $novedad->fecha_revision instanceof \Carbon\Carbon ? $novedad->fecha_revision->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_revision)) }}</td>
+                            <td><?php echo e($novedad->fecha_revision instanceof \Carbon\Carbon ? $novedad->fecha_revision->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_revision))); ?></td>
                         </tr>
-                    @endif
-                    @if($novedad->usuarioAprueba)
+                    <?php endif; ?>
+                    <?php if($novedad->usuarioAprueba): ?>
                         <tr>
                             <th>Aprobado por</th>
-                            <td>{{ $novedad->usuarioAprueba->name }}</td>
+                            <td><?php echo e($novedad->usuarioAprueba->name); ?></td>
                         </tr>
                         <tr>
                             <th>Fecha Aprobación</th>
-                            <td>{{ $novedad->fecha_aprobacion instanceof \Carbon\Carbon ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_aprobacion)) }}</td>
+                            <td><?php echo e($novedad->fecha_aprobacion instanceof \Carbon\Carbon ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_aprobacion))); ?></td>
                         </tr>
-                    @endif
+                    <?php endif; ?>
                 </table>
             </div>
             <div class="col-md-6">
@@ -114,7 +115,8 @@
                         <i class="fas fa-comment"></i> Observaciones Generales
                     </div>
                     <div class="card-body">
-                        {{ $novedad->observaciones ?? 'Sin observaciones' }}
+                        <?php echo e($novedad->observaciones ?? 'Sin observaciones'); ?>
+
                     </div>
                 </div>
             </div>
@@ -137,36 +139,36 @@
                                 <tr>
                                     <td>
                                         <span class="badge badge-secondary">Elaboración</span>
-                                        @if($novedad->estado == 'elaboracion')
+                                        <?php if($novedad->estado == 'elaboracion'): ?>
                                             <span class="badge badge-warning">Actual</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
-                                    <td>{{ $novedad->usuarioElabora->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_elaboracion ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : 'N/A' }}</td>
+                                    <td><?php echo e($novedad->usuarioElabora->name ?? 'N/A'); ?></td>
+                                    <td><?php echo e($novedad->fecha_elaboracion ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : 'N/A'); ?></td>
                                 </tr>
 
                                 <!-- Revisión -->
                                 <tr>
                                     <td>
                                         <span class="badge badge-info">Revisión</span>
-                                        @if($novedad->estado == 'revision')
+                                        <?php if($novedad->estado == 'revision'): ?>
                                             <span class="badge badge-warning">Actual</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
-                                    <td>{{ $novedad->usuarioRevisa->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_revision ? $novedad->fecha_revision->format('d/m/Y H:i') : 'N/A' }}</td>
+                                    <td><?php echo e($novedad->usuarioRevisa->name ?? 'N/A'); ?></td>
+                                    <td><?php echo e($novedad->fecha_revision ? $novedad->fecha_revision->format('d/m/Y H:i') : 'N/A'); ?></td>
                                 </tr>
 
                                 <!-- Aprobación -->
                                 <tr>
                                     <td>
                                         <span class="badge badge-success">Aprobado</span>
-                                        @if($novedad->estado == 'aprobado')
+                                        <?php if($novedad->estado == 'aprobado'): ?>
                                             <span class="badge badge-warning">Actual</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
-                                    <td>{{ $novedad->usuarioAprueba->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                                    <td><?php echo e($novedad->usuarioAprueba->name ?? 'N/A'); ?></td>
+                                    <td><?php echo e($novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A'); ?></td>
                                 </tr>
 
                                 
@@ -203,22 +205,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($novedad->emergencias as $key => $emergencia)
+                            <?php $__empty_1 = true; $__currentLoopData = $novedad->emergencias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $emergencia): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ ucfirst($emergencia->tipo_emergencia) }}</td>
-                                    <td>{{ $emergencia->lugar }}</td>
-                                    <td>{{ $emergencia->hora_ingreso }}</td>
-                                    <td>{{ $emergencia->hora_salida ?? '-' }}</td>
-                                    <td>{{ $emergencia->numero_afectados }}</td>
-                                    <td>{{ $emergencia->numero_vehiculos }}</td>
-                                    <td>{{ $emergencia->numero_bomberos }}</td>
+                                    <td><?php echo e($key + 1); ?></td>
+                                    <td><?php echo e(ucfirst($emergencia->tipo_emergencia)); ?></td>
+                                    <td><?php echo e($emergencia->lugar); ?></td>
+                                    <td><?php echo e($emergencia->hora_ingreso); ?></td>
+                                    <td><?php echo e($emergencia->hora_salida ?? '-'); ?></td>
+                                    <td><?php echo e($emergencia->numero_afectados); ?></td>
+                                    <td><?php echo e($emergencia->numero_vehiculos); ?></td>
+                                    <td><?php echo e($emergencia->numero_bomberos); ?></td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="8" class="text-center">No hay emergencias registradas</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -243,21 +245,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($novedad->vehiculos as $key => $vehiculo)
+                            <?php $__empty_1 = true; $__currentLoopData = $novedad->vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $vehiculo->vehiculo->placa ?? 'N/A' }}</td>
-                                    <td>{{ ucfirst($vehiculo->estado) }}</td>
-                                    <td>{{ $vehiculo->tipo_novedad }}</td>
-                                    <td>{{ $vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_reporte)) }}</td>
-                                    <td>{{ $vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_solucion))) : '-' }}</td>
-                                    <td>{{ $vehiculo->kilometraje ?? '-' }}</td>
+                                    <td><?php echo e($key + 1); ?></td>
+                                    <td><?php echo e($vehiculo->vehiculo->placa ?? 'N/A'); ?></td>
+                                    <td><?php echo e(ucfirst($vehiculo->estado)); ?></td>
+                                    <td><?php echo e($vehiculo->tipo_novedad); ?></td>
+                                    <td><?php echo e($vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_reporte))); ?></td>
+                                    <td><?php echo e($vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_solucion))) : '-'); ?></td>
+                                    <td><?php echo e($vehiculo->kilometraje ?? '-'); ?></td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="7" class="text-center">No hay novedades de vehículos</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -282,16 +284,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($novedad->personal as $key => $persona)
+                            <?php $__empty_1 = true; $__currentLoopData = $novedad->personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $persona): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>{{ $key + 1 }}</td>
-                                    <td>{{ $persona->user->name ?? 'N/A' }}</td>
-                                    <td>{{ $persona->cargo }}</td>
-                                    <td>{{ ucfirst($persona->turno) }}</td>
-                                    <td>{{ $persona->hora_entrada ?? '-' }}</td>
-                                    <td>{{ $persona->hora_salida ?? '-' }}</td>
+                                    <td><?php echo e($key + 1); ?></td>
+                                    <td><?php echo e($persona->user->name ?? 'N/A'); ?></td>
+                                    <td><?php echo e($persona->cargo); ?></td>
+                                    <td><?php echo e(ucfirst($persona->turno)); ?></td>
+                                    <td><?php echo e($persona->hora_entrada ?? '-'); ?></td>
+                                    <td><?php echo e($persona->hora_salida ?? '-'); ?></td>
                                     <td>
-                                        @php
+                                        <?php
                                             $estadosPersonal = [
                                                 'presente' => 'success',
                                                 'ausente' => 'danger',
@@ -299,17 +301,18 @@
                                                 'licencia' => 'info',
                                                 'comision' => 'primary'
                                             ];
-                                        @endphp
-                                        <span class="badge badge-{{ $estadosPersonal[$persona->estado] ?? 'secondary' }}">
-                                            {{ ucfirst($persona->estado) }}
+                                        ?>
+                                        <span class="badge badge-<?php echo e($estadosPersonal[$persona->estado] ?? 'secondary'); ?>">
+                                            <?php echo e(ucfirst($persona->estado)); ?>
+
                                         </span>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="7" class="text-center">No hay personal registrado</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -317,7 +320,7 @@
         </div>
 
         <!-- Integrantes de la Guardia -->
-            @if($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0)
+            <?php if($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0): ?>
             <div class="row mt-4">
                 <div class="col-md-12">
                     <h5 class="text-primary">Integrantes de la Guardia Bomberil</h5>
@@ -333,22 +336,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($novedad->integrantes_guardia as $key => $integrante)
+                                <?php $__currentLoopData = $novedad->integrantes_guardia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $integrante): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td>{{ $key + 1 }}</td>
-                                        <td>{{ $integrante['nombre'] ?? 'N/A' }}</td>
-                                        <td>{{ $integrante['cedula'] ?? 'N/A' }}</td>
-                                        <td>{{ $integrante['cargo'] ?? 'N/A' }}</td>
-                                        <td>{{ $integrante['observaciones'] ?? 'N/A' }}</td>
+                                        <td><?php echo e($key + 1); ?></td>
+                                        <td><?php echo e($integrante['nombre'] ?? 'N/A'); ?></td>
+                                        <td><?php echo e($integrante['cedula'] ?? 'N/A'); ?></td>
+                                        <td><?php echo e($integrante['cargo'] ?? 'N/A'); ?></td>
+                                        <td><?php echo e($integrante['observaciones'] ?? 'N/A'); ?></td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.plantilla', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Desarrollo\htdocs\resources\views/estacion_novedades/show.blade.php ENDPATH**/ ?>
