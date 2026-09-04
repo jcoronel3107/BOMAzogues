@@ -14,7 +14,7 @@
 	</div>
 	
 	<div class="row mb-4">
-		<div class="col-xl-4 col-lg-4 col-md-4 col-sm-4">
+		<div class="col-xl-4 col-lg-4 col-md-4 col- sm-4">
 			<div class="card">
 				<div class="card-header text-white bg-info">
 					<a>

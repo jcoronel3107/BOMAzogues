@@ -21,7 +21,12 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','cargo','avatar'
+        'name', 
+        'email', 
+        'password',
+        'cargo',
+        'avatar',
+        'station_id'  // <-- Debe estar aquí
     ];
 
     /**
@@ -95,6 +100,15 @@ class User extends Authenticatable
     public function mecanico(){
         //Muestra informacion del vehiculo en la clave consultada
         return $this->hasOne(Mecanico::class);
-}
+    }
+    public function station()
+    {
+    return $this->belongsTo(Station::class);
+    }
+
+    public function novedades()
+    {
+    return $this->hasMany(EstacionNovedad::class, 'estacion_id', 'station_id');
+    }   
     
 }

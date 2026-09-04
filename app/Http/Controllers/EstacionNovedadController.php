@@ -31,16 +31,36 @@ class EstacionNovedadController extends Controller
 
     public function index()
 {
-    $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba', 'usuarioRatifica'])
-        ->latest()
-        ->paginate(15);
+    $user = Auth::user();
+    
+    // Si el usuario tiene estación asignada, filtrar
+    if ($user->station_id) {
+        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+            ->where('estacion_id', $user->station_id)
+            ->latest()
+            ->paginate(15);
+    } else {
+        // Si no tiene estación asignada (Super-Admin), ver todas
+        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+            ->latest()
+            ->paginate(15);
+    }
     
     return view('estacion_novedades.index', compact('novedades'));
 }
 
     public function create()
     {
-        $estaciones = Station::all();
+        $user = Auth::user();
+        
+        // Si el usuario tiene estación asignada, solo mostrar esa
+        if ($user->station_id) {
+            $estaciones = Station::where('id', $user->station_id)->get();
+        } else {
+            // Super-Admin puede ver todas
+            $estaciones = Station::all();
+        }
+        
         $personal = User::all();
         $vehiculos = Vehiculo::all();
         
@@ -54,6 +74,13 @@ class EstacionNovedadController extends Controller
             'estacion_id' => 'required|exists:stations,id',
             'observaciones' => 'nullable|string',
         ]);
+        // Verificar que el usuario pertenece a la estación seleccionada
+        $user = Auth::user();
+        if ($user->station_id && $user->station_id != $request->estacion_id) {
+            return redirect()->back()
+            ->with('error', 'No tienes permiso para crear novedades en esta estación.')
+            ->withInput();
+        }
 
         $novedad = EstacionNovedad::create([
             'fecha' => $request->fecha,

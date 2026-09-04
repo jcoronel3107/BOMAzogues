@@ -125,4 +125,23 @@ class EstacionNovedad extends Model
     {
         return $this->estado === self::ESTADO_ELABORACION && !$this->bloqueado;
     }
+
+    public function scopeDeUsuario($query)
+    {
+        $user = auth()->user();
+        if ($user && $user->station_id) {
+            return $query->where('estacion_id', $user->station_id);
+        }
+        return $query;
+    }
+
+    public function index()
+    {
+        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+            ->deUsuario()
+            ->latest()
+            ->paginate(15);
+        
+        return view('estacion_novedades.index', compact('novedades'));
+    }
 }
