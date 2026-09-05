@@ -1,38 +1,67 @@
-@extends('layouts.plantilla')
 
-@section('cuerpo')
+
+<?php $__env->startSection('cuerpo'); ?>
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Nueva Novedad de Estación</h6>
     </div>
     <div class="card-body">
-        <form action="{{ route('estacion-novedades.store') }}" method="POST" id="formNovedad">
-            @csrf
+        <form action="<?php echo e(route('estacion-novedades.store')); ?>" method="POST" id="formNovedad">
+            <?php echo csrf_field(); ?>
 
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Fecha <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', date('Y-m-d')) }}" required>
-                        @error('fecha')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <input type="date" name="fecha" class="form-control <?php $__errorArgs = ['fecha'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('fecha', date('Y-m-d'))); ?>" required>
+                        <?php $__errorArgs = ['fecha'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <span class="invalid-feedback"><?php echo e($message); ?></span>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label>Estación <span class="text-danger">*</span></label>
-                        <select name="estacion_id" class="form-control @error('estacion_id') is-invalid @enderror" required>
+                        <select name="estacion_id" class="form-control <?php $__errorArgs = ['estacion_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
                             <option value="">Seleccione...</option>
-                            @foreach($estaciones as $estacion)
-                                <option value="{{ $estacion->id }}" {{ old('estacion_id') == $estacion->id ? 'selected' : '' }}>
-                                    {{ $estacion->nombre }}
+                            <?php $__currentLoopData = $estaciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $estacion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($estacion->id); ?>" <?php echo e(old('estacion_id') == $estacion->id ? 'selected' : ''); ?>>
+                                    <?php echo e($estacion->nombre); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('estacion_id')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                        <?php $__errorArgs = ['estacion_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <span class="invalid-feedback"><?php echo e($message); ?></span>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </div>
@@ -41,7 +70,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>Observaciones Generales</label>
-                        <textarea name="observaciones" class="form-control" rows="2">{{ old('observaciones') }}</textarea>
+                        <textarea name="observaciones" class="form-control" rows="2"><?php echo e(old('observaciones')); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -101,18 +130,19 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Fecha</label>
-                                        <input type="date" id="buscar_fecha" class="form-control" value="{{ date('Y-m-d') }}">
+                                        <input type="date" id="buscar_fecha" class="form-control" value="<?php echo e(date('Y-m-d')); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Estación</label>
                                         <select id="buscar_estacion" class="form-control">
-                                            @foreach($estaciones as $estacion)
-                                                <option value="{{ $estacion->id }}" {{ old('estacion_id') == $estacion->id ? 'selected' : '' }}>
-                                                    {{ $estacion->nombre }}
+                                            <?php $__currentLoopData = $estaciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $estacion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($estacion->id); ?>" <?php echo e(old('estacion_id') == $estacion->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($estacion->nombre); ?>
+
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                 </div>
@@ -169,7 +199,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Guardar Novedad
                 </button>
-                <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary">
+                <a href="<?php echo e(route('estacion-novedades.index')); ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Cancelar
                 </a>
             </div>
@@ -261,9 +291,9 @@
                         <label>Vehículo</label>
                         <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
                             <option value="">Seleccione...</option>
-                            @foreach($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->id }}">{{ $vehiculo->placa }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($vehiculo->id); ?>"><?php echo e($vehiculo->placa); ?> - <?php echo e($vehiculo->marca); ?> <?php echo e($vehiculo->modelo); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                 </div>
@@ -297,7 +327,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label>Fecha Reporte</label>
-                        <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="{{ date('Y-m-d') }}">
+                        <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="<?php echo e(date('Y-m-d')); ?>">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -343,9 +373,9 @@
                         <label>Funcionario</label>
                         <select name="personal[${personalCount}][user_id]" class="form-control">
                             <option value="">Seleccione...</option>
-                            @foreach($personal as $persona)
-                                <option value="{{ $persona->id }}">{{ $persona->name }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $persona): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($persona->id); ?>"><?php echo e($persona->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                 </div>
@@ -487,27 +517,13 @@ function buscarEmergencias() {
     container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando emergencias...</p></div>';
     document.getElementById('emergencias-listado').style.display = 'block';
     
-    // Usar la ruta de prueba que funciona
-    const url = `/test-buscar?fecha=${fecha}&estacion_id=${estacionId}`;
-    console.log('URL:', url);
-    
     // Realizar la petición AJAX
-    fetch(url)
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error('HTTP error ' + response.status);
-            }
-            return response.json();
-        })
+    //fetch(`<?php echo e(route('estacion-novedades.buscar-emergencias')); ?>?fecha=${fecha}&estacion_id=${estacionId}`)
+    //fetch(`/estacion-novedades/buscar-emergencias-json?fecha=${fecha}&estacion_id=${estacionId}`)
+    fetch(`/test-buscar?fecha=${fecha}&estacion_id=${estacionId}`)
+        .then(response => response.json())
         .then(data => {
-            console.log('Datos recibidos:', data);
             document.getElementById('total-emergencias').textContent = data.total;
-            
-            if (data.error) {
-                container.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${data.error}</div>`;
-                return;
-            }
             
             if (data.total === 0) {
                 container.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> No se encontraron emergencias en esta fecha y estación.</div>';
@@ -535,16 +551,13 @@ function buscarEmergencias() {
                 const personalCount = emergencia.usuarios ? emergencia.usuarios.length : 0;
                 const vehiculosCount = emergencia.vehiculos ? emergencia.vehiculos.length : 0;
                 
-                // Verificar si tipo_incidente existe
-                const nombreIncidente = emergencia.tipo_incidente ? emergencia.tipo_incidente.nombre_incidente : 'N/A';
-                
                 html += `
                     <tr>
-                        <td><input type="checkbox" class="seleccionar-emergencia" value="${emergencia.id}" data-incidente="${nombreIncidente}" data-hora-salida="${emergencia.hora_salida_emergencia || ''}" data-hora-llegada="${emergencia.hora_llegada_emergencia || ''}" data-personal="${personalCount}" data-vehiculos="${vehiculosCount}" data-detalle="${emergencia.detalle_emergencia || ''}"></td>
+                        <td><input type="checkbox" class="seleccionar-emergencia" value="${emergencia.id}" data-incidente="${emergencia.tipo_incidente.nombre_incidente || ''}" data-hora-salida="${emergencia.hora_salida_emergencia}" data-hora-llegada="${emergencia.hora_llegada_emergencia}" data-personal="${personalCount}" data-vehiculos="${vehiculosCount}" data-detalle="${emergencia.detalle_emergencia || ''}"></td>
                         <td>${emergencia.id}</td>
-                        <td>${nombreIncidente}</td>
-                        <td>${emergencia.hora_salida_emergencia || 'N/A'}</td>
-                        <td>${emergencia.hora_llegada_emergencia || 'N/A'}</td>
+                        <td>${emergencia.tipo_incidente ? emergencia.tipo_incidente.nombre_incidente : 'N/A'}</td>
+                        <td>${emergencia.hora_salida_emergencia}</td>
+                        <td>${emergencia.hora_llegada_emergencia}</td>
                         <td>${personalCount}</td>
                         <td>${vehiculosCount}</td>
                         <td>
@@ -569,8 +582,8 @@ function buscarEmergencias() {
             container.innerHTML = html;
         })
         .catch(error => {
-            console.error('Error completo:', error);
-            container.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</div>`;
+            console.error('Error:', error);
+            container.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error al cargar las emergencias.</div>';
         });
 }
 
@@ -650,4 +663,5 @@ function verDetalleEmergencia(id) {
     window.open(`/emergencias/${id}`, '_blank');
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.plantilla', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\Desarrollo\htdocs\resources\views/estacion_novedades/create.blade.php ENDPATH**/ ?>

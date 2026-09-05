@@ -143,6 +143,20 @@
         </div>
     </div>
 </li>
+<!-- Nav Item - Emergencias -->
+<li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEmergencias" aria-expanded="true" aria-controls="collapseEmergencias">
+        <i class="fas fa-fw fa-ambulance"></i>
+        <span>Emergencias</span>
+    </a>
+    <div id="collapseEmergencias" class="collapse" aria-labelledby="headingEmergencias" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Gestión de Emergencias:</h6>
+            <a class="collapse-item" href="{{ route('emergencias.index') }}">Lista de Emergencias</a>
+            <a class="collapse-item" href="{{ route('emergencias.create') }}">Nueva Emergencia</a>
+        </div>
+    </div>
+</li>
 
 
     </div>
