@@ -245,6 +245,10 @@ Route::get('vehiculos/export/',    					'VehiculoController@export')->middleware
 / ------------------------------------------------------------------------------------
 */
 //Rutas Permisos Usuarios 
+Route::resource('user', 'UserController')->middleware('role:admin|Super-Admin');
+
+
+
 Route::get('users/permisosxrol/{id}',				'UserController@PerrmisosxRol')->middleware('role:admin|Super-Admin');
 Route::get('users/consultarol/{id}',				'UserController@ConsultaRolUsuario')->name('consultrol')->middleware('role:admin|Super-Admin');
 Route::get('users/roles',							'UserController@rol')->middleware('role:admin|Super-Admin');

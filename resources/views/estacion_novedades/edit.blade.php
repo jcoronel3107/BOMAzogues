@@ -275,6 +275,75 @@
                 </div>
             </div>
 
+            <hr>
+
+            <!-- Integrantes de la Guardia Bomberil -->
+            <div class="row">
+                <div class="col-md-12">
+                    <h5 class="text-primary">Integrantes de la Guardia Bomberil</h5>
+                    <button type="button" class="btn btn-success btn-sm mb-2" onclick="agregarIntegranteGuardia()">
+                        <i class="fas fa-plus"></i> Agregar Integrante
+                    </button>
+                    <div id="integrantes-guardia-container">
+                        @if($novedad->integrantes_guardia)
+                            @foreach($novedad->integrantes_guardia as $key => $integrante)
+                                <div class="card mb-2 p-3" id="integrante-guardia-{{ $key }}">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Nombres y Apellidos</label>
+                                                <input type="text" name="integrantes_guardia[{{ $key }}][nombre]" class="form-control" value="{{ $integrante['nombre'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Cédula</label>
+                                                <input type="text" name="integrantes_guardia[{{ $key }}][cedula]" class="form-control" value="{{ $integrante['cedula'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Cargo</label>
+                                                <select name="integrantes_guardia[{{ $key }}][cargo]" class="form-control">
+                                                    <option value="">Seleccione...</option>
+                                                    <option value="Bombero" {{ ($integrante['cargo'] ?? '') == 'Bombero' ? 'selected' : '' }}>Bombero</option>
+                                                    <option value="Teniente" {{ ($integrante['cargo'] ?? '') == 'Teniente' ? 'selected' : '' }}>Teniente</option>
+                                                    <option value="Capitán" {{ ($integrante['cargo'] ?? '') == 'Capitán' ? 'selected' : '' }}>Capitán</option>
+                                                    <option value="Mayor" {{ ($integrante['cargo'] ?? '') == 'Mayor' ? 'selected' : '' }}>Mayor</option>
+                                                    <option value="Comandante" {{ ($integrante['cargo'] ?? '') == 'Comandante' ? 'selected' : '' }}>Comandante</option>
+                                                    <option value="Paramédico" {{ ($integrante['cargo'] ?? '') == 'Paramédico' ? 'selected' : '' }}>Paramédico</option>
+                                                    <option value="Conductor" {{ ($integrante['cargo'] ?? '') == 'Conductor' ? 'selected' : '' }}>Conductor</option>
+                                                    <option value="Operador Radio" {{ ($integrante['cargo'] ?? '') == 'Operador Radio' ? 'selected' : '' }}>Operador Radio</option>
+                                                    <option value="Administrativo" {{ ($integrante['cargo'] ?? '') == 'Administrativo' ? 'selected' : '' }}>Administrativo</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegranteGuardia({{ $key }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Observaciones del Integrante</label>
+                                                <input type="text" name="integrantes_guardia[{{ $key }}][observaciones]" class="form-control" value="{{ $integrante['observaciones'] ?? '' }}" placeholder="Observaciones">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Actualizar Novedad
@@ -291,7 +360,9 @@
 let emergenciaCount = {{ count($novedad->emergencias) }};
 let vehiculoCount = {{ count($novedad->vehiculos) }};
 let personalCount = {{ count($novedad->personal) }};
+let integranteGuardiaCount = {{ isset($novedad->integrantes_guardia) ? count($novedad->integrantes_guardia) : 0 }};
 
+// Funciones para Emergencias
 function agregarEmergencia() {
     emergenciaCount++;
     const container = document.getElementById('emergencias-container');
@@ -358,6 +429,7 @@ function eliminarEmergencia(id) {
     if (element) element.remove();
 }
 
+// Funciones para Vehículos
 function agregarVehiculo() {
     vehiculoCount++;
     const container = document.getElementById('vehiculos-container');
@@ -440,6 +512,7 @@ function eliminarVehiculo(id) {
     if (element) element.remove();
 }
 
+// Funciones para Personal
 function agregarPersonal() {
     personalCount++;
     const container = document.getElementById('personal-container');
@@ -511,6 +584,70 @@ function agregarPersonal() {
 
 function eliminarPersonal(id) {
     const element = document.getElementById('personal-' + id);
+    if (element) element.remove();
+}
+
+// Funciones para Integrantes de la Guardia
+function agregarIntegranteGuardia() {
+    integranteGuardiaCount++;
+    const container = document.getElementById('integrantes-guardia-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-3';
+    div.id = 'integrante-guardia-' + integranteGuardiaCount;
+    div.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Nombres y Apellidos</label>
+                    <input type="text" name="integrantes_guardia[${integranteGuardiaCount}][nombre]" class="form-control" placeholder="Nombre completo">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" name="integrantes_guardia[${integranteGuardiaCount}][cedula]" class="form-control" placeholder="Cédula">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <select name="integrantes_guardia[${integranteGuardiaCount}][cargo]" class="form-control">
+                        <option value="">Seleccione...</option>
+                        <option value="Bombero">Bombero</option>
+                        <option value="Teniente">Teniente</option>
+                        <option value="Capitán">Capitán</option>
+                        <option value="Mayor">Mayor</option>
+                        <option value="Comandante">Comandante</option>
+                        <option value="Paramédico">Paramédico</option>
+                        <option value="Conductor">Conductor</option>
+                        <option value="Operador Radio">Operador Radio</option>
+                        <option value="Administrativo">Administrativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegranteGuardia(${integranteGuardiaCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Observaciones del Integrante</label>
+                    <input type="text" name="integrantes_guardia[${integranteGuardiaCount}][observaciones]" class="form-control" placeholder="Observaciones">
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function eliminarIntegranteGuardia(id) {
+    const element = document.getElementById('integrante-guardia-' + id);
     if (element) element.remove();
 }
 </script>

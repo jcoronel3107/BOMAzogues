@@ -38,6 +38,7 @@
 			<th>{!! trans('messages.E-Mail Address') !!}</th>
 			<th>{!! trans('messages.avatar') !!}</th>
 			<th>{!! trans('messages.position') !!}</th>
+			<th>Estación</th>
 			<th>{!! trans('messages.Rols') !!}</th>
 			<th>{!! trans('messages.status') !!}</th>
 			<th>{!! trans('messages.Options') !!}</th>
@@ -52,6 +53,7 @@
 			<td>{{$user->email}}</td>
 			<td><img src="{{asset('storage/avatar/'.$user->avatar)}}" alt="avatar" width="30" height="30"></td>
 			<td>{{$user->cargo}}</td>
+			<td>{{ $user->station->nombre ?? 'N/A' }}</td>
 			<td>{{$user->getRoleNames()}}</td>
 			<td>{{$user->status}}</td>
 			<td>

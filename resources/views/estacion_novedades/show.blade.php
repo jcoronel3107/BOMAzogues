@@ -267,7 +267,7 @@
         <!-- Personal -->
         <div class="row mt-4">
             <div class="col-md-12">
-                <h5 class="text-primary">Personal</h5>
+                <h5 class="text-primary">Novedades de Personal</h5>
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
                         <thead class="thead-light">
@@ -315,6 +315,40 @@
                 </div>
             </div>
         </div>
+
+        <!-- Integrantes de la Guardia -->
+            @if($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0)
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-primary">Integrantes de la Guardia Bomberil</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nombres y Apellidos</th>
+                                    <th>Cédula</th>
+                                    <th>Cargo</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($novedad->integrantes_guardia as $key => $integrante)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $integrante['nombre'] ?? 'N/A' }}</td>
+                                        <td>{{ $integrante['cedula'] ?? 'N/A' }}</td>
+                                        <td>{{ $integrante['cargo'] ?? 'N/A' }}</td>
+                                        <td>{{ $integrante['observaciones'] ?? 'N/A' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+        
     </div>
 </div>
 @endsection

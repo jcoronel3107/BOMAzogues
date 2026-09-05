@@ -26,6 +26,7 @@ class EstacionNovedad extends Model
         'fecha_creacion',
         'observaciones',
         'bloqueado',
+        'integrantes_guardia',  // <-- Agregar este campo
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class EstacionNovedad extends Model
         'fecha_ratificacion' => 'datetime',
         'fecha_creacion' => 'datetime',
         'bloqueado' => 'boolean',
+        'integrantes_guardia' => 'array',  // <-- Agregar este cast
     ];
 
     // === ESTADOS DE LA NOVEDAD ===
@@ -122,5 +124,24 @@ class EstacionNovedad extends Model
     public function puedeRevisar()
     {
         return $this->estado === self::ESTADO_ELABORACION && !$this->bloqueado;
+    }
+
+    public function scopeDeUsuario($query)
+    {
+        $user = auth()->user();
+        if ($user && $user->station_id) {
+            return $query->where('estacion_id', $user->station_id);
+        }
+        return $query;
+    }
+
+    public function index()
+    {
+        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+            ->deUsuario()
+            ->latest()
+            ->paginate(15);
+        
+        return view('estacion_novedades.index', compact('novedades'));
     }
 }
