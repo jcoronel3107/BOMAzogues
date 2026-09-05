@@ -393,5 +393,7 @@ Route::get('/refresh/',							    'MenuController@refrescamiento');
 Route::get('qrcode',                                'MenuController@qrcode_blade')->middleware(('auth'));
 
 
+// Rutas para Emergencias
+Route::resource('emergencias', 'EmergenciaController')->middleware('auth');
 
     
