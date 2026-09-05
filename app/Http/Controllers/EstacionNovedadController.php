@@ -9,12 +9,14 @@ use App\EstacionPersonal;
 use App\Station;
 use App\User;
 use App\Vehiculo;
+use App\Emergencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NovedadEnRevision;
 use App\Notifications\NovedadAprobada;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
+
 
 class EstacionNovedadController extends Controller
 {
@@ -30,25 +32,25 @@ class EstacionNovedadController extends Controller
     }
 
     public function index()
-{
-    $user = Auth::user();
-    
-    // Si el usuario tiene estación asignada, filtrar
-    if ($user->station_id) {
-        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
-            ->where('estacion_id', $user->station_id)
-            ->latest()
-            ->paginate(15);
-    } else {
-        // Si no tiene estación asignada (Super-Admin), ver todas
-        $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
-            ->latest()
-            ->paginate(15);
+    {
+        $user = Auth::user();
+        
+        // Si el usuario tiene estación asignada, filtrar
+        if ($user->station_id) {
+            $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+                ->where('estacion_id', $user->station_id)
+                ->latest()
+                ->paginate(15);
+        } else {
+            // Si no tiene estación asignada (Super-Admin), ver todas
+            $novedades = EstacionNovedad::with(['estacion', 'usuarioElabora', 'usuarioRevisa', 'usuarioAprueba'])
+                ->latest()
+                ->paginate(15);
+        }
+        
+        return view('estacion_novedades.index', compact('novedades'));
     }
-    
-    return view('estacion_novedades.index', compact('novedades'));
-}
-
+/* FUNCION CREATE ORIGINAL SIN BUSQUEDA DE EMERGENCIAS
     public function create()
     {
         $user = Auth::user();
@@ -65,6 +67,61 @@ class EstacionNovedadController extends Controller
         $vehiculos = Vehiculo::all();
         
         return view('estacion_novedades.create', compact('estaciones', 'personal', 'vehiculos'));
+    }
+*/
+    public function create()
+    {
+            $user = Auth::user();
+            
+            // Obtener estaciones permitidas
+            if ($user->station_id) {
+                $estaciones = Station::where('id', $user->station_id)->get();
+                // Obtener emergencias de la estación del usuario para hoy
+                $emergencias = Emergencia::where('estacion_id', $user->station_id)
+                    ->whereDate('fecha', today())
+                    ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
+                    ->get();
+            } else {
+                // Super-Admin puede ver todas
+                $estaciones = Station::all();
+                $emergencias = collect(); // vacío
+            }
+            
+            $personal = User::all();
+            $vehiculos = Vehiculo::all();
+            
+            return view('estacion_novedades.create', compact('estaciones', 'personal', 'vehiculos', 'emergencias'));
+    }
+
+    // Buscar emergencias por fecha
+    public function buscarEmergencias(Request $request)
+    {
+        try {
+            $fecha = $request->input('fecha');
+            $estacionId = $request->input('estacion_id');
+
+            \Log::info('Buscando emergencias - Fecha: ' . $fecha . ' - Estación: ' . $estacionId);
+
+            $emergencias = Emergencia::where('estacion_id', $estacionId)
+                ->whereDate('fecha', $fecha)
+                ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
+                ->get();
+
+            \Log::info('Emergencias encontradas: ' . $emergencias->count());
+
+            return response()->json([
+                'emergencias' => $emergencias,
+                'total' => $emergencias->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al buscar emergencias: ' . $e->getMessage());
+            return response()->json([
+                'error' => $e->getMessage(),
+                'emergencias' => [],
+                'total' => 0
+            ], 500);
+        }
     }
 
     public function store(Request $request)

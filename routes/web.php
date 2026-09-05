@@ -339,6 +339,38 @@ Route::get('/test-pdf', function() {
     return $pdf->Output('test.pdf', 'D');
 });
 
+Route::get('test-buscar', function() {
+    $fecha = request()->input('fecha');
+    $estacionId = request()->input('estacion_id');
+    
+    $emergencias = App\Emergencia::where('estacion_id', $estacionId)
+        ->whereDate('fecha', $fecha)
+        ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
+        ->get();
+    
+    return response()->json([
+        'emergencias' => $emergencias,
+        'total' => $emergencias->count()
+    ]);
+});
+
+Route::get('estacion-novedades/buscar-emergencias-json', function() {
+    $fecha = request()->input('fecha');
+    $estacionId = request()->input('estacion_id');
+    
+    $emergencias = App\Emergencia::where('estacion_id', $estacionId)
+        ->whereDate('fecha', $fecha)
+        ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
+        ->get();
+    
+    return response()->json([
+        'emergencias' => $emergencias,
+        'total' => $emergencias->count()
+    ]);
+})->middleware('auth');
+
+
+Route::get('estacion-novedades/buscar-emergencias', [App\Http\Controllers\EstacionNovedadController::class, 'buscarEmergencias'])->name('estacion-novedades.buscar-emergencias')->middleware('auth');
 
 // Rutas para enviar correos
 Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');
