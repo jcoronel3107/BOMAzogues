@@ -18,8 +18,10 @@ use App\Http\Controllers\TallerController;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+
 Route::get('/',										'PagesController@index')->middleware('auth');
+*/
+Route::get('/', 'WelcomeController@index')->middleware('auth');
 Route::get('/home',							'PagesController@index')->middleware('auth');
 Auth::routes();
 /* -----------------------------------------------------------------------------------
@@ -414,6 +416,16 @@ Route::get('vehiculo/{id}/ultimo-km', function($id) {
 Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');
 Route::get('movilizaciones/{id}/enviar-correo', 'MovilizacionController@enviarCorreo')->name('movilizaciones.enviar-correo')->middleware('auth');
 Route::get('inspeccion/{id}/enviar-correo', 'InspeccionController@enviarCorreo')->name('inspeccion.enviar-correo')->middleware('auth');
+
+
+
+// Reportes de Emergencias
+Route::get('reportes/emergencias', 'ReporteEmergenciasController@index')->name('reportes.emergencias')->middleware('auth');
+Route::post('reportes/emergencias/buscar', 'ReporteEmergenciasController@buscar')->name('reportes.emergencias.buscar')->middleware('auth');
+Route::get('reportes/emergencias/pdf', 'ReporteEmergenciasController@exportPdf')->name('reportes.emergencias.pdf')->middleware('auth');
+
+
+
 /* --------------------------------------- Rutas para notificaciones    ----------------------- */
 
 Route::get('notificaciones/marcar-todas-leidas', function() {
@@ -442,6 +454,13 @@ Route::post('movilizaciones/{id}/finalizar', 'MovilizacionController@finalizar')
 /*-----------------Exportar Novedades Excel---------------------------------*/
 Route::get('estacion-novedades/export/excel', 'EstacionNovedadController@exportExcel')->name('estacion-novedades.export.excel')->middleware('auth');
 Route::get('estacion-novedades/{id}/export/emergencias', 'EstacionNovedadController@exportEmergencias')->name('estacion-novedades.export.emergencias')->middleware('auth');
+
+// Dashboard de Emergencias
+Route::get('dashboard', 'DashboardEmergenciasController@index')->name('dashboard.emergencias')->middleware('auth');
+Route::get('dashboard/datos', 'DashboardEmergenciasController@getChartData')->name('dashboard.emergencias.datos')->middleware('auth');
+
+
+
 /* ----------------------------------------------------------------------------------------------
 /                                   Rutas Menu Principal
 /
