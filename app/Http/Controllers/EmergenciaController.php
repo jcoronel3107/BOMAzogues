@@ -7,6 +7,7 @@ use App\Incidente;
 use App\Station;
 use App\User;
 use App\Vehiculo;
+use App\Parroquia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -30,10 +31,11 @@ class EmergenciaController extends Controller
     {
         $incidentes = Incidente::orderBy('nombre_incidente')->get();
         $estaciones = Station::all();
+        $parroquias = Parroquia::orderBy('nombre')->get(); // <-- Agregar esta línea
         $usuarios = User::orderBy('name')->get();
         $vehiculos = Vehiculo::where('activo', 1)->orderBy('placa')->get();
         
-        return view('emergencias.create', compact('incidentes', 'estaciones', 'usuarios', 'vehiculos'));
+         return view('emergencias.create', compact('incidentes', 'estaciones', 'parroquias', 'usuarios', 'vehiculos'));
     }
 
     public function store(Request $request)
@@ -44,6 +46,7 @@ class EmergenciaController extends Controller
             'tipo_incidente_id' => 'required|exists:incidentes,id',
             'subcategoria' => 'nullable|string|max:255',
             'estacion_id' => 'required|exists:stations,id',
+            'parroquia_id' => 'nullable|exists:parroquias,id', // <-- Agregar
             'hora_salida_emergencia' => 'required',
             'hora_llegada_emergencia' => 'required',
             'hora_en_base' => 'required',
@@ -62,6 +65,7 @@ class EmergenciaController extends Controller
             'tipo_incidente_id' => $request->tipo_incidente_id,
             'subcategoria' => $request->subcategoria,
             'estacion_id' => $request->estacion_id,
+            'parroquia_id' => $request->parroquia_id, // <-- Agregar
             'hora_salida_emergencia' => $request->hora_salida_emergencia,
             'hora_llegada_emergencia' => $request->hora_llegada_emergencia,
             'hora_en_base' => $request->hora_en_base,
@@ -105,10 +109,11 @@ class EmergenciaController extends Controller
         $emergencia = Emergencia::with(['usuarios', 'vehiculos'])->findOrFail($id);
         $incidentes = Incidente::orderBy('nombre_incidente')->get();
         $estaciones = Station::all();
+        $parroquias = Parroquia::orderBy('nombre')->get(); // <-- Agregar
         $usuarios = User::orderBy('name')->get();
         $vehiculos = Vehiculo::where('activo', 1)->orderBy('placa')->get();
         
-        return view('emergencias.edit', compact('emergencia', 'incidentes', 'estaciones', 'usuarios', 'vehiculos'));
+        return view('emergencias.edit', compact('emergencia', 'incidentes', 'estaciones', 'parroquias', 'usuarios', 'vehiculos'));
     }
 
     public function update(Request $request, $id)
@@ -121,6 +126,7 @@ class EmergenciaController extends Controller
             'tipo_incidente_id' => 'required|exists:incidentes,id',
             'subcategoria' => 'nullable|string|max:255',
             'estacion_id' => 'required|exists:stations,id',
+            'parroquia_id' => 'nullable|exists:parroquias,id', // <-- Agregar
             'hora_salida_emergencia' => 'required',
             'hora_llegada_emergencia' => 'required',
             'hora_en_base' => 'required',

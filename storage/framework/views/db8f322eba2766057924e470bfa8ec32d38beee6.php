@@ -29,7 +29,7 @@
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE1/"><?php echo trans('messages.Station1'); ?></a>
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE2/"><?php echo trans('messages.Station2'); ?></a>
             <a rel="nofollow noopener noreferrer" class="collapse-item" target="_blank" href="/eventoE3/"><?php echo trans('messages.Station3'); ?></a>
-           
+          
           </div>
         </div>
       </li>

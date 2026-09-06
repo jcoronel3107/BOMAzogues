@@ -15,6 +15,7 @@ class Emergencia extends Model
         'tipo_incidente_id',
         'subcategoria',
         'estacion_id',
+        'parroquia_id', // <-- Agregar esta línea
         'hora_salida_emergencia',
         'hora_llegada_emergencia',
         'hora_en_base',
@@ -55,5 +56,10 @@ class Emergencia extends Model
     public function conductor()
     {
         return $this->belongsTo(User::class, 'conductor_id');
+    }
+    
+    public function parroquia()
+    {
+    return $this->belongsTo(Parroquia::class);
     }
 }
