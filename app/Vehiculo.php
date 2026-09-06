@@ -44,6 +44,7 @@ class Vehiculo extends Model
 	"kmmantrut",
 	"usuacrea",
 	"usuaedit",
+	'km_actual', // <-- Agregar si no existe
 	"combustible"];
 
 	protected static $logFillable = true;
@@ -113,6 +114,33 @@ class Vehiculo extends Model
 
 	public function maintenance_requests(){
 		return $this->hasMany(Maintenance_request::class);
+		}
+
+
+	public function getUltimoKmRetorno()
+		{
+			// Buscar el último registro en emergencia_vehiculo para este vehículo
+			$ultimoRegistro = \DB::table('emergencia_vehiculo')
+				->where('vehiculo_id', $this->id)
+				->orderBy('created_at', 'desc')
+				->first();
+			
+			if ($ultimoRegistro && $ultimoRegistro->km_retorno) {
+				return $ultimoRegistro->km_retorno;
+			}
+			
+			// Si no hay registro, buscar en incendios
+			$ultimoIncendio = \DB::table('incendio_vehiculo')
+				->where('vehiculo_id', $this->id)
+				->orderBy('created_at', 'desc')
+				->first();
+			
+			if ($ultimoIncendio && $ultimoIncendio->km_llegada) {
+				return $ultimoIncendio->km_llegada;
+			}
+			
+			// Si no hay registros, retornar el km actual del vehículo o 0
+			return $this->km_actual ?? 0;
 		}
 
 }

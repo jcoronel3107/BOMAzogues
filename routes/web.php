@@ -372,6 +372,44 @@ Route::get('estacion-novedades/buscar-emergencias-json', function() {
 
 Route::get('estacion-novedades/buscar-emergencias', [App\Http\Controllers\EstacionNovedadController::class, 'buscarEmergencias'])->name('estacion-novedades.buscar-emergencias')->middleware('auth');
 
+
+//Ruta pa otener el KM del vehiculo
+Route::get('vehiculo/{id}/ultimo-km', function($id) {
+    try {
+        $vehiculo = App\Vehiculo::find($id);
+        if (!$vehiculo) {
+            return response()->json(['error' => 'Vehículo no encontrado', 'km' => 0], 404);
+        }
+        
+        // Buscar el último registro en emergencia_vehiculo
+        $ultimoRegistro = DB::table('emergencia_vehiculo')
+            ->where('vehiculo_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        $km = 0;
+        if ($ultimoRegistro && $ultimoRegistro->km_retorno) {
+            $km = (float) $ultimoRegistro->km_retorno;
+        } else {
+            // Si no hay en emergencias, buscar en incendios
+            $ultimoIncendio = DB::table('incendio_vehiculo')
+                ->where('vehiculo_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            if ($ultimoIncendio && $ultimoIncendio->km_llegada) {
+                $km = (float) $ultimoIncendio->km_llegada;
+            }
+        }
+        
+        return response()->json([
+            'km' => $km,
+            'vehiculo_id' => $id,
+            'mensaje' => $km > 0 ? 'KM cargado del último registro' : 'Sin registros previos'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage(), 'km' => 0], 500);
+    }
+})->name('vehiculo.ultimo-km');
 // Rutas para enviar correos
 Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@enviarCorreo')->name('estacion-novedades.enviar-correo')->middleware('auth');
 Route::get('movilizaciones/{id}/enviar-correo', 'MovilizacionController@enviarCorreo')->name('movilizaciones.enviar-correo')->middleware('auth');

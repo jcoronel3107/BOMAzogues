@@ -120,6 +120,24 @@
                                 @enderror
                             </div>
                         </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Parroquia</label>
+                                    <select name="parroquia_id" class="form-control @error('parroquia_id') is-invalid @enderror">
+                                        <option value="">Seleccione...</option>
+                                        @foreach($parroquias as $parroquia)
+                                            <option value="{{ $parroquia->id }}" {{ old('parroquia_id', $emergencia->parroquia_id) == $parroquia->id ? 'selected' : '' }}>
+                                                {{ $parroquia->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('parroquia_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Ciudadano Afectado</label>
@@ -280,7 +298,7 @@ function agregarVehiculo() {
             <div class="col-md-3">
                 <div class="form-group">
                     <label>Vehículo</label>
-                    <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
+                    <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control" onchange="cargarKmSalida(this, ${vehiculoCount})">
                         <option value="">Seleccione...</option>
                         @foreach($vehiculos as $vehiculo)
                             <option value="{{ $vehiculo->id }}">{{ $vehiculo->placa }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>

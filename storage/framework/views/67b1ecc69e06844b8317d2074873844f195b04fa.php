@@ -406,7 +406,9 @@ unset($__errorArgs, $__bag); ?>
 <script>
 let vehiculoCount = 0;
 
-function agregarVehiculo() {
+
+function agregarVehiculo()
+{
     vehiculoCount++;
     const container = document.getElementById('vehiculos-container');
     const div = document.createElement('div');
@@ -417,7 +419,7 @@ function agregarVehiculo() {
             <div class="col-md-3">
                 <div class="form-group">
                     <label>Vehículo</label>
-                    <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
+                    <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control" onchange="cargarKmSalida(this, ${vehiculoCount})">
                         <option value="">Seleccione...</option>
                         <?php $__currentLoopData = $vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <option value="<?php echo e($vehiculo->id); ?>"><?php echo e($vehiculo->placa); ?> - <?php echo e($vehiculo->marca); ?> <?php echo e($vehiculo->modelo); ?></option>
@@ -439,13 +441,13 @@ function agregarVehiculo() {
             <div class="col-md-2">
                 <div class="form-group">
                     <label>KM Salida</label>
-                    <input type="number" name="vehiculos[${vehiculoCount}][km_salida]" class="form-control" placeholder="KM">
+                    <input type="number" name="vehiculos[${vehiculoCount}][km_salida]" id="km_salida_${vehiculoCount}" class="form-control" placeholder="KM" step="0.1" onchange="validarKm(${vehiculoCount})">
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="form-group">
                     <label>KM Retorno</label>
-                    <input type="number" name="vehiculos[${vehiculoCount}][km_retorno]" class="form-control" placeholder="KM">
+                    <input type="number" name="vehiculos[${vehiculoCount}][km_retorno]" id="km_retorno_${vehiculoCount}" class="form-control" placeholder="KM" step="0.1" onchange="validarKm(${vehiculoCount})">
                 </div>
             </div>
             <div class="col-md-2">
@@ -457,8 +459,84 @@ function agregarVehiculo() {
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="km_error_${vehiculoCount}" style="display:none; color: red; font-size: 12px; margin-top: 5px;">
+                    <i class="fas fa-exclamation-circle"></i> El KM de Retorno no puede ser menor que el KM de Salida.
+                </div>
+            </div>
+        </div>
     `;
     container.appendChild(div);
+}
+
+function validarKm(index) 
+{
+    console.log('=== VALIDANDO KM ===');
+    console.log('Index:', index);
+    
+    const kmSalida = parseFloat(document.getElementById('km_salida_' + index).value);
+    const kmRetorno = parseFloat(document.getElementById('km_retorno_' + index).value);
+    const errorDiv = document.getElementById('km_error_' + index);
+    const btnSubmit = document.querySelector('button[type="submit"]');
+    
+    console.log('KM Salida:', kmSalida);
+    console.log('KM Retorno:', kmRetorno);
+    console.log('Error Div:', errorDiv);
+    
+    if (kmSalida && kmRetorno && kmRetorno < kmSalida) {
+        console.log('❌ ERROR: KM Retorno es menor que KM Salida');
+        errorDiv.style.display = 'block';
+        document.getElementById('km_salida_' + index).style.borderColor = '#dc3545';
+        document.getElementById('km_retorno_' + index).style.borderColor = '#dc3545';
+        if (btnSubmit) btnSubmit.disabled = true;
+    } else {
+        console.log('✅ KM válidos');
+        errorDiv.style.display = 'none';
+        document.getElementById('km_salida_' + index).style.borderColor = '';
+        document.getElementById('km_retorno_' + index).style.borderColor = '';
+        if (btnSubmit) btnSubmit.disabled = false;
+    }
+}
+
+
+
+
+function cargarKmSalida(select, index)
+ {
+    const vehiculoId = select.value;
+    const kmInput = document.getElementById('km_salida_' + index);
+    
+    if (!vehiculoId) {
+        kmInput.value = '';
+        return;
+    }
+    
+    // Mostrar loading
+    kmInput.placeholder = 'Cargando...';
+    kmInput.disabled = true;
+    
+    // Realizar petición AJAX
+    fetch(`/vehiculo/${vehiculoId}/ultimo-km`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.km !== undefined && data.km > 0) {
+                kmInput.value = data.km;
+                kmInput.style.backgroundColor = '#e8f5e9';
+                // Mostrar mensaje
+                console.log('KM cargado:', data.km);
+            } else {
+                kmInput.value = '';
+                kmInput.placeholder = 'Sin registros';
+                kmInput.style.backgroundColor = '#fff3e0';
+            }
+            kmInput.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error al cargar KM:', error);
+            kmInput.placeholder = 'Error al cargar';
+            kmInput.disabled = false;
+        });
 }
 
 function eliminarVehiculo(id) {
@@ -476,6 +554,32 @@ $(document).ready(function() {
         placeholder: "Seleccione el personal...",
         allowClear: true
     });
+});
+// Validación al enviar el formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formEmergencia');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Verificar todos los vehículos
+            let hasError = false;
+            const vehiculos = document.querySelectorAll('[id^="vehiculo-"]');
+            vehiculos.forEach(function(vehiculo) {
+                const index = vehiculo.id.split('-')[1];
+                const kmSalida = parseFloat(document.getElementById('km_salida_' + index).value);
+                const kmRetorno = parseFloat(document.getElementById('km_retorno_' + index).value);
+                
+                if (kmSalida && kmRetorno && kmRetorno < kmSalida) {
+                    hasError = true;
+                    document.getElementById('km_error_' + index).style.display = 'block';
+                }
+            });
+            
+            if (hasError) {
+                e.preventDefault();
+                alert('❌ Corrija los errores de KM antes de guardar. El KM de Retorno no puede ser menor que el KM de Salida.');
+            }
+        });
+    }
 });
 </script>
 <?php $__env->stopSection(); ?>
