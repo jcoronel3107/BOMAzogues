@@ -120,6 +120,25 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label>Parroquia</label>
+                                <select name="parroquia_id" class="form-control @error('parroquia_id') is-invalid @enderror">
+                                    <option value="">Seleccione...</option>
+                                    @foreach($parroquias as $parroquia)
+                                        <option value="{{ $parroquia->id }}" {{ old('parroquia_id') == $parroquia->id ? 'selected' : '' }}>
+                                            {{ $parroquia->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('parroquia_id')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-md-6">
+                            <div class="form-group">
                                 <label>Ciudadano Afectado</label>
                                 <input type="text" name="ciudadano_afectado" class="form-control @error('ciudadano_afectado') is-invalid @enderror" value="{{ old('ciudadano_afectado') }}" placeholder="Nombre del ciudadano afectado">
                                 @error('ciudadano_afectado')
