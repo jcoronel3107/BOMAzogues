@@ -81,6 +81,15 @@
         </div>
     </li>
 
+    
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Addons
+    </div>
     <!-- Nav Item - Inspeccion -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrevencionInsp" aria-expanded="true" aria-controls="collapsePrevencionInsp">
@@ -96,13 +105,6 @@
         </div>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Addons
-    </div>
 
     <!-- Nav Item - Emergencias -->
     <li class="nav-item">
