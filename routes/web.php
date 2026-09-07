@@ -488,3 +488,7 @@ Route::resource('emergencias', 'EmergenciaController')->middleware('auth');
 // Rutas para Insumos Médicos
 Route::resource('insumos-medicos', 'InsumoMedicoController')->middleware('auth');
 Route::post('insumos-medicos/{id}/ajustar-stock', 'InsumoMedicoController@ajustarStock')->name('insumos-medicos.ajustar-stock')->middleware('auth');
+
+// Rutas para Herramientas
+Route::resource('herramientas', 'HerramientaController')->middleware('auth');
+Route::post('herramientas/{id}/cambiar-estado', 'HerramientaController@cambiarEstado')->name('herramientas.cambiar-estado')->middleware('auth');

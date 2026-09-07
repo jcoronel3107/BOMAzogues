@@ -13,8 +13,12 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Código</label>
-                        <input type="text" class="form-control" value="{{ $herramienta->codigo }}" disabled>
+                        <label>Código <span class="text-danger">*</span></label>
+                        <input type="text" name="codigo" class="form-control @error('codigo') is-invalid @enderror" value="{{ old('codigo', $herramienta->codigo) }}" required>
+                        <small class="text-muted">El código debe ser único. Formato sugerido: HERR-YYYY-XXXXXX</small>
+                        @error('codigo')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
                 <div class="col-md-6">

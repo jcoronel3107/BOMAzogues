@@ -89,6 +89,7 @@ class HerramientaController extends Controller
         $herramienta = Herramienta::findOrFail($id);
 
         $request->validate([
+            'codigo' => 'required|string|max:50|unique:herramientas,codigo,' . $id,
             'descripcion' => 'required|string|max:255',
             'ubicacion' => 'nullable|string|max:255',
             'cantidad' => 'required|integer|min:0',
@@ -102,9 +103,11 @@ class HerramientaController extends Controller
             'fecha_mantenimiento' => 'nullable|date',
             'observaciones' => 'nullable|string',
             'estado' => 'required|in:disponible,en_uso,mantenimiento,averiada,baja',
+            
         ]);
 
         $herramienta->update([
+            'codigo' => $request->codigo,
             'descripcion' => $request->descripcion,
             'ubicacion' => $request->ubicacion,
             'cantidad' => $request->cantidad,
