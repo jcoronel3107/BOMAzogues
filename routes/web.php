@@ -485,4 +485,6 @@ Route::get('qrcode',                                'MenuController@qrcode_blade
 // Rutas para Emergencias
 Route::resource('emergencias', 'EmergenciaController')->middleware('auth');
 
-    
+// Rutas para Insumos Médicos
+Route::resource('insumos-medicos', 'InsumoMedicoController')->middleware('auth');
+Route::post('insumos-medicos/{id}/ajustar-stock', 'InsumoMedicoController@ajustarStock')->name('insumos-medicos.ajustar-stock')->middleware('auth');
