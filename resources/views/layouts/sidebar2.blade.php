@@ -190,6 +190,7 @@
         <div id="collapseParametros" class="collapse" aria-labelledby="headingParametros" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">{!! trans('messages.Choices') !!}</h6>
+                <a class="collapse-item" href="{{ route('herramientas.index') }}">Herramientas</a>
                 <a class="collapse-item" href="{{ route('insumos-medicos.index') }}">Insumos Médicos</a>
                 <a class="collapse-item" href="{{ url('/incidente') }}">{!! trans('messages.Incidents') !!}</a>
                 <a class="collapse-item" href="{{ url('/estacion') }}">{!! trans('messages.Firefighter station') !!}</a>
