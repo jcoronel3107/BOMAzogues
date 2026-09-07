@@ -37,6 +37,7 @@
                         <th>Fecha</th>
                         <th>Incidente</th>
                         <th>Estación</th>
+                        <th>Parroquia</th>
                         <th>Personal</th>
                         <th>Vehículos</th>
                         <th>Estado</th>
@@ -50,14 +51,19 @@
                         <td>{{ $emergencia->fecha->format('d/m/Y') }}</td>
                         <td>{{ $emergencia->tipoIncidente->nombre_incidente ?? 'N/A' }}</td>
                         <td>{{ $emergencia->estacion->nombre ?? 'N/A' }}</td>
+                        <td>{{ $emergencia->parroquia->nombre ?? 'N/A' }}</td>
                         <td>{{ $emergencia->usuarios->count() }}</td>
                         <td>{{ $emergencia->vehiculos->count() }}</td>
                         <td>
-                            @if($emergencia->deleted_at)
-                                <span class="badge badge-danger">Eliminado</span>
-                            @else
-                                <span class="badge badge-success">Activo</span>
-                            @endif
+                            @php
+                                $estados = [
+                                    'activo' => 'success',
+                                    'finalizado' => 'secondary'
+                                ];
+                            @endphp
+                            <span class="badge badge-{{ $estados[$emergencia->estado] ?? 'success' }}">
+                                {{ ucfirst($emergencia->estado ?? 'Activo') }}
+                            </span>
                         </td>
                         <td>
                             <div class="btn-group" role="group">
@@ -67,21 +73,29 @@
                                 <a href="{{ route('emergencias.edit', $emergencia) }}" class="btn btn-warning btn-sm" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                @if(!$emergencia->deleted_at)
-                                    <form action="{{ route('emergencias.destroy', $emergencia) }}" method="POST" class="d-inline">
+                                
+                                @if($emergencia->estado == 'activo' || !$emergencia->estado)
+                                    <form action="{{ route('emergencias.finalizar', $emergencia) }}" method="POST" class="d-inline">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta emergencia?')">
-                                            <i class="fas fa-trash"></i>
+                                        <button type="submit" class="btn btn-success btn-sm" title="Finalizar" onclick="return confirm('¿Estás seguro de finalizar esta emergencia?')">
+                                            <i class="fas fa-flag-checkered"></i>
                                         </button>
                                     </form>
                                 @endif
+                                
+                                <form action="{{ route('emergencias.destroy', $emergencia) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar esta emergencia?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center">No hay emergencias registradas</td>
+                        <td colspan="9" class="text-center">No hay emergencias registradas</td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -9,6 +9,11 @@ class Emergencia extends Model
 {
     use SoftDeletes;
 
+    // === ESTADOS ===
+    const ESTADO_ACTIVO = 'activo';
+    const ESTADO_FINALIZADO = 'finalizado';
+
+
     protected $fillable = [
         'fecha',
         'informacion_inicial',
@@ -62,4 +67,39 @@ class Emergencia extends Model
     {
     return $this->belongsTo(Parroquia::class);
     }
+
+    // === ESTADOS ===
+const ESTADO_ACTIVO = 'activo';
+const ESTADO_FINALIZADO = 'finalizado';
+
+public static function getEstados()
+{
+    return [
+        self::ESTADO_ACTIVO => 'Activo',
+        self::ESTADO_FINALIZADO => 'Finalizado',
+    ];
+}
+
+public function getEstadoColor()
+{
+    $colores = [
+        self::ESTADO_ACTIVO => 'success',
+        self::ESTADO_FINALIZADO => 'secondary',
+    ];
+    return $colores[$this->estado] ?? 'secondary';
+}
+
+public function puedeFinalizar()
+{
+    return $this->estado === self::ESTADO_ACTIVO;
+}
+
+// Relación
+public function usuarioFinaliza()
+{
+    return $this->belongsTo(User::class, 'usuario_finaliza_id');
+}
+
+
+
 }
