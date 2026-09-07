@@ -81,6 +81,15 @@
         </div>
     </li>
 
+    
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Addons
+    </div>
     <!-- Nav Item - Inspeccion -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrevencionInsp" aria-expanded="true" aria-controls="collapsePrevencionInsp">
@@ -96,13 +105,6 @@
         </div>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Addons
-    </div>
 
     <!-- Nav Item - Emergencias -->
     <li class="nav-item">
@@ -188,6 +190,7 @@
         <div id="collapseParametros" class="collapse" aria-labelledby="headingParametros" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">{!! trans('messages.Choices') !!}</h6>
+                <a class="collapse-item" href="{{ route('insumos-medicos.index') }}">Insumos Médicos</a>
                 <a class="collapse-item" href="{{ url('/incidente') }}">{!! trans('messages.Incidents') !!}</a>
                 <a class="collapse-item" href="{{ url('/estacion') }}">{!! trans('messages.Firefighter station') !!}</a>
                 <a class="collapse-item" href="{{ url('/gasolinera') }}">{!! trans('messages.Service Station') !!}</a>
