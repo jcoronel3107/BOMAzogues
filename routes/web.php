@@ -417,7 +417,7 @@ Route::get('estacion-novedades/{id}/enviar-correo', 'EstacionNovedadController@e
 Route::get('movilizaciones/{id}/enviar-correo', 'MovilizacionController@enviarCorreo')->name('movilizaciones.enviar-correo')->middleware('auth');
 Route::get('inspeccion/{id}/enviar-correo', 'InspeccionController@enviarCorreo')->name('inspeccion.enviar-correo')->middleware('auth');
 
-
+Route::post('emergencias/{id}/finalizar', 'EmergenciaController@finalizar')->name('emergencias.finalizar')->middleware('auth');
 
 // Reportes de Emergencias
 Route::get('reportes/emergencias', 'ReporteEmergenciasController@index')->name('reportes.emergencias')->middleware('auth');

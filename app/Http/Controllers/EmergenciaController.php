@@ -179,4 +179,29 @@ class EmergenciaController extends Controller
         Session::flash('success', 'Emergencia eliminada exitosamente.');
         return redirect()->route('emergencias.index');
     }
+
+    public function finalizar($id)
+    {
+                try {
+                    $emergencia = Emergencia::findOrFail($id);
+                    
+                    // Verificar que no esté ya finalizada
+                    if ($emergencia->estado == 'finalizado') {
+                        return redirect()->route('emergencias.index')
+                            ->with('error', 'Esta emergencia ya está finalizada.');
+                    }
+                    
+                    $emergencia->estado = 'finalizado';
+                    $emergencia->fecha_finalizacion = now();
+                    $emergencia->usuario_finaliza_id = Auth::id();
+                    $emergencia->save();
+                    
+                    return redirect()->route('emergencias.index')
+                        ->with('success', 'Emergencia finalizada exitosamente.');
+                        
+                } catch (\Exception $e) {
+                    return redirect()->route('emergencias.index')
+                        ->with('error', 'Error al finalizar: ' . $e->getMessage());
+                }
+    }
 }
