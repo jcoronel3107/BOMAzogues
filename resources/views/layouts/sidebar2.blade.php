@@ -120,7 +120,40 @@
             </div>
         </div>
     </li>
-
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+    <!-- Nav Item - Emergencias Prehospitalarias -->
+    <li class="nav-item {{ request()->routeIs('emergencias-prehospitalarias.*') ? 'active' : '' }}">
+        <a class="nav-link {{ request()->routeIs('emergencias-prehospitalarias.*') ? '' : 'collapsed' }}"
+           href="#"
+           data-toggle="collapse"
+           data-target="#collapseEmergenciasPreh"
+           aria-expanded="{{ request()->routeIs('emergencias-prehospitalarias.*') ? 'true' : 'false' }}"
+           aria-controls="collapseEmergenciasPreh">
+            <i class="fas fa-fw fa-ambulance"></i>
+            <span>Emergencias Prehospitalarias</span>
+        </a>
+        <div id="collapseEmergenciasPreh"
+             class="collapse {{ request()->routeIs('emergencias-prehospitalarias.*') ? 'show' : '' }}"
+             aria-labelledby="headingEmergenciasPreh"
+             data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestión Prehospitalaria:</h6>
+                <a class="collapse-item {{ request()->routeIs('emergencias-prehospitalarias.index') ? 'active' : '' }}"
+                   href="{{ route('emergencias-prehospitalarias.index') }}">
+                    Lista de Emergencias
+                </a>
+                <a class="collapse-item {{ request()->routeIs('emergencias-prehospitalarias.create') ? 'active' : '' }}"
+                   href="{{ route('emergencias-prehospitalarias.create') }}">
+                    Nueva Emergencia
+                </a>
+                <a class="collapse-item {{ request()->routeIs('emergencias-prehospitalarias.estadisticas') ? 'active' : '' }}"
+                   href="{{ route('emergencias-prehospitalarias.estadisticas') }}">
+                    Estadísticas
+                </a>
+            </div>
+        </div>
+    </li>
     <!-- Nav Item - Novedades -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNovedades" aria-expanded="true" aria-controls="collapseNovedades">

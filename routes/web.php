@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\Auth;
-
 use App\Http\Controllers\AdminReservationsController;
 use App\Http\Controllers\ReservacionController;
 use App\Http\Controllers\UserSolicitudsController;
 use App\Http\Controllers\TallerController;
+use App\Http\Controllers\EmergenciaPrehospitalariaController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -481,6 +482,59 @@ Route::get('/refresh/',							    'MenuController@refrescamiento');
 // Rotas Creacion QR
 Route::get('qrcode',                                'MenuController@qrcode_blade')->middleware(('auth'));
 
+
+/* ---------------------------------------------------------------------------------
+/                        Rutas para Emergencias Prehospitalarias
+/ --------------------------------------------------------------------------------- */
+Route::middleware('auth')->group(function () {
+
+    // ⚠️ IMPORTANTE: las rutas sin parámetro van ANTES que las que llevan {id}
+
+    // Index
+    Route::get('/emergencias-prehospitalarias',
+        [EmergenciaPrehospitalariaController::class, 'index'])
+        ->name('emergencias-prehospitalarias.index');
+
+    // Create
+    Route::get('/emergencias-prehospitalarias/create',
+        [EmergenciaPrehospitalariaController::class, 'create'])
+        ->name('emergencias-prehospitalarias.create');
+
+    // Store
+    Route::post('/emergencias-prehospitalarias',
+        [EmergenciaPrehospitalariaController::class, 'store'])
+        ->name('emergencias-prehospitalarias.store');
+
+    // Estadísticas
+    Route::get('/emergencias-prehospitalarias/estadisticas',
+        [EmergenciaPrehospitalariaController::class, 'estadisticas'])
+        ->name('emergencias-prehospitalarias.estadisticas');
+
+    // PDF
+    Route::get('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}/pdf',
+        [EmergenciaPrehospitalariaController::class, 'generarPdf'])
+        ->name('emergencias-prehospitalarias.pdf');
+
+    // Show
+    Route::get('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}',
+        [EmergenciaPrehospitalariaController::class, 'show'])
+        ->name('emergencias-prehospitalarias.show');
+
+    // Edit
+    Route::get('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}/edit',
+        [EmergenciaPrehospitalariaController::class, 'edit'])
+        ->name('emergencias-prehospitalarias.edit');
+
+    // Update
+    Route::put('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}',
+        [EmergenciaPrehospitalariaController::class, 'update'])
+        ->name('emergencias-prehospitalarias.update');
+
+    // Destroy
+    Route::delete('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}',
+        [EmergenciaPrehospitalariaController::class, 'destroy'])
+        ->name('emergencias-prehospitalarias.destroy');
+});
 
 // Rutas para Emergencias
 Route::resource('emergencias', 'EmergenciaController')->middleware('auth');

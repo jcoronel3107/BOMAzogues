@@ -52,8 +52,8 @@ class User extends Authenticatable
 	public function EsAdmin(){
 		if($this->Rol->nombre=='administrador'){
 			return true;
-	}
-		return false;
+        }
+            return false;
 	}
 
     public function clave(){
@@ -92,23 +92,33 @@ class User extends Authenticatable
         return $this->belongsToMany(Salud::class);
     }
 
-    public function solicitud(){
+    public function solicitud()
+    {
         //Muestra informacion de las Claves Realizadas por gasolinera
-    return $this->hasMany(Solicitud::class);
+        return $this->hasMany(Solicitud::class);
     }
 
-    public function mecanico(){
+    public function mecanico()
+    {
         //Muestra informacion del vehiculo en la clave consultada
         return $this->hasOne(Mecanico::class);
     }
+
     public function station()
     {
-    return $this->belongsTo(Station::class);
+        return $this->belongsTo(Station::class);
     }
 
     public function novedades()
     {
-    return $this->hasMany(EstacionNovedad::class, 'estacion_id', 'station_id');
-    }   
+       return $this->hasMany(EstacionNovedad::class, 'estacion_id', 'station_id');
+    }  
+    
+    public function emergenciasAtendidas()
+    {
+     return $this->belongsToMany(EmergenciaPrehospitalaria::class, 'emergencia_personal')
+                ->withPivot('rol_en_emergencia')
+                ->withTimestamps();
+    }
     
 }

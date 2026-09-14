@@ -94,4 +94,4 @@
 	
 	<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html><?php /**PATH D:\Desarrollo\htdocs\resources\views/layouts/plantilla.blade.php ENDPATH**/ ?>
+</html><?php /**PATH D:\desarrollo\azogues\BOMAzogues\resources\views/layouts/plantilla.blade.php ENDPATH**/ ?>

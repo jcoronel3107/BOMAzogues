@@ -83,6 +83,15 @@
         </div>
     </li>
 
+    
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Addons
+    </div>
     <!-- Nav Item - Inspeccion -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrevencionInsp" aria-expanded="true" aria-controls="collapsePrevencionInsp">
@@ -98,13 +107,6 @@
         </div>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Addons
-    </div>
 
     <!-- Nav Item - Emergencias -->
     <li class="nav-item">
@@ -120,7 +122,40 @@
             </div>
         </div>
     </li>
-
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+    <!-- Nav Item - Emergencias Prehospitalarias -->
+    <li class="nav-item <?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? 'active' : ''); ?>">
+        <a class="nav-link <?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? '' : 'collapsed'); ?>"
+           href="#"
+           data-toggle="collapse"
+           data-target="#collapseEmergenciasPreh"
+           aria-expanded="<?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? 'true' : 'false'); ?>"
+           aria-controls="collapseEmergenciasPreh">
+            <i class="fas fa-fw fa-ambulance"></i>
+            <span>Emergencias Prehospitalarias</span>
+        </a>
+        <div id="collapseEmergenciasPreh"
+             class="collapse <?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? 'show' : ''); ?>"
+             aria-labelledby="headingEmergenciasPreh"
+             data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestión Prehospitalaria:</h6>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-prehospitalarias.index') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('emergencias-prehospitalarias.index')); ?>">
+                    Lista de Emergencias
+                </a>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-prehospitalarias.create') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('emergencias-prehospitalarias.create')); ?>">
+                    Nueva Emergencia
+                </a>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-prehospitalarias.estadisticas') ? 'active' : ''); ?>"
+                   href="<?php echo e(route('emergencias-prehospitalarias.estadisticas')); ?>">
+                    Estadísticas
+                </a>
+            </div>
+        </div>
+    </li>
     <!-- Nav Item - Novedades -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNovedades" aria-expanded="true" aria-controls="collapseNovedades">
@@ -190,6 +225,8 @@
         <div id="collapseParametros" class="collapse" aria-labelledby="headingParametros" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header"><?php echo trans('messages.Choices'); ?></h6>
+                <a class="collapse-item" href="<?php echo e(route('herramientas.index')); ?>">Herramientas</a>
+                <a class="collapse-item" href="<?php echo e(route('insumos-medicos.index')); ?>">Insumos Médicos</a>
                 <a class="collapse-item" href="<?php echo e(url('/incidente')); ?>"><?php echo trans('messages.Incidents'); ?></a>
                 <a class="collapse-item" href="<?php echo e(url('/estacion')); ?>"><?php echo trans('messages.Firefighter station'); ?></a>
                 <a class="collapse-item" href="<?php echo e(url('/gasolinera')); ?>"><?php echo trans('messages.Service Station'); ?></a>
@@ -224,4 +261,4 @@
     </div>
 
 </ul>
-<!-- End of Sidebar --><?php /**PATH D:\Desarrollo\htdocs\resources\views/layouts/sidebar2.blade.php ENDPATH**/ ?>
+<!-- End of Sidebar --><?php /**PATH D:\desarrollo\azogues\BOMAzogues\resources\views/layouts/sidebar2.blade.php ENDPATH**/ ?>

@@ -10,4 +10,4 @@
         </div>
     
     </footer>
-    <!-- End of Footer --><?php /**PATH D:\Desarrollo\htdocs\resources\views/layouts/footer.blade.php ENDPATH**/ ?>
+    <!-- End of Footer --><?php /**PATH D:\desarrollo\azogues\BOMAzogues\resources\views/layouts/footer.blade.php ENDPATH**/ ?>

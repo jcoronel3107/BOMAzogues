@@ -142,5 +142,8 @@ class Vehiculo extends Model
 			// Si no hay registros, retornar el km actual del vehículo o 0
 			return $this->km_actual ?? 0;
 		}
-
+	public function emergencias()
+		{
+			return $this->hasMany(EmergenciaPrehospitalaria::class);
+		}
 }

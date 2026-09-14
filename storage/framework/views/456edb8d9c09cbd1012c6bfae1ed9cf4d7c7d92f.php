@@ -54,4 +54,4 @@
     </script>
 
 <?php endif; ?>
-<?php /**PATH D:\Desarrollo\htdocs\vendor\spatie\laravel-cookie-consent\src/../resources/views/index.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\desarrollo\azogues\BOMAzogues\vendor\spatie\laravel-cookie-consent\src/../resources/views/index.blade.php ENDPATH**/ ?>

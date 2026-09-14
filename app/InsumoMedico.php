@@ -77,4 +77,11 @@ class InsumoMedico extends Model
     {
         return $this->belongsTo(User::class, 'usuario_edita_id');
     }
+
+    public function emergenciasPrehospitalarias()
+    {
+    return $this->belongsToMany(EmergenciaPrehospitalaria::class, 'emergencia_insumos')
+                ->withPivot('cantidad', 'observaciones')
+                ->withTimestamps();
+    }
 }

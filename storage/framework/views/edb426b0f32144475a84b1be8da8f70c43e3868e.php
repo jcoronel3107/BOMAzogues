@@ -260,4 +260,4 @@
     </div>
 </div>
 
-<!-- End of Topbar --><?php /**PATH D:\Desarrollo\htdocs\resources\views/layouts/topbar.blade.php ENDPATH**/ ?>
+<!-- End of Topbar --><?php /**PATH D:\desarrollo\azogues\BOMAzogues\resources\views/layouts/topbar.blade.php ENDPATH**/ ?>

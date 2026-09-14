@@ -485,4 +485,4 @@
         </div>
     </body>
 </html>
-<?php /**PATH D:\Desarrollo\htdocs\vendor\laravel\framework\src\Illuminate\Foundation\Exceptions/views/illustrated-layout.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\desarrollo\azogues\BOMAzogues\vendor\laravel\framework\src\Illuminate\Foundation\Exceptions/views/illustrated-layout.blade.php ENDPATH**/ ?>
