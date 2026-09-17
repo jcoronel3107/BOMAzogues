@@ -9,7 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class EmergenciaPrehospitalariaController extends Controller
 {
@@ -319,29 +319,52 @@ class EmergenciaPrehospitalariaController extends Controller
     }
 
     public function generarPdf(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
-    {
-        $emergenciaPrehospitalaria->load([
-            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
-        ]);
+{
+    // ⬇️ CARGAR TCPDF MANUALMENTE
+    require_once base_path('vendor/tecnickcom/tcpdf/tcpdf.php');
 
-        $tiempos = $this->calcularTiempos($emergenciaPrehospitalaria);
+    // Cargar relaciones
+    $emergenciaPrehospitalaria->load([
+        'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
+    ]);
 
-        $pdf = Pdf::loadView(
-            'emergencias_prehospitalarias.pdf.parte_ambulancia',
-            compact('emergenciaPrehospitalaria', 'tiempos')
-        );
+    // Calcular tiempos
+    $tiempos = $this->calcularTiempos($emergenciaPrehospitalaria);
 
-        $pdf->setPaper('letter', 'portrait');
-        $pdf->setOptions([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'Arial',
-            'dpi' => 130,
-        ]);
+    // Renderizar la vista a HTML
+    $html = view('emergencias_prehospitalarias.pdf.parte_tcpdf',
+        compact('emergenciaPrehospitalaria', 'tiempos'))->render();
 
-        $nombreArchivo = 'Parte_Ambulancia_' . $emergenciaPrehospitalaria->codigo . '.pdf';
-        return $pdf->inline($nombreArchivo);
-    }
+    // Crear el PDF con TCPDF
+    // ⚠️ TCPDF 7.x usa namespace tecnickcom\tcpdf\TCPDF
+    $pdf = new \TCPDF('L', 'mm', 'LETTER', true, 'UTF-8', false);
+
+    // Configuración del documento
+    $pdf->SetCreator('Sistema de Emergencias');
+    $pdf->SetAuthor($emergenciaPrehospitalaria->usuarioRegistra->name ?? 'Sistema');
+    $pdf->SetTitle('Parte de Ambulancia - ' . $emergenciaPrehospitalaria->codigo);
+    $pdf->SetSubject('Parte de Atención Prehospitalaria');
+
+    // Quitar header y footer por defecto
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+
+    // Márgenes
+    $pdf->SetMargins(8, 8, 8);
+    $pdf->SetAutoPageBreak(TRUE, 15);
+
+    // Agregar página
+    $pdf->AddPage();
+
+    // Escribir el HTML
+    $pdf->writeHTML($html, true, false, true, false, '');
+
+    // Nombre del archivo
+    $nombreArchivo = 'Parte_Ambulancia_' . $emergenciaPrehospitalaria->codigo . '.pdf';
+
+    // Salida: 'I' = inline (ver en navegador), 'D' = descargar
+    return $pdf->Output($nombreArchivo, 'I');
+}
 
     private function calcularTiempos(EmergenciaPrehospitalaria $e)
     {

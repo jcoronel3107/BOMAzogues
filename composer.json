@@ -21,7 +21,8 @@
         "spatie/laravel-activitylog": "^3.16",
         "spatie/laravel-cookie-consent": "^2.12",
         "spatie/laravel-permission": "^3.16",
-        "symfony/css-selector": "6.0"
+        "symfony/css-selector": "6.0",
+        "tecnickcom/tcpdf": "6.6"
     },
     "require-dev": {
         "facade/ignition": "^2.17",
@@ -37,6 +38,11 @@
         "platform-check": false,
         "allow-plugins": {
             "composer/package-versions-deprecated": true
+        },
+        "policy": {
+            "advisories": {
+                "block": false
+            }
         }
     },
     "extra": {
