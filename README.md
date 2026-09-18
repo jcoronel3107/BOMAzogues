@@ -1,78 +1,126 @@
-  Módulo de Movilizaciones
+  Actuaizacion 17/09/2026
+# Módulo de Emergencias Prehospitalarias
 
-    Tabla: movilizacions con todos los campos
+Sistema de registro y gestión de atenciones de ambulancias, con soporte para múltiples pacientes por emergencia, personal que atiende, insumos médicos utilizados, archivos adjuntos y generación de PDF oficial.
 
-    Modelo: Movilizacion con relaciones y métodos
+---
 
-    Controlador: CRUD completo + Autorizar + Rechazar + Finalizar
+## 📋 Descripción General
 
-    Vistas: Index, Create, Show, Edit
+Este módulo permite registrar **emergencias prehospitalarias** (salidas de ambulancia) donde una misma emergencia puede tener:
 
-    Flujo: Pendiente → Aprobado/Rechazado → Finalizado
+- **Múltiples pacientes** atendidos (con datos básicos y signos vitales prehospitalarios)
+- **Múltiples miembros del personal** que atienden (relacionados con usuarios del sistema)
+- **Múltiples insumos médicos** utilizados (con descuento automático de stock)
+- **Un vehículo/ambulancia** asignado
+- **Archivos adjuntos** (fotos, PDFs, documentos) con límite de 50 MB por emergencia
 
-    Integrantes: Listado dinámico de personal en la comisión
+---
 
-    Cálculos: KM recorridos automáticos
+## 🗄️ Estructura de Base de Datos
 
-📋 Campos incluidos
-Sección	Campos
-Datos principales	Fecha salida, Hora salida, Motivo, Lugar origen, Destino
-Conductor	Nombres, Cédula, Cargo
-Vehículo	Marca, Placa, KM salida, KM retorno
-Comisión	Lista de integrantes (nombre, cédula, cargo)
-Control	Estado, Observaciones, Usuario creador, editor, autorizador
-🔄 Flujo de trabajo
+### Tabla `emergencias_prehospitalarias` (cabecera)
 
-    Crear → estado: pendiente
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `codigo` | string(30) | Código único (formato: EP-YYYY-NNNN) |
+| `fecha_salida` | datetime | Fecha/hora de salida de la base |
+| `fecha_llegada_sitio` | datetime | Llegada al sitio de la emergencia |
+| `fecha_salida_sitio` | datetime | Salida del sitio |
+| `fecha_llegada_base` | datetime | Llegada a la base |
+| `direccion` | string(255) | Dirección del incidente |
+| `referencia` | string(255) | Referencia adicional |
+| `motivo_llamado` | string(255) | Motivo del llamado |
+| `tipo_emergencia` | string | Tipo (Accidente, Trauma, Obstétrica, etc.) |
+| `prioridad` | string(20) | Triage: Rojo, Naranja, Amarillo, Verde, Azul |
+| `vehiculo_id` | bigint | FK a `vehiculos` |
+| `usuario_registra_id` | bigint | FK a `users` |
+| `observaciones_generales` | text | Notas adicionales |
+| `estado` | string(30) | En curso, Finalizada, Cancelada, Derivada |
+| `created_at`, `updated_at` | timestamp | Auditoría |
 
-    Autorizar → estado: aprobado
+### Tabla `pacientes_emergencia` (muchos por emergencia)
 
-    Finalizar → estado: finalizado (con fecha de retorno y km de retorno)
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `emergencia_prehospitalaria_id` | bigint | FK a `emergencias_prehospitalarias` |
+| `nombre_completo` | string(150) | Nombre del paciente |
+| `edad` | integer | Edad en años |
+| `sexo` | string(20) | M, F, Indefinido |
+| `cedula` | string(20) | Cédula (opcional) |
+| `telefono` | string(20) | Teléfono (opcional) |
+| **Signos vitales** | | |
+| `frecuencia_cardiaca` | integer | FC en lpm |
+| `frecuencia_respiratoria` | integer | FR en rpm |
+| `saturacion_oxigeno` | integer | SatO₂ en % |
+| `temperatura` | decimal(4,1) | Temperatura en °C |
+| `presion_sistolica` | integer | TA sistólica en mmHg |
+| `presion_diastolica` | integer | TA diastólica en mmHg |
+| `glasgow` | integer | Escala de Glasgow (3-15) |
+| **Evaluación** | | |
+| `motivo_atencion` | text | Motivo de la atención |
+| `evaluacion` | text | Evaluación médica |
+| `procedimientos_realizados` | text | Procedimientos aplicados |
+| `observaciones` | text | Notas adicionales |
+| `condicion` | string(30) | Estable, Crítico, Fallecido, Rechaza atención |
+| `destino` | string(100) | Trasladado, Alta en sitio, Fuga, etc. |
+| `hospital_destino` | string(150) | Hospital de destino |
 
-    Rechazar → estado: rechazado
+### Tabla `emergencia_personal` (pivote)
 
-📊 Módulos completos del sistema
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `emergencia_prehospitalaria_id` | bigint | FK a emergencias |
+| `user_id` | bigint | FK a users |
+| `rol_en_emergencia` | string(50) | Conductor, Paramédico, Médico, etc. |
 
-    ✅ Novedades de Estación (CRUD + PDF + Excel + Dashboard)
+### Tabla `emergencia_insumos` (pivote)
 
-    ✅ Movilizaciones de Unidades (CRUD + Autorización + Finalización)
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `emergencia_prehospitalaria_id` | bigint | FK a emergencias |
+| `insumo_medico_id` | bigint | FK a `insumos_medicos` |
+| `cantidad` | integer | Cantidad utilizada |
+| `observaciones` | text | Notas adicionales |
 
-    ✅ Inspecciones (CRUD + PDF)
+### Tabla `emergencia_archivos` (adjuntos)
 
-    ✅ Usuarios (Edición + Roles)
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `emergencia_prehospitalaria_id` | bigint | FK a emergencias |
+| `nombre_original` | string(255) | Nombre original del archivo |
+| `nombre_archivo` | string(255) | Nombre único en el servidor |
+| `ruta` | string(500) | Ruta relativa en storage |
+| `tipo` | string(50) | Tipo de archivo |
+| `mime_type` | string(100) | MIME type |
+| `tamano` | bigint | Tamaño en bytes |
+| `descripcion` | string(255) | Descripción opcional |
+| `usuario_subio_id` | bigint | FK a users |
 
-    ✅ Notificaciones (Campanita + Base de datos)
+---
 
-System for the Control and Registration of Incidents to which a Firefighters Institution attends
+## 🔗 Relaciones del Modelo
 
-Fully responsive system, that is, it works on mobiles, tablets and computers
+```php
+// EmergenciaPrehospitalaria
+- vehiculo()              → belongsTo(Vehiculo::class)
+- usuarioRegistra()       → belongsTo(User::class)
+- personal()              → belongsToMany(User::class, 'emergencia_personal')
+- insumos()               → belongsToMany(InsumoMedico::class, 'emergencia_insumos')
+- pacientes()             → hasMany(PacienteEmergencia::class)
+- archivos()              → hasMany(EmergenciaArchivo::class)
 
-## Features
--php            ^7.2
+// PacienteEmergencia
+- emergencia()            → belongsTo(EmergenciaPrehospitalaria::class)
 
--Icons FontAwesome
-
--Activity Log 	spatie/laravel-activitylog    ^3.16
-
--Geocoder		javascript
-
--laravel/framework  ^8.0,
-
--Translate		laravel-lang/lang    ~7.0
-
--Send Mail		smtp
-
--PDF export		barryvdh/laravel-dompdf    ^0.8.6
-
--PDF import		barryvdh/laravel-dompdf    ^0.8.6
-
--Excel export	maatwebsite/excel          ^3.1
-
--Excel import	maatwebsite/excel          ^3.1
-
--Bootstrap		Fully responsive system, that is, it works on mobiles, tablets and computers
-### Images
-
+// EmergenciaArchivo
+- emergencia()            → belongsTo(EmergenciaPrehospitalaria::class)
+- usuario()               → belongsTo(User::class, 'usuario_subio_id')
 ### Installation
 
 1. Clone the repo
