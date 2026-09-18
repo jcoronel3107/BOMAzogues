@@ -645,6 +645,27 @@
                     </div>
                 </div>
             </div>
+            <hr>
+
+            {{-- ===== SECCIÓN: ARCHIVOS ADJUNTOS ===== --}}
+            <div class="row">
+                <div class="col-md-12">
+                    <h5 class="text-primary">
+                        <i class="fas fa-paperclip"></i> Archivos Adjuntos
+                        <span class="badge badge-info">{{ $emergenciaPrehospitalaria->archivos->count() }}</span>
+                    </h5>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        La gestión de archivos se realiza desde la vista de detalle:
+                        <a href="{{ route('emergencias-prehospitalarias.show', $emergenciaPrehospitalaria) }}"
+                        class="alert-link" target="_blank">
+                            Ver detalle
+                        </a>
+                    </div>
+                </div>
+            </div>
+</div>
         `;
         container.appendChild(div);
     }

@@ -534,6 +534,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}',
         [EmergenciaPrehospitalariaController::class, 'destroy'])
         ->name('emergencias-prehospitalarias.destroy');
+
+        // Archivos adjuntos
+        Route::post('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}/archivos',
+            'EmergenciaPrehospitalariaController@subirArchivos')
+            ->name('emergencias-prehospitalarias.archivos.subir');
+
+        Route::delete('/emergencias-prehospitalarias/archivos/{archivo}',
+            'EmergenciaPrehospitalariaController@eliminarArchivo')
+            ->name('emergencias-prehospitalarias.archivos.eliminar');
+
+        Route::get('/emergencias-prehospitalarias/archivos/{archivo}/descargar',
+            'EmergenciaPrehospitalariaController@descargarArchivo')
+            ->name('emergencias-prehospitalarias.archivos.descargar');
 });
 
 // Rutas para Emergencias

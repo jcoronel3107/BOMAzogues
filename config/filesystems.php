@@ -81,5 +81,19 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Límites de archivos adjuntos para emergencias
+    |--------------------------------------------------------------------------
+    */
+    'emergencias_archivos' => [
+        'limite_mb' => env('EMERGENCIA_ARCHIVOS_LIMITE_MB', 50),
+        'max_archivo_mb' => env('EMERGENCIA_ARCHIVO_MAX_MB', 10),
+        'extensiones_permitidas' => [
+            'jpg', 'jpeg', 'png', 'gif', 'webp',
+            'pdf', 'doc', 'docx', 'xls', 'xlsx',
+            'mp4', 'mp3', 'zip', 'rar'
+        ],
+    ],
 
 ];

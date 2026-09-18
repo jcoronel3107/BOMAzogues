@@ -6,8 +6,10 @@ use App\PacienteEmergencia;
 use App\InsumoMedico;
 use App\Vehiculo;
 use App\User;
+use App\EmergenciaArchivo;                     // ⬅️ AGREGAR
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;       // ⬅️ AGREGAR
 use Carbon\Carbon;
 
 
@@ -319,52 +321,52 @@ class EmergenciaPrehospitalariaController extends Controller
     }
 
     public function generarPdf(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
-{
-    // ⬇️ CARGAR TCPDF MANUALMENTE
-    require_once base_path('vendor/tecnickcom/tcpdf/tcpdf.php');
+    {
+        // ⬇️ CARGAR TCPDF MANUALMENTE
+        require_once base_path('vendor/tecnickcom/tcpdf/tcpdf.php');
 
-    // Cargar relaciones
-    $emergenciaPrehospitalaria->load([
-        'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
-    ]);
+        // Cargar relaciones
+        $emergenciaPrehospitalaria->load([
+            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
+        ]);
 
-    // Calcular tiempos
-    $tiempos = $this->calcularTiempos($emergenciaPrehospitalaria);
+        // Calcular tiempos
+        $tiempos = $this->calcularTiempos($emergenciaPrehospitalaria);
 
-    // Renderizar la vista a HTML
-    $html = view('emergencias_prehospitalarias.pdf.parte_tcpdf',
-        compact('emergenciaPrehospitalaria', 'tiempos'))->render();
+        // Renderizar la vista a HTML
+        $html = view('emergencias_prehospitalarias.pdf.parte_tcpdf',
+            compact('emergenciaPrehospitalaria', 'tiempos'))->render();
 
-    // Crear el PDF con TCPDF
-    // ⚠️ TCPDF 7.x usa namespace tecnickcom\tcpdf\TCPDF
-    $pdf = new \TCPDF('L', 'mm', 'LETTER', true, 'UTF-8', false);
+        // Crear el PDF con TCPDF
+        // ⚠️ TCPDF 7.x usa namespace tecnickcom\tcpdf\TCPDF
+        $pdf = new \TCPDF('L', 'mm', 'LETTER', true, 'UTF-8', false);
 
-    // Configuración del documento
-    $pdf->SetCreator('Sistema de Emergencias');
-    $pdf->SetAuthor($emergenciaPrehospitalaria->usuarioRegistra->name ?? 'Sistema');
-    $pdf->SetTitle('Parte de Ambulancia - ' . $emergenciaPrehospitalaria->codigo);
-    $pdf->SetSubject('Parte de Atención Prehospitalaria');
+        // Configuración del documento
+        $pdf->SetCreator('Sistema de Emergencias');
+        $pdf->SetAuthor($emergenciaPrehospitalaria->usuarioRegistra->name ?? 'Sistema');
+        $pdf->SetTitle('Parte de Ambulancia - ' . $emergenciaPrehospitalaria->codigo);
+        $pdf->SetSubject('Parte de Atención Prehospitalaria');
 
-    // Quitar header y footer por defecto
-    $pdf->setPrintHeader(false);
-    $pdf->setPrintFooter(false);
+        // Quitar header y footer por defecto
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
 
-    // Márgenes
-    $pdf->SetMargins(8, 8, 8);
-    $pdf->SetAutoPageBreak(TRUE, 15);
+        // Márgenes
+        $pdf->SetMargins(8, 8, 8);
+        $pdf->SetAutoPageBreak(TRUE, 15);
 
-    // Agregar página
-    $pdf->AddPage();
+        // Agregar página
+        $pdf->AddPage();
 
-    // Escribir el HTML
-    $pdf->writeHTML($html, true, false, true, false, '');
+        // Escribir el HTML
+        $pdf->writeHTML($html, true, false, true, false, '');
 
-    // Nombre del archivo
-    $nombreArchivo = 'Parte_Ambulancia_' . $emergenciaPrehospitalaria->codigo . '.pdf';
+        // Nombre del archivo
+        $nombreArchivo = 'Parte_Ambulancia_' . $emergenciaPrehospitalaria->codigo . '.pdf';
 
-    // Salida: 'I' = inline (ver en navegador), 'D' = descargar
-    return $pdf->Output($nombreArchivo, 'I');
-}
+        // Salida: 'I' = inline (ver en navegador), 'D' = descargar
+        return $pdf->Output($nombreArchivo, 'I');
+    }
 
     private function calcularTiempos(EmergenciaPrehospitalaria $e)
     {
@@ -542,4 +544,133 @@ class EmergenciaPrehospitalariaController extends Controller
             'fechaDesde', 'fechaHasta'
         ));
     }
+
+        /**
+     * Subir archivos adjuntos a una emergencia
+     */
+    public function subirArchivos(Request $request, EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
+    {
+        // ===== CONFIGURACIÓN =====
+        $limiteTotalMb = config('filesystems.emergencias_archivos.limite_mb', 50);
+        $limiteArchivoMb = config('filesystems.emergencias_archivos.max_archivo_mb', 10);
+        $limiteTotalBytes = $limiteTotalMb * 1024 * 1024;
+        $extensionesPermitidas = config('filesystems.emergencias_archivos.extensiones_permitidas', []);
+
+        // ===== VALIDACIÓN BÁSICA =====
+        $request->validate([
+            'archivos' => 'required|array|min:1',
+            'archivos.*' => 'file|max:' . ($limiteArchivoMb * 1024), // max en KB
+        ], [
+            'archivos.*.max' => "Cada archivo no puede superar los {$limiteArchivoMb}MB.",
+            'archivos.*.file' => 'El archivo no es válido.',
+        ]);
+
+        // ===== VALIDAR EXTENSIONES =====
+        foreach ($request->file('archivos') as $archivo) {
+            $extension = strtolower($archivo->getClientOriginalExtension());
+            if (!in_array($extension, $extensionesPermitidas)) {
+                return back()->with('error', "El archivo '{$archivo->getClientOriginalName()}' tiene una extensión no permitida ({$extension}).");
+            }
+        }
+
+        // ===== CALCULAR ESPACIO USADO ACTUAL =====
+        $espacioUsado = $emergenciaPrehospitalaria->archivos()->sum('tamano') ?? 0;
+
+        // ===== CALCULAR TAMAÑO DE NUEVOS ARCHIVOS =====
+        $tamanoNuevos = 0;
+        foreach ($request->file('archivos') as $archivo) {
+            $tamanoNuevos += $archivo->getSize();
+        }
+
+        // ===== VERIFICAR LÍMITE TOTAL =====
+        if (($espacioUsado + $tamanoNuevos) > $limiteTotalBytes) {
+            $espacioDisponible = $limiteTotalBytes - $espacioUsado;
+            $espacioDisponibleMb = round($espacioDisponible / 1024 / 1024, 2);
+            $tamanoNuevosMb = round($tamanoNuevos / 1024 / 1024, 2);
+
+            return back()->with('error',
+                "❌ No hay espacio suficiente. " .
+                "Intentas subir {$tamanoNuevosMb}MB pero solo quedan {$espacioDisponibleMb}MB disponibles " .
+                "de los {$limiteTotalMb}MB permitidos para esta emergencia."
+            );
+        }
+
+        // ===== SUBIR ARCHIVOS =====
+        $subidos = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->file('archivos') as $archivo) {
+                $carpeta = 'emergencias/' . $emergenciaPrehospitalaria->id;
+                if (!Storage::disk('public')->exists($carpeta)) {
+                    Storage::disk('public')->makeDirectory($carpeta);
+                }
+
+                $nombreOriginal = $archivo->getClientOriginalName();
+                $extension = $archivo->getClientOriginalExtension();
+                $nombreArchivo = time() . '_' . uniqid() . '.' . $extension;
+
+                $ruta = $archivo->storeAs($carpeta, $nombreArchivo, 'public');
+
+                EmergenciaArchivo::create([
+                    'emergencia_prehospitalaria_id' => $emergenciaPrehospitalaria->id,
+                    'nombre_original' => $nombreOriginal,
+                    'nombre_archivo' => $nombreArchivo,
+                    'ruta' => $ruta,
+                    'tipo' => $archivo->getClientMimeType(),
+                    'mime_type' => $archivo->getClientMimeType(),
+                    'tamano' => $archivo->getSize(),
+                    'usuario_subio_id' => auth()->id(),
+                ]);
+
+                $subidos++;
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('emergencias-prehospitalarias.show', $emergenciaPrehospitalaria)
+                ->with('success', "{$subidos} archivo(s) subido(s) correctamente.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error al subir: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Eliminar un archivo adjunto
+     */
+    public function eliminarArchivo(EmergenciaArchivo $archivo)
+    {
+        $emergenciaId = $archivo->emergencia_prehospitalaria_id;
+
+        // Eliminar del storage
+        if (\Storage::disk('public')->exists($archivo->ruta)) {
+            \Storage::disk('public')->delete($archivo->ruta);
+        }
+
+        // Eliminar de BD
+        $archivo->delete();
+
+        return redirect()
+            ->route('emergencias-prehospitalarias.show', $emergenciaId)
+            ->with('success', 'Archivo eliminado correctamente.');
+    }
+
+    /**
+     * Descargar un archivo adjunto
+     */
+    public function descargarArchivo(EmergenciaArchivo $archivo)
+    {
+        $ruta = storage_path('app/public/' . $archivo->ruta);
+
+        if (!file_exists($ruta)) {
+            abort(404, 'El archivo no existe en el servidor.');
+        }
+
+        return response()->download($ruta, $archivo->nombre_original);
+    }
+
+    
 }

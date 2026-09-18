@@ -1,47 +1,50 @@
-@extends('layouts.plantilla')
 
-@section('cuerpo')
 
-{{-- ===== ENCABEZADO ===== --}}
+<?php $__env->startSection('cuerpo'); ?>
+
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">
         <i class="fas fa-ambulance text-primary"></i>
-        Emergencia Prehospitalaria — {{ $emergenciaPrehospitalaria->codigo }}
+        Emergencia Prehospitalaria — <?php echo e($emergenciaPrehospitalaria->codigo); ?>
+
     </h1>
     <div>
-        <a href="{{ route('emergencias-prehospitalarias.pdf', $emergenciaPrehospitalaria) }}"
+        <a href="<?php echo e(route('emergencias-prehospitalarias.pdf', $emergenciaPrehospitalaria)); ?>"
            class="btn btn-danger btn-sm shadow-sm" target="_blank">
             <i class="fas fa-file-pdf"></i> Generar PDF
         </a>
-        <a href="{{ route('emergencias-prehospitalarias.edit', $emergenciaPrehospitalaria) }}"
+        <a href="<?php echo e(route('emergencias-prehospitalarias.edit', $emergenciaPrehospitalaria)); ?>"
            class="btn btn-warning btn-sm shadow-sm">
             <i class="fas fa-edit"></i> Editar
         </a>
-        <a href="{{ route('emergencias-prehospitalarias.index') }}"
+        <a href="<?php echo e(route('emergencias-prehospitalarias.index')); ?>"
            class="btn btn-secondary btn-sm shadow-sm">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
 </div>
 
-{{-- ===== ALERTAS ===== --}}
-@if(session('success'))
+
+<?php if(session('success')): ?>
     <div class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
+
         <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
-@endif
+<?php endif; ?>
 
-@if(session('error'))
+<?php if(session('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show">
-        <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        <i class="fas fa-exclamation-circle"></i> <?php echo e(session('error')); ?>
+
         <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
-@endif
+<?php endif; ?>
 
-{{-- ===== BADGES DE ESTADO Y PRIORIDAD ===== --}}
+
 <div class="mb-3">
-    @php
+    <?php
         $estadoColor = [
             'En curso' => 'primary',
             'Finalizada' => 'success',
@@ -56,16 +59,18 @@
             'Verde' => 'success',
             'Azul' => 'primary',
         ][$emergenciaPrehospitalaria->prioridad] ?? 'secondary';
-    @endphp
-    <span class="badge badge-{{ $estadoColor }} p-2">
-        <i class="fas fa-info-circle"></i> Estado: {{ $emergenciaPrehospitalaria->estado }}
+    ?>
+    <span class="badge badge-<?php echo e($estadoColor); ?> p-2">
+        <i class="fas fa-info-circle"></i> Estado: <?php echo e($emergenciaPrehospitalaria->estado); ?>
+
     </span>
-    <span class="badge badge-{{ $prioridadColor }} p-2">
-        <i class="fas fa-exclamation-triangle"></i> Prioridad: {{ $emergenciaPrehospitalaria->prioridad }}
+    <span class="badge badge-<?php echo e($prioridadColor); ?> p-2">
+        <i class="fas fa-exclamation-triangle"></i> Prioridad: <?php echo e($emergenciaPrehospitalaria->prioridad); ?>
+
     </span>
 </div>
 
-{{-- ===== SECCIÓN 1: DATOS GENERALES ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">1. Datos Generales</h6>
@@ -74,19 +79,19 @@
         <div class="row">
             <div class="col-md-3">
                 <small class="text-muted">Fecha/Hora Salida</small>
-                <p class="mb-1"><strong>{{ $emergenciaPrehospitalaria->fecha_salida->format('d/m/Y H:i') }}</strong></p>
+                <p class="mb-1"><strong><?php echo e($emergenciaPrehospitalaria->fecha_salida->format('d/m/Y H:i')); ?></strong></p>
             </div>
             <div class="col-md-3">
                 <small class="text-muted">Llegada al Sitio</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->fecha_llegada_sitio?->format('d/m/Y H:i') ?? '—' }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->fecha_llegada_sitio?->format('d/m/Y H:i') ?? '—'); ?></p>
             </div>
             <div class="col-md-3">
                 <small class="text-muted">Salida del Sitio</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->fecha_salida_sitio?->format('d/m/Y H:i') ?? '—' }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->fecha_salida_sitio?->format('d/m/Y H:i') ?? '—'); ?></p>
             </div>
             <div class="col-md-3">
                 <small class="text-muted">Llegada a Base</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->fecha_llegada_base?->format('d/m/Y H:i') ?? '—' }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->fecha_llegada_base?->format('d/m/Y H:i') ?? '—'); ?></p>
             </div>
         </div>
 
@@ -95,55 +100,56 @@
         <div class="row">
             <div class="col-md-6">
                 <small class="text-muted">Dirección</small>
-                <p class="mb-1"><strong>{{ $emergenciaPrehospitalaria->direccion }}</strong></p>
+                <p class="mb-1"><strong><?php echo e($emergenciaPrehospitalaria->direccion); ?></strong></p>
             </div>
             <div class="col-md-6">
                 <small class="text-muted">Referencia</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->referencia ?? '—' }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->referencia ?? '—'); ?></p>
             </div>
         </div>
 
         <div class="row mt-2">
             <div class="col-md-4">
                 <small class="text-muted">Motivo del Llamado</small>
-                <p class="mb-1"><strong>{{ $emergenciaPrehospitalaria->motivo_llamado }}</strong></p>
+                <p class="mb-1"><strong><?php echo e($emergenciaPrehospitalaria->motivo_llamado); ?></strong></p>
             </div>
             <div class="col-md-4">
                 <small class="text-muted">Tipo de Emergencia</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->tipo_emergencia }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->tipo_emergencia); ?></p>
             </div>
             <div class="col-md-4">
                 <small class="text-muted">Vehículo (Ambulancia)</small>
                 <p class="mb-1">
                     <i class="fas fa-ambulance text-primary"></i>
-                    <strong>{{ $emergenciaPrehospitalaria->vehiculo->placa ?? 'N/A' }}</strong>
-                    — {{ $emergenciaPrehospitalaria->vehiculo->marca ?? '' }}
+                    <strong><?php echo e($emergenciaPrehospitalaria->vehiculo->placa ?? 'N/A'); ?></strong>
+                    — <?php echo e($emergenciaPrehospitalaria->vehiculo->marca ?? ''); ?>
+
                 </p>
             </div>
         </div>
 
-        @if($emergenciaPrehospitalaria->observaciones_generales)
+        <?php if($emergenciaPrehospitalaria->observaciones_generales): ?>
             <hr>
             <div>
                 <small class="text-muted">Observaciones Generales</small>
-                <p class="mb-0">{{ $emergenciaPrehospitalaria->observaciones_generales }}</p>
+                <p class="mb-0"><?php echo e($emergenciaPrehospitalaria->observaciones_generales); ?></p>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-{{-- ===== SECCIÓN 2: PERSONAL ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">
             2. Personal que Atendió
-            <span class="badge badge-info">{{ $emergenciaPrehospitalaria->personal->count() }}</span>
+            <span class="badge badge-info"><?php echo e($emergenciaPrehospitalaria->personal->count()); ?></span>
         </h6>
     </div>
     <div class="card-body">
-        @if($emergenciaPrehospitalaria->personal->isEmpty())
+        <?php if($emergenciaPrehospitalaria->personal->isEmpty()): ?>
             <p class="text-muted mb-0">No hay personal registrado.</p>
-        @else
+        <?php else: ?>
             <div class="table-responsive">
                 <table class="table table-bordered table-sm">
                     <thead class="thead-light">
@@ -155,75 +161,75 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($emergenciaPrehospitalaria->personal as $i => $persona)
+                        <?php $__currentLoopData = $emergenciaPrehospitalaria->personal; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $persona): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ $i + 1 }}</td>
-                                <td><strong>{{ $persona->name }}</strong></td>
-                                <td>{{ $persona->email }}</td>
-                                <td><span class="badge badge-info">{{ $persona->pivot->rol_en_emergencia }}</span></td>
+                                <td><?php echo e($i + 1); ?></td>
+                                <td><strong><?php echo e($persona->name); ?></strong></td>
+                                <td><?php echo e($persona->email); ?></td>
+                                <td><span class="badge badge-info"><?php echo e($persona->pivot->rol_en_emergencia); ?></span></td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-{{-- ===== SECCIÓN 3: PACIENTES ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">
             3. Pacientes Atendidos
-            <span class="badge badge-warning">{{ $emergenciaPrehospitalaria->pacientes->count() }}</span>
+            <span class="badge badge-warning"><?php echo e($emergenciaPrehospitalaria->pacientes->count()); ?></span>
         </h6>
     </div>
     <div class="card-body">
-        @if($emergenciaPrehospitalaria->pacientes->isEmpty())
+        <?php if($emergenciaPrehospitalaria->pacientes->isEmpty()): ?>
             <p class="text-muted mb-0">No hay pacientes registrados.</p>
-        @else
-            @foreach($emergenciaPrehospitalaria->pacientes as $i => $paciente)
+        <?php else: ?>
+            <?php $__currentLoopData = $emergenciaPrehospitalaria->pacientes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $paciente): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="card mb-3 border-left-warning">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <strong>Paciente #{{ $i + 1 }}: {{ $paciente->nombre_completo }}</strong>
-                        @php
+                        <strong>Paciente #<?php echo e($i + 1); ?>: <?php echo e($paciente->nombre_completo); ?></strong>
+                        <?php
                             $condColor = [
                                 'Estable' => 'success',
                                 'Crítico' => 'danger',
                                 'Fallecido' => 'dark',
                                 'Rechaza atención' => 'warning',
                             ][$paciente->condicion] ?? 'secondary';
-                        @endphp
-                        <span class="badge badge-{{ $condColor }}">{{ $paciente->condicion }}</span>
+                        ?>
+                        <span class="badge badge-<?php echo e($condColor); ?>"><?php echo e($paciente->condicion); ?></span>
                     </div>
                     <div class="card-body">
 
-                        {{-- Datos básicos --}}
+                        
                         <div class="row mb-3">
                             <div class="col-md-3">
                                 <small class="text-muted">Edad</small>
-                                <p class="mb-1"><strong>{{ $paciente->edad }} años</strong></p>
+                                <p class="mb-1"><strong><?php echo e($paciente->edad); ?> años</strong></p>
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted">Sexo</small>
                                 <p class="mb-1">
-                                    @if($paciente->sexo == 'M') Masculino
-                                    @elseif($paciente->sexo == 'F') Femenino
-                                    @else Indefinido
-                                    @endif
+                                    <?php if($paciente->sexo == 'M'): ?> Masculino
+                                    <?php elseif($paciente->sexo == 'F'): ?> Femenino
+                                    <?php else: ?> Indefinido
+                                    <?php endif; ?>
                                 </p>
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted">Cédula</small>
-                                <p class="mb-1">{{ $paciente->cedula ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->cedula ?? '—'); ?></p>
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted">Teléfono</small>
-                                <p class="mb-1">{{ $paciente->telefono ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->telefono ?? '—'); ?></p>
                             </div>
                         </div>
 
-                        {{-- Signos vitales --}}
+                        
                         <h6 class="text-primary border-bottom pb-1 mb-3">
                             <i class="fas fa-heartbeat"></i> Signos Vitales
                         </h6>
@@ -231,28 +237,28 @@
                             <div class="col-md-2 col-6 mb-2">
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">FC</small>
-                                    <strong class="h5">{{ $paciente->frecuencia_cardiaca ?? '—' }}</strong>
+                                    <strong class="h5"><?php echo e($paciente->frecuencia_cardiaca ?? '—'); ?></strong>
                                     <small class="d-block text-muted">lpm</small>
                                 </div>
                             </div>
                             <div class="col-md-2 col-6 mb-2">
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">FR</small>
-                                    <strong class="h5">{{ $paciente->frecuencia_respiratoria ?? '—' }}</strong>
+                                    <strong class="h5"><?php echo e($paciente->frecuencia_respiratoria ?? '—'); ?></strong>
                                     <small class="d-block text-muted">rpm</small>
                                 </div>
                             </div>
                             <div class="col-md-2 col-6 mb-2">
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">SatO₂</small>
-                                    <strong class="h5">{{ $paciente->saturacion_oxigeno ?? '—' }}</strong>
+                                    <strong class="h5"><?php echo e($paciente->saturacion_oxigeno ?? '—'); ?></strong>
                                     <small class="d-block text-muted">%</small>
                                 </div>
                             </div>
                             <div class="col-md-2 col-6 mb-2">
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">Temp</small>
-                                    <strong class="h5">{{ $paciente->temperatura ?? '—' }}</strong>
+                                    <strong class="h5"><?php echo e($paciente->temperatura ?? '—'); ?></strong>
                                     <small class="d-block text-muted">°C</small>
                                 </div>
                             </div>
@@ -260,7 +266,8 @@
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">TA</small>
                                     <strong class="h5">
-                                        {{ $paciente->presion_sistolica ?? '—' }}/{{ $paciente->presion_diastolica ?? '—' }}
+                                        <?php echo e($paciente->presion_sistolica ?? '—'); ?>/<?php echo e($paciente->presion_diastolica ?? '—'); ?>
+
                                     </strong>
                                     <small class="d-block text-muted">mmHg</small>
                                 </div>
@@ -268,69 +275,69 @@
                             <div class="col-md-2 col-6 mb-2">
                                 <div class="border rounded p-2 bg-light">
                                     <small class="text-muted d-block">Glasgow</small>
-                                    <strong class="h5">{{ $paciente->glasgow ?? '—' }}</strong>
+                                    <strong class="h5"><?php echo e($paciente->glasgow ?? '—'); ?></strong>
                                     <small class="d-block text-muted">/15</small>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Evaluación --}}
+                        
                         <h6 class="text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-notes-medical"></i> Evaluación y Procedimientos
                         </h6>
                         <div class="row">
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">Motivo de Atención</small>
-                                <p class="mb-1">{{ $paciente->motivo_atencion ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->motivo_atencion ?? '—'); ?></p>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">Evaluación</small>
-                                <p class="mb-1">{{ $paciente->evaluacion ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->evaluacion ?? '—'); ?></p>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">Procedimientos Realizados</small>
-                                <p class="mb-1">{{ $paciente->procedimientos_realizados ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->procedimientos_realizados ?? '—'); ?></p>
                             </div>
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">Observaciones</small>
-                                <p class="mb-1">{{ $paciente->observaciones ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->observaciones ?? '—'); ?></p>
                             </div>
                         </div>
 
-                        {{-- Destino --}}
+                        
                         <h6 class="text-primary border-bottom pb-1 mb-2">
                             <i class="fas fa-hospital"></i> Destino
                         </h6>
                         <div class="row">
                             <div class="col-md-6">
                                 <small class="text-muted">Destino</small>
-                                <p class="mb-1"><strong>{{ $paciente->destino ?? '—' }}</strong></p>
+                                <p class="mb-1"><strong><?php echo e($paciente->destino ?? '—'); ?></strong></p>
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted">Hospital de Destino</small>
-                                <p class="mb-1">{{ $paciente->hospital_destino ?? '—' }}</p>
+                                <p class="mb-1"><?php echo e($paciente->hospital_destino ?? '—'); ?></p>
                             </div>
                         </div>
 
                     </div>
                 </div>
-            @endforeach
-        @endif
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endif; ?>
     </div>
 </div>
 
-{{-- ===== SECCIÓN 4: INSUMOS ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">
             4. Insumos Utilizados
-            <span class="badge badge-secondary">{{ $emergenciaPrehospitalaria->insumos->count() }}</span>
+            <span class="badge badge-secondary"><?php echo e($emergenciaPrehospitalaria->insumos->count()); ?></span>
         </h6>
     </div>
     <div class="card-body">
-        @if($emergenciaPrehospitalaria->insumos->isEmpty())
+        <?php if($emergenciaPrehospitalaria->insumos->isEmpty()): ?>
             <p class="text-muted mb-0">No se registraron insumos.</p>
-        @else
+        <?php else: ?>
             <div class="table-responsive">
                 <table class="table table-bordered table-sm">
                     <thead class="thead-light">
@@ -342,120 +349,123 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($emergenciaPrehospitalaria->insumos as $i => $insumo)
+                        <?php $__currentLoopData = $emergenciaPrehospitalaria->insumos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $insumo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ $i + 1 }}</td>
-                                <td><strong>{{ $insumo->descripcion }}</strong></td>
+                                <td><?php echo e($i + 1); ?></td>
+                                <td><strong><?php echo e($insumo->descripcion); ?></strong></td>
                                 <td class="text-center">
-                                    <span class="badge badge-primary">{{ $insumo->pivot->cantidad }}</span>
+                                    <span class="badge badge-primary"><?php echo e($insumo->pivot->cantidad); ?></span>
                                 </td>
-                                <td>{{ $insumo->pivot->observaciones ?? '—' }}</td>
+                                <td><?php echo e($insumo->pivot->observaciones ?? '—'); ?></td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-{{-- ===== SECCIÓN 5: ARCHIVOS ADJUNTOS ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">
             <i class="fas fa-paperclip"></i> Archivos Adjuntos
-            <span class="badge badge-info">{{ $emergenciaPrehospitalaria->archivos->count() }}</span>
+            <span class="badge badge-info"><?php echo e($emergenciaPrehospitalaria->archivos->count()); ?></span>
         </h6>
         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalSubirArchivos"
-                {{ $emergenciaPrehospitalaria->porcentaje_uso >= 100 ? 'disabled' : '' }}>
+                <?php echo e($emergenciaPrehospitalaria->porcentaje_uso >= 100 ? 'disabled' : ''); ?>>
             <i class="fas fa-upload"></i> Subir Archivos
         </button>
     </div>
 
-    {{-- ===== BARRA DE PROGRESO DE ESPACIO ===== --}}
+    
     <div class="card-body py-2 border-bottom bg-light">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <small class="font-weight-bold">
                 <i class="fas fa-hdd"></i> Espacio usado:
-                <strong>{{ $emergenciaPrehospitalaria->espacio_usado_mb }} MB</strong>
-                de <strong>{{ $emergenciaPrehospitalaria->limite_mb }} MB</strong>
+                <strong><?php echo e($emergenciaPrehospitalaria->espacio_usado_mb); ?> MB</strong>
+                de <strong><?php echo e($emergenciaPrehospitalaria->limite_mb); ?> MB</strong>
             </small>
-            <small class="text-{{ $emergenciaPrehospitalaria->color_barra }}">
-                <strong>{{ $emergenciaPrehospitalaria->porcentaje_uso }}%</strong>
+            <small class="text-<?php echo e($emergenciaPrehospitalaria->color_barra); ?>">
+                <strong><?php echo e($emergenciaPrehospitalaria->porcentaje_uso); ?>%</strong>
             </small>
         </div>
         <div class="progress" style="height: 10px;">
-            <div class="progress-bar bg-{{ $emergenciaPrehospitalaria->color_barra }}"
+            <div class="progress-bar bg-<?php echo e($emergenciaPrehospitalaria->color_barra); ?>"
                  role="progressbar"
-                 style="width: {{ $emergenciaPrehospitalaria->porcentaje_uso }}%"
-                 aria-valuenow="{{ $emergenciaPrehospitalaria->porcentaje_uso }}"
+                 style="width: <?php echo e($emergenciaPrehospitalaria->porcentaje_uso); ?>%"
+                 aria-valuenow="<?php echo e($emergenciaPrehospitalaria->porcentaje_uso); ?>"
                  aria-valuemin="0"
                  aria-valuemax="100">
             </div>
         </div>
-        @if($emergenciaPrehospitalaria->porcentaje_uso >= 90)
-            <small class="text-{{ $emergenciaPrehospitalaria->color_barra }} d-block mt-1">
+        <?php if($emergenciaPrehospitalaria->porcentaje_uso >= 90): ?>
+            <small class="text-<?php echo e($emergenciaPrehospitalaria->color_barra); ?> d-block mt-1">
                 <i class="fas fa-exclamation-triangle"></i>
-                @if($emergenciaPrehospitalaria->porcentaje_uso >= 100)
+                <?php if($emergenciaPrehospitalaria->porcentaje_uso >= 100): ?>
                     Límite alcanzado. Elimina archivos para subir más.
-                @else
-                    Queda poco espacio disponible ({{ $emergenciaPrehospitalaria->espacio_disponible_mb }} MB).
-                @endif
+                <?php else: ?>
+                    Queda poco espacio disponible (<?php echo e($emergenciaPrehospitalaria->espacio_disponible_mb); ?> MB).
+                <?php endif; ?>
             </small>
-        @endif
+        <?php endif; ?>
     </div>
 
     <div class="card-body">
-        @if($emergenciaPrehospitalaria->archivos->isEmpty())
+        <?php if($emergenciaPrehospitalaria->archivos->isEmpty()): ?>
             <p class="text-muted mb-0 text-center">
                 <i class="fas fa-folder-open fa-2x d-block mb-2 text-gray-300"></i>
                 No hay archivos adjuntos.
             </p>
-        @else
+        <?php else: ?>
             <div class="row">
-                @foreach($emergenciaPrehospitalaria->archivos as $archivo)
+                <?php $__currentLoopData = $emergenciaPrehospitalaria->archivos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $archivo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <div class="card h-100 shadow-sm">
-                            {{-- Preview si es imagen --}}
-                            @if($archivo->es_imagen)
-                                <img src="{{ asset('storage/' . $archivo->ruta) }}"
+                            
+                            <?php if($archivo->es_imagen): ?>
+                                <img src="<?php echo e(asset('storage/' . $archivo->ruta)); ?>"
                                      class="card-img-top"
                                      style="height: 120px; object-fit: cover; cursor: pointer;"
                                      data-toggle="modal"
                                      data-target="#modalPreviewImagen"
-                                     data-img="{{ asset('storage/' . $archivo->ruta) }}"
-                                     data-titulo="{{ $archivo->nombre_original }}">
-                            @else
+                                     data-img="<?php echo e(asset('storage/' . $archivo->ruta)); ?>"
+                                     data-titulo="<?php echo e($archivo->nombre_original); ?>">
+                            <?php else: ?>
                                 <div class="text-center py-4 bg-light">
-                                    <i class="fas {{ $archivo->icono }} fa-3x text-secondary"></i>
+                                    <i class="fas <?php echo e($archivo->icono); ?> fa-3x text-secondary"></i>
                                 </div>
-                            @endif
+                            <?php endif; ?>
 
                             <div class="card-body p-2">
-                                <small class="d-block text-truncate" title="{{ $archivo->nombre_original }}">
-                                    <strong>{{ $archivo->nombre_original }}</strong>
+                                <small class="d-block text-truncate" title="<?php echo e($archivo->nombre_original); ?>">
+                                    <strong><?php echo e($archivo->nombre_original); ?></strong>
                                 </small>
                                 <small class="text-muted d-block">
-                                    {{ $archivo->tamano_legible }}
-                                    · {{ $archivo->created_at->format('d/m/Y H:i') }}
+                                    <?php echo e($archivo->tamano_legible); ?>
+
+                                    · <?php echo e($archivo->created_at->format('d/m/Y H:i')); ?>
+
                                 </small>
-                                @if($archivo->usuario)
+                                <?php if($archivo->usuario): ?>
                                     <small class="text-muted d-block">
-                                        <i class="fas fa-user"></i> {{ $archivo->usuario->name }}
+                                        <i class="fas fa-user"></i> <?php echo e($archivo->usuario->name); ?>
+
                                     </small>
-                                @endif
+                                <?php endif; ?>
                             </div>
 
                             <div class="card-footer p-1 d-flex justify-content-between">
-                                <a href="{{ route('emergencias-prehospitalarias.archivos.descargar', $archivo) }}"
+                                <a href="<?php echo e(route('emergencias-prehospitalarias.archivos.descargar', $archivo)); ?>"
                                    class="btn btn-info btn-sm" title="Descargar">
                                     <i class="fas fa-download"></i>
                                 </a>
-                                <form action="{{ route('emergencias-prehospitalarias.archivos.eliminar', $archivo) }}"
+                                <form action="<?php echo e(route('emergencias-prehospitalarias.archivos.eliminar', $archivo)); ?>"
                                       method="POST" class="d-inline"
                                       onsubmit="return confirm('¿Eliminar este archivo?')">
-                                    @csrf
-                                    @method('DELETE')
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -463,13 +473,13 @@
                             </div>
                         </div>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
-{{-- ===== SECCIÓN 6: INFORMACIÓN DE REGISTRO ===== --}}
+
 <div class="card shadow mb-4">
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">6. Información de Registro</h6>
@@ -478,51 +488,51 @@
         <div class="row">
             <div class="col-md-4">
                 <small class="text-muted">Registrado por</small>
-                <p class="mb-1"><strong>{{ $emergenciaPrehospitalaria->usuarioRegistra->name ?? 'N/A' }}</strong></p>
+                <p class="mb-1"><strong><?php echo e($emergenciaPrehospitalaria->usuarioRegistra->name ?? 'N/A'); ?></strong></p>
             </div>
             <div class="col-md-4">
                 <small class="text-muted">Fecha de Registro</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->created_at->format('d/m/Y H:i') }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->created_at->format('d/m/Y H:i')); ?></p>
             </div>
             <div class="col-md-4">
                 <small class="text-muted">Última Actualización</small>
-                <p class="mb-1">{{ $emergenciaPrehospitalaria->updated_at->format('d/m/Y H:i') }}</p>
+                <p class="mb-1"><?php echo e($emergenciaPrehospitalaria->updated_at->format('d/m/Y H:i')); ?></p>
             </div>
         </div>
     </div>
 </div>
 
-{{-- ===== BOTONES FINALES ===== --}}
+
 <div class="text-center mb-5">
-    <a href="{{ route('emergencias-prehospitalarias.index') }}" class="btn btn-secondary">
+    <a href="<?php echo e(route('emergencias-prehospitalarias.index')); ?>" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Volver al listado
     </a>
-    <a href="{{ route('emergencias-prehospitalarias.pdf', $emergenciaPrehospitalaria) }}"
+    <a href="<?php echo e(route('emergencias-prehospitalarias.pdf', $emergenciaPrehospitalaria)); ?>"
        class="btn btn-danger" target="_blank">
         <i class="fas fa-file-pdf"></i> PDF Parte de Ambulancia
     </a>
-    <a href="{{ route('emergencias-prehospitalarias.edit', $emergenciaPrehospitalaria) }}"
+    <a href="<?php echo e(route('emergencias-prehospitalarias.edit', $emergenciaPrehospitalaria)); ?>"
        class="btn btn-warning">
         <i class="fas fa-edit"></i> Editar
     </a>
-    <form action="{{ route('emergencias-prehospitalarias.destroy', $emergenciaPrehospitalaria) }}"
+    <form action="<?php echo e(route('emergencias-prehospitalarias.destroy', $emergenciaPrehospitalaria)); ?>"
           method="POST" class="d-inline"
           onsubmit="return confirm('¿Está seguro de eliminar esta emergencia? Se restaurará el stock de insumos.')">
-        @csrf
-        @method('DELETE')
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('DELETE'); ?>
         <button type="submit" class="btn btn-danger">
             <i class="fas fa-trash"></i> Eliminar
         </button>
     </form>
 </div>
 
-{{-- ===== MODAL SUBIR ARCHIVOS ===== --}}
+
 <div class="modal fade" id="modalSubirArchivos" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('emergencias-prehospitalarias.archivos.subir', $emergenciaPrehospitalaria) }}"
+            <form action="<?php echo e(route('emergencias-prehospitalarias.archivos.subir', $emergenciaPrehospitalaria)); ?>"
                   method="POST" enctype="multipart/form-data">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">
                         <i class="fas fa-upload"></i> Subir Archivos
@@ -534,8 +544,8 @@
                         <small>
                             <i class="fas fa-info-circle"></i>
                             Espacio disponible:
-                            <strong>{{ $emergenciaPrehospitalaria->espacio_disponible_mb }} MB</strong>
-                            de {{ $emergenciaPrehospitalaria->limite_mb }} MB
+                            <strong><?php echo e($emergenciaPrehospitalaria->espacio_disponible_mb); ?> MB</strong>
+                            de <?php echo e($emergenciaPrehospitalaria->limite_mb); ?> MB
                         </small>
                     </div>
                     <div class="form-group">
@@ -545,7 +555,7 @@
                         <input type="file" name="archivos[]" class="form-control-file"
                                multiple required accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.mp4,.mp3,.zip,.rar">
                         <small class="text-muted d-block mt-2">
-                            Máximo {{ config('filesystems.emergencias_archivos.max_archivo_mb', 10) }}MB por archivo.
+                            Máximo <?php echo e(config('filesystems.emergencias_archivos.max_archivo_mb', 10)); ?>MB por archivo.
                             Permitidos: imágenes, PDF, Word, Excel, video, audio, ZIP.
                         </small>
                     </div>
@@ -561,7 +571,7 @@
     </div>
 </div>
 
-{{-- ===== MODAL PREVIEW IMAGEN ===== --}}
+
 <div class="modal fade" id="modalPreviewImagen" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -576,7 +586,7 @@
     </div>
 </div>
 
-{{-- ===== SCRIPT: PREVIEW DE IMAGEN ===== --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalPreview = document.getElementById('modalPreviewImagen');
@@ -590,4 +600,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.plantilla', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\desarrollo\azogues\BOMAzogues\resources\views/emergencias_prehospitalarias/show.blade.php ENDPATH**/ ?>

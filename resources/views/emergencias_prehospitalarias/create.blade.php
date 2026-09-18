@@ -194,6 +194,11 @@
                     <i class="fas fa-arrow-left"></i> Cancelar
                 </a>
             </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Nota:</strong> Después de guardar la emergencia podrás adjuntar archivos (fotos, documentos, etc.)
+                desde la vista de detalle.
+            </div>
         </form>
     </div>
 </div>
