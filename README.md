@@ -121,6 +121,123 @@ Este módulo permite registrar **emergencias prehospitalarias** (salidas de ambu
 // EmergenciaArchivo
 - emergencia()            → belongsTo(EmergenciaPrehospitalaria::class)
 - usuario()               → belongsTo(User::class, 'usuario_subio_id')
+
+# Módulo de Novedades de Estación
+
+Sistema de registro y gestión de novedades diarias de estación, con soporte para múltiples emergencias atendidas, novedades de vehículos, personal, integrantes de guardia y exportación a PDF/Excel.
+
+---
+
+## 📋 Descripción General
+
+Este módulo permite registrar **novedades de estación** (reportes diarios de turno) donde una misma novedad puede contener:
+
+- **Emergencias atendidas** durante el turno (con opción de importar emergencias existentes)
+- **Novedades de vehículos** (estado, mantenimiento, kilometraje, reportes)
+- **Novedades del personal** (turnos, estados, observaciones)
+- **Integrantes de la guardia bomberil** (con nombre, cédula, cargo)
+- **Observaciones generales** del turno
+
+---
+
+## 🗄️ Estructura de Base de Datos
+
+### Tablas principales
+
+| Tabla | Descripción |
+|-------|-------------|
+| `estacion_novedades` | Cabecera de la novedad (fecha, estación, observaciones) |
+| `estacion_novedad_emergencias` | Emergencias atendidas en la novedad |
+| `estacion_novedad_vehiculos` | Novedades de vehículos |
+| `estacion_novedad_personal` | Novedades del personal |
+| `estacion_novedad_integrantes` | Integrantes de la guardia |
+
+### Tabla `estacion_novedades` (cabecera)
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `fecha` | date | Fecha de la novedad |
+| `estacion_id` | bigint | FK a `estaciones` |
+| `observaciones` | text | Observaciones generales |
+| `estado` | string(30) | Borrador, En revisión, Aprobada, Rechazada |
+| `usuario_crea_id` | bigint | FK a `users` |
+| `usuario_aprueba_id` | bigint | FK a `users` (nullable) |
+| `fecha_aprobacion` | datetime | Fecha de aprobación |
+| `created_at`, `updated_at` | timestamp | Auditoría |
+
+### Tabla `estacion_novedad_emergencias`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `estacion_novedad_id` | bigint | FK a `estacion_novedades` |
+| `emergencia_id` | bigint | FK a `emergencias` (opcional) |
+| `tipo` | string(50) | Tipo de emergencia |
+| `lugar` | string(255) | Lugar del incidente |
+| `hora_ingreso` | time | Hora de ingreso |
+| `hora_salida` | time | Hora de salida |
+| `descripcion` | text | Descripción |
+
+### Tabla `estacion_novedad_vehiculos`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `estacion_novedad_id` | bigint | FK a `estacion_novedades` |
+| `vehiculo_id` | bigint | FK a `vehiculos` |
+| `estado` | string(30) | Operativo, Mantenimiento, Averiado, Fuera de Servicio |
+| `tipo_novedad` | string(100) | Tipo de novedad |
+| `fecha_reporte` | date | Fecha de reporte |
+| `fecha_solucion` | date | Fecha de solución (nullable) |
+| `kilometraje` | integer | Kilometraje actual |
+| `descripcion` | text | Descripción de la novedad |
+
+### Tabla `estacion_novedad_personal`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `estacion_novedad_id` | bigint | FK a `estacion_novedades` |
+| `user_id` | bigint | FK a `users` |
+| `cargo` | string(100) | Cargo del funcionario |
+| `turno` | string(20) | Mañana, Tarde, Noche, Descanso |
+| `estado` | string(20) | Presente, Ausente, Permiso, Licencia, Comisión |
+| `observaciones` | text | Observaciones |
+
+### Tabla `estacion_novedad_integrantes`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | bigint | ID autoincremental |
+| `estacion_novedad_id` | bigint | FK a `estacion_novedades` |
+| `nombre` | string(150) | Nombre completo |
+| `cedula` | string(20) | Cédula |
+| `cargo` | string(50) | Bombero, Teniente, Capitán, etc. |
+| `observaciones` | string(255) | Observaciones |
+
+---
+
+## 🔗 Relaciones del Modelo
+
+```php
+// EstacionNovedad
+- estacion()              → belongsTo(Station::class)
+- usuarioCrea()           → belongsTo(User::class)
+- usuarioAprueba()        → belongsTo(User::class)
+- emergencias()           → hasMany(EstacionNovedadEmergencia::class)
+- vehiculos()             → hasMany(EstacionNovedadVehiculo::class)
+- personal()              → hasMany(EstacionNovedadPersonal::class)
+- integrantes()           → hasMany(EstacionNovedadIntegrante::class)
+
+
+
+
+
+
+
+
+
 ### Installation
 
 1. Clone the repo
