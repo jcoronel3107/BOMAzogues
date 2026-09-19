@@ -155,7 +155,43 @@
                 </a>
             </div>
         </div>
+    </li><!-- Nav Item - Emergencias de Fuego -->
+    <li class="nav-item <?php echo e(request()->routeIs('emergencias-fuego.*') ? 'active' : ''); ?>">
+        <a class="nav-link <?php echo e(request()->routeIs('emergencias-fuego.*') ? '' : 'collapsed'); ?>"
+        href="#"
+        data-toggle="collapse"
+        data-target="#collapseEmergenciasFuego"
+        aria-expanded="<?php echo e(request()->routeIs('emergencias-fuego.*') ? 'true' : 'false'); ?>"
+        aria-controls="collapseEmergenciasFuego">
+            <i class="fas fa-fire"></i>
+            <span>Emergencias de Fuego</span>
+        </a>
+        <div id="collapseEmergenciasFuego"
+            class="collapse <?php echo e(request()->routeIs('emergencias-fuego.*') ? 'show' : ''); ?>"
+            aria-labelledby="headingEmergenciasFuego"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestión de Incendios:</h6>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-fuego.index') ? 'active' : ''); ?>"
+                href="<?php echo e(route('emergencias-fuego.index')); ?>">
+                    Lista de Emergencias
+                </a>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-fuego.create') ? 'active' : ''); ?>"
+                href="<?php echo e(route('emergencias-fuego.create')); ?>">
+                    Nueva Emergencia
+                </a>
+                <a class="collapse-item <?php echo e(request()->routeIs('emergencias-fuego.estadisticas') ? 'active' : ''); ?>"
+                href="<?php echo e(route('emergencias-fuego.estadisticas')); ?>">
+                    Estadísticas
+                </a>
+            </div>
+        </div>
     </li>
+
+
+
+
+
     <!-- Nav Item - Novedades -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNovedades" aria-expanded="true" aria-controls="collapseNovedades">

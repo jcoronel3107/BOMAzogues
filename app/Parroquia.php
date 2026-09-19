@@ -33,4 +33,9 @@ class Parroquia extends Model
     {
         return $this->hasMany(Emergencia::class);
     }
+
+    public function emergenciasFuego()
+    {
+        return $this->hasMany(EmergenciaFuego::class, 'parroquia_id');
+    }
 }

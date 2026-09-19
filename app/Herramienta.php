@@ -88,4 +88,11 @@ class Herramienta extends Model
     {
         return $this->belongsTo(User::class, 'usuario_edita_id');
     }
+
+    public function emergenciasFuego()
+    {
+        return $this->belongsToMany(EmergenciaFuego::class, 'emergencia_fuego_herramientas')
+                    ->withPivot('cantidad', 'observaciones')
+                    ->withTimestamps();
+    }
 }

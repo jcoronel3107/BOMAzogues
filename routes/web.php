@@ -559,3 +559,72 @@ Route::post('insumos-medicos/{id}/ajustar-stock', 'InsumoMedicoController@ajusta
 // Rutas para Herramientas
 Route::resource('herramientas', 'HerramientaController')->middleware('auth');
 Route::post('herramientas/{id}/cambiar-estado', 'HerramientaController@cambiarEstado')->name('herramientas.cambiar-estado')->middleware('auth');
+
+
+/* ---------------------------------------------------------------------------------
+/                        Rutas para Emergencias de Fuego
+/ --------------------------------------------------------------------------------- */
+Route::middleware('auth')->group(function () {
+
+    // ⚠️ IMPORTANTE: las rutas sin parámetro van ANTES que las que llevan {id}
+
+    // Index
+    Route::get('/emergencias-fuego',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'index'])
+        ->name('emergencias-fuego.index');
+
+    // Create
+    Route::get('/emergencias-fuego/create',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'create'])
+        ->name('emergencias-fuego.create');
+
+    // Store
+    Route::post('/emergencias-fuego',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'store'])
+        ->name('emergencias-fuego.store');
+
+    // Estadísticas
+    Route::get('/emergencias-fuego/estadisticas',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'estadisticas'])
+        ->name('emergencias-fuego.estadisticas');
+
+    // PDF
+    Route::get('/emergencias-fuego/{emergenciaFuego}/pdf',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'generarPdf'])
+        ->name('emergencias-fuego.pdf');
+
+    // Show
+    Route::get('/emergencias-fuego/{emergenciaFuego}',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'show'])
+        ->name('emergencias-fuego.show');
+
+    // Edit
+    Route::get('/emergencias-fuego/{emergenciaFuego}/edit',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'edit'])
+        ->name('emergencias-fuego.edit');
+
+    // Update
+    Route::put('/emergencias-fuego/{emergenciaFuego}',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'update'])
+        ->name('emergencias-fuego.update');
+
+    // Destroy
+    Route::delete('/emergencias-fuego/{emergenciaFuego}',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'destroy'])
+        ->name('emergencias-fuego.destroy');
+
+    // ===== ARCHIVOS ADJUNTOS =====
+    Route::post('/emergencias-fuego/{emergenciaFuego}/archivos',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'subirArchivos'])
+        ->name('emergencias-fuego.archivos.subir');
+
+    Route::delete('/emergencias-fuego/archivos/{archivo}',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'eliminarArchivo'])
+        ->name('emergencias-fuego.archivos.eliminar');
+
+    Route::get('/emergencias-fuego/archivos/{archivo}/descargar',
+        [App\Http\Controllers\EmergenciaFuegoController::class, 'descargarArchivo'])
+        ->name('emergencias-fuego.archivos.descargar');
+
+    
+});

@@ -146,4 +146,11 @@ class Vehiculo extends Model
 		{
 			return $this->hasMany(EmergenciaPrehospitalaria::class);
 		}
+
+	public function emergenciasFuego()
+	{
+    return $this->belongsToMany(EmergenciaFuego::class, 'emergencia_fuego_vehiculos')
+                ->withPivot('rol_en_emergencia', 'km_salida', 'km_llegada')
+                ->withTimestamps();
+	}
 }

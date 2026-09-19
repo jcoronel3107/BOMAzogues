@@ -84,4 +84,12 @@ class InsumoMedico extends Model
                 ->withPivot('cantidad', 'observaciones')
                 ->withTimestamps();
     }
+
+    public function emergenciasFuego()
+    {
+    return $this->belongsToMany(EmergenciaFuego::class, 'emergencia_fuego_insumos')
+                ->withPivot('cantidad', 'observaciones')
+                ->withTimestamps();
+    }
+
 }

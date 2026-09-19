@@ -120,5 +120,12 @@ class User extends Authenticatable
                 ->withPivot('rol_en_emergencia')
                 ->withTimestamps();
     }
-    
+    public function emergenciasFuegoAtendidas()
+    {
+    return $this->belongsToMany(EmergenciaFuego::class, 'emergencia_fuego_personal')
+                ->withPivot('rol_en_emergencia')
+                ->withTimestamps();
+    }
+
+
 }
