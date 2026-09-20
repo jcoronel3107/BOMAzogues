@@ -66,6 +66,8 @@ class EmergenciaController extends Controller
             'subcategoria' => $request->subcategoria,
             'estacion_id' => $request->estacion_id,
             'parroquia_id' => $request->parroquia_id, // <-- Agregar
+            'direccion' => $request->direccion,
+            'referencia' => $request->referencia,
             'hora_salida_emergencia' => $request->hora_salida_emergencia,
             'hora_llegada_emergencia' => $request->hora_llegada_emergencia,
             'hora_en_base' => $request->hora_en_base,
@@ -127,6 +129,8 @@ class EmergenciaController extends Controller
             'subcategoria' => 'nullable|string|max:255',
             'estacion_id' => 'required|exists:stations,id',
             'parroquia_id' => 'nullable|exists:parroquias,id', // <-- Agregar
+             'direccion' => 'nullable|string|max:255',      // ✅ CORREGIDO
+             'referencia' => 'nullable|string|max:255',     // ✅ CORREGIDO
             'hora_salida_emergencia' => 'required',
             'hora_llegada_emergencia' => 'required',
             'hora_en_base' => 'required',
@@ -141,6 +145,9 @@ class EmergenciaController extends Controller
             'tipo_incidente_id' => $request->tipo_incidente_id,
             'subcategoria' => $request->subcategoria,
             'estacion_id' => $request->estacion_id,
+            'parroquia_id' => $request->parroquia_id,  // ✅ AGREGAR
+            'direccion' => $request->direccion,        // ✅ AGREGAR
+            'referencia' => $request->referencia,      // ✅ AGREGAR
             'hora_salida_emergencia' => $request->hora_salida_emergencia,
             'hora_llegada_emergencia' => $request->hora_llegada_emergencia,
             'hora_en_base' => $request->hora_en_base,

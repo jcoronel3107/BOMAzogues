@@ -68,6 +68,15 @@
                         <td>{{ $emergencia->parroquia->nombre ?? 'N/A' }}</td>
                     </tr>
                     <tr>
+                        <th>Dirección</th>
+                        <td>{{ $emergencia->direccion ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Referencia</th>
+                        <td>{{ $emergencia->referencia ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+
                         <th>Hora Salida a Emergencia</th>
                         <td>{{ $emergencia->hora_salida_emergencia }}</td>
                     </tr>

@@ -134,8 +134,23 @@
                                 @enderror
                             </div>
                         </div>
+                         
 
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Dirección <span class="text-danger">*</span></label>
+                                <input type="text" name="direccion" class="form-control" required
+                                    value="{{ old('direccion') }}">
+                            </div>
+                        </div>
 
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Referencia</label>
+                                <input type="text" name="referencia" class="form-control"
+                                    value="{{ old('referencia') }}">
+                            </div>
+                        </div>
 
                         <div class="col-md-6">
                             <div class="form-group">

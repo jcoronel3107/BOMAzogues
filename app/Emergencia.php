@@ -16,6 +16,8 @@ class Emergencia extends Model
         'subcategoria',
         'estacion_id',
         'parroquia_id',
+        'direccion',      // ⬅️ AGREGAR
+        'referencia',     // ⬅️ AGREGAR
         'hora_salida_emergencia',
         'hora_llegada_emergencia',
         'hora_en_base',
