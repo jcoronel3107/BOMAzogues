@@ -61,7 +61,7 @@
             </div>
 
             <hr>
-            <h5 class="text-primary">Datos del Conductor</h5>
+            <h5 class="text-primary">Datos del Acompañante</h5>
 
             <div class="row">
                 <div class="col-md-5">

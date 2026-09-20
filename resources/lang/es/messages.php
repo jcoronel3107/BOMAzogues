@@ -113,5 +113,6 @@ return [
     'Denomination'=>'Denominación',
     'Term'=>'Plazo',
     'Value'=>'Valor',
+    'emergency'=>'Emergencia',
 
 ];
