@@ -104,8 +104,7 @@
             </div>
         </div>
     </li>
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+    
     <!-- Nav Item - Emergencias Prehospitalarias -->
     <li class="nav-item {{ request()->routeIs('emergencias-prehospitalarias.*') ? 'active' : '' }}">
         <a class="nav-link {{ request()->routeIs('emergencias-prehospitalarias.*') ? '' : 'collapsed' }}"
@@ -170,7 +169,8 @@
         </div>
     </li>
 
-
+    <!-- Divider -->
+    <hr class="sidebar-divider">
 
 
 
