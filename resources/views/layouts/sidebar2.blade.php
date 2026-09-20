@@ -271,6 +271,30 @@
     </li>
 
     <!-- Divider -->
+<hr class="sidebar-divider d-none d-md-block">
+
+<!-- Heading -->
+<div class="sidebar-heading">
+    Ayuda
+</div>
+
+<!-- Manual Prehospitalario -->
+<li class="nav-item">
+    <a class="nav-link" href="{{ asset('manuales/manual-prehospitalario.pdf') }}" target="_blank">
+        <i class="fas fa-book-medical"></i>
+        <span>Manual Prehospitalario</span>
+    </a>
+</li>
+
+<!-- Manual Fuego -->
+<li class="nav-item">
+    <a class="nav-link" href="{{ asset('manuales/manual-emergencias-fuego.pdf') }}" target="_blank">
+        <i class="fas fa-fire-extinguisher"></i>
+        <span>Manual de Fuego</span>
+    </a>
+</li>
+
+    <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 
     <!-- Sidebar Toggler -->

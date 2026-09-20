@@ -1,0 +1,27 @@
+MANUALES DE USUARIO — BOM AZOGUES
+==================================
+
+Este paquete contiene los manuales de usuario para los módulos:
+
+1. Emergencias Prehospitalarias
+2. Emergencias de Fuego
+
+FORMATOS DISPONIBLES:
+- PDF: Listo para imprimir o consultar digitalmente
+- HTML: Editable y consultable en navegador
+
+CÓMO USAR EL HTML:
+1. Abre el archivo .html en cualquier navegador
+2. Para guardar como PDF: Ctrl + P → Guardar como PDF
+3. Para editar: Abre con VS Code o cualquier editor de texto
+
+CÓMO USAR EL PDF:
+1. Ábrelo con Adobe Reader o cualquier visor de PDF
+2. Imprímelo si necesitas copia física
+
+SOPORTE:
+- Email: soporte@tudominio.com
+- Teléfono: (07) XXX-XXXX
+- Horario: Lunes a Viernes, 8:00 - 17:00
+
+Última actualización: Septiembre 2026

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual de Usuario — Emergencias de Fuego</title>
+    <style>
+        /* Mismo CSS que el anterior, solo cambia el color principal */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .cover {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+        .cover h1 { font-size: 32pt; margin: 0; }
+        .cover h2 { font-size: 18pt; font-weight: normal; margin: 10px 0 30px; }
+        .cover .icon { font-size: 60pt; margin: 20px 0; }
+        .cover .version { font-size: 12pt; opacity: 0.9; }
+        
+        h1 { font-size: 20pt; color: #991b1b; border-bottom: 3px solid #991b1b; padding-bottom: 10px; margin-top: 40px; }
+        h2 { font-size: 15pt; color: #1e3a8a; margin-top: 30px; }
+        h3 { font-size: 13pt; color: #333; margin-top: 20px; }
+        
+        .index { background: #f3f4f6; padding: 20px 30px; border-radius: 8px; margin-bottom: 30px; }
+        .index h2 { margin-top: 0; color: #991b1b; }
+        .index ol { margin: 0; padding-left: 20px; }
+        .index li { margin: 5px 0; }
+        
+        .tip { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 15px 0; border-radius: 4px; }
+        .tip::before { content: "💡 "; font-weight: bold; }
+        
+        .warning { background: #fee2e2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 15px 0; border-radius: 4px; }
+        .warning::before { content: "⚠️ "; font-weight: bold; }
+        
+        .info { background: #dbeafe; border-left: 4px solid #2563eb; padding: 12px 16px; margin: 15px 0; border-radius: 4px; }
+        .info::before { content: "ℹ️ "; font-weight: bold; }
+        
+        .success { background: #dcfce7; border-left: 4px solid #16a34a; padding: 12px 16px; margin: 15px 0; border-radius: 4px; }
+        .success::before { content: "✅ "; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10pt; }
+        table th { background: #991b1b; color: white; padding: 8px 10px; text-align: left; border: 1px solid #991b1b; }
+        table td { padding: 8px 10px; border: 1px solid #d1d5db; }
+        table tr:nth-child(even) td { background: #f9fafb; }
+        
+        .screenshot {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin: 15px 0;
+            background: #f9fafb;
+            padding: 10px;
+            text-align: center;
+        }
+        .screenshot img { max-width: 100%; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .screenshot .caption { font-size: 9pt; color: #6b7280; font-style: italic; margin-top: 8px; }
+        
+        .steps { counter-reset: step-counter; list-style: none; padding-left: 0; }
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding-left: 45px;
+            position: relative;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: #991b1b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 9pt; font-weight: bold; color: white; }
+        .badge-bajo { background: #16a34a; }
+        .badge-medio { background: #0dcaf0; color: #000; }
+        .badge-alto { background: #ffc107; color: #000; }
+        .badge-critico { background: #dc2626; }
+        
+        .page-break { page-break-before: always; }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid #991b1b;
+            text-align: center;
+            font-size: 9pt;
+            color: #6b7280;
+        }
+        
+        @media print {
+            body { padding: 0; }
+            .cover { page-break-after: always; }
+            h1 { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+    <div class="icon">🔥</div>
+    <h1>MANUAL DE USUARIO</h1>
+    <h2>Módulo de Emergencias de Fuego</h2>
+    <p class="version">
+        Sistema de Gestión de Bomberos<br>
+        <strong>BOM Azogues</strong><br>
+        Versión 1.0 — Septiembre 2026
+    </p>
+</div>
+
+<!-- ÍNDICE -->
+<div class="index">
+    <h2>📋 Índice de Contenidos</h2>
+    <ol>
+        <li>¿Qué es el módulo de Emergencias de Fuego?</li>
+        <li>¿Cómo acceder al módulo?</li>
+        <li>Registrar una nueva emergencia de fuego</li>
+        <li>Añadir vehículos utilizados</li>
+        <li>Añadir personal que atiende</li>
+        <li>Añadir pacientes / víctimas</li>
+        <li>Añadir herramientas utilizadas</li>
+        <li>Añadir insumos utilizados</li>
+        <li>Guardar la emergencia</li>
+        <li>Ver el listado de emergencias</li>
+        <li>Ver el detalle de una emergencia</li>
+        <li>Editar una emergencia</li>
+        <li>Adjuntar archivos (fotos del incendio)</li>
+        <li>Generar el PDF del parte de bomberos</li>
+        <li>Eliminar una emergencia</li>
+        <li>Ver estadísticas</li>
+        <li>Preguntas frecuentes</li>
+    </ol>
+</div>
+
+<!-- 1 -->
+<h1>1. ¿Qué es el módulo de Emergencias de Fuego?</h1>
+<p>Este módulo permite <strong>registrar incendios y emergencias de fuego</strong> que atiende el cuerpo de bomberos. Cada emergencia puede incluir:</p>
+<ul>
+    <li><strong>Datos generales:</strong> fecha, hora, dirección, tipo de fuego</li>
+    <li><strong>Recursos utilizados:</strong> agua, espuma, químico (en litros)</li>
+    <li><strong>Herramientas utilizadas:</strong> hachas, mangueras, escaleras, etc.</li>
+    <li><strong>Vehículos:</strong> bomberos, cisternas, rescate</li>
+    <li><strong>Personal que atendió:</strong> bomberos, conductores, jefe de incidente</li>
+    <li><strong>Pacientes/víctimas:</strong> ilesos, heridos, fallecidos</li>
+    <li><strong>Insumos médicos</strong> usados</li>
+    <li><strong>Archivos adjuntos:</strong> fotos del incendio</li>
+</ul>
+
+<!-- 2 -->
+<h1>2. ¿Cómo acceder al módulo?</h1>
+<ol class="steps">
+    <li>Inicia sesión en el sistema</li>
+    <li>En el menú lateral izquierdo, busca <strong>"Emergencias de Fuego"</strong> 🔥</li>
+    <li>Haz clic para desplegar el submenú</li>
+    <li>Verás 3 opciones: <strong>Lista</strong>, <strong>Nueva</strong> y <strong>Estadísticas</strong></li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/01-menu.png" alt="Menú lateral">
+    <div class="caption">Figura 1: Ubicación del módulo en el menú lateral</div>
+</div>
+
+<!-- 3 -->
+<h1>3. Registrar una nueva emergencia de fuego</h1>
+
+<h2>Paso 1: Acceder al formulario</h2>
+<p>En el menú, haz clic en <strong>"Emergencias de Fuego"</strong> → <strong>"Nueva Emergencia"</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/02-formulario.png" alt="Formulario de nueva emergencia">
+    <div class="caption">Figura 2: Formulario de nueva emergencia</div>
+</div>
+
+<h2>Paso 2: Completar Datos Generales</h2>
+<table>
+    <thead>
+        <tr><th>Campo</th><th>Descripción</th><th>¿Obligatorio?</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Fecha/Hora Salida</td><td>Cuándo salió la unidad</td><td>✅ Sí</td></tr>
+        <tr><td>Llegada al sitio</td><td>Cuándo llegó al incendio</td><td>No</td></tr>
+        <tr><td>Control del fuego</td><td>Cuándo se controló</td><td>No</td></tr>
+        <tr><td>Extinción total</td><td>Cuándo se extinguió</td><td>No</td></tr>
+        <tr><td>Llegada a base</td><td>Cuándo regresó</td><td>No</td></tr>
+        <tr><td>Dirección</td><td>Dirección del incendio</td><td>✅ Sí</td></tr>
+        <tr><td>Referencia</td><td>Punto de referencia</td><td>No</td></tr>
+        <tr><td>Parroquia</td><td>Selecciona de la lista</td><td>No</td></tr>
+        <tr><td>Sector</td><td>Sector o barrio</td><td>No</td></tr>
+        <tr><td>Motivo del llamado</td><td>Por qué se llamó</td><td>✅ Sí</td></tr>
+        <tr><td>Tipo de fuego</td><td>Estructural, Forestal, etc.</td><td>✅ Sí</td></tr>
+        <tr><td>Nivel de riesgo</td><td>Bajo, Medio, Alto, Crítico</td><td>✅ Sí</td></tr>
+        <tr><td>Causa probable</td><td>Eléctrica, Intencional, etc.</td><td>No</td></tr>
+        <tr><td>Área afectada (m²)</td><td>Tamaño del incendio</td><td>No</td></tr>
+        <tr><td>Pérdidas estimadas</td><td>Valor económico</td><td>No</td></tr>
+    </tbody>
+</table>
+
+<div class="tip">
+    <strong>Tipos de fuego:</strong><br>
+    🏠 <strong>Estructural:</strong> Casas, edificios<br>
+    🌲 <strong>Forestal:</strong> Vegetación<br>
+    🚗 <strong>Vehicular:</strong> Autos, motos<br>
+    🗑️ <strong>Basura:</strong> Contenedores<br>
+    ☣️ <strong>Químico:</strong> Materiales peligrosos<br>
+    🏭 <strong>Industrial:</strong> Fábricas
+</div>
+
+<h2>Paso 3: Completar Recursos Utilizados</h2>
+<ul>
+    <li><strong>Agua utilizada (litros)</strong></li>
+    <li><strong>Espuma utilizada (litros)</strong></li>
+    <li><strong>Químico utilizado (litros)</strong></li>
+</ul>
+
+<h2>Paso 4: Completar Víctimas</h2>
+<ul>
+    <li><strong>Ilesos</strong> — Personas sin daño</li>
+    <li><strong>Heridos</strong> — Personas con lesiones</li>
+    <li><strong>Fallecidos</strong> — Personas fallecidas</li>
+    <li><strong>Requirió apoyo externo</strong> — Marca si aplica</li>
+    <li><strong>Detalle del apoyo</strong> — Quién ayudó</li>
+</ul>
+
+<!-- 4 -->
+<h1>4. Añadir vehículos utilizados</h1>
+<ol class="steps">
+    <li>En la sección <strong>"5. Vehículos Utilizados"</strong>, haz clic en <strong>"+ Añadir Vehículo"</strong></li>
+    <li>Selecciona el <strong>Vehículo</strong> de la lista</li>
+    <li>Escribe el <strong>Rol</strong> (Bomberos, Cisterna, Rescate...)</li>
+    <li>Ingresa el <strong>Km de Salida</strong> y <strong>Km de Llegada</strong></li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/03-vehiculos.png" alt="Vehículos">
+    <div class="caption">Figura 3: Sección de vehículos con kilometraje</div>
+</div>
+
+<!-- 5 -->
+<h1>5. Añadir personal que atiende</h1>
+<ol class="steps">
+    <li>En la sección <strong>"4. Personal que Atiende"</strong>, haz clic en <strong>"+ Añadir Personal"</strong></li>
+    <li>Selecciona el <strong>Funcionario</strong></li>
+    <li>Escribe su <strong>Rol</strong> (Bombero, Conductor, Jefe de Incidente...)</li>
+</ol>
+
+<!-- 6 -->
+<h1>6. Añadir pacientes / víctimas</h1>
+<ol class="steps">
+    <li>En la sección <strong>"6. Pacientes / Víctimas"</strong>, haz clic en <strong>"+ Añadir Paciente"</strong></li>
+    <li>Completa los datos básicos</li>
+    <li>Selecciona la <strong>Condición</strong> (Ileso, Herido, Fallecido, Desconocido)</li>
+    <li>Especifica el <strong>Tipo de lesión</strong> (Quemadura, inhalación...)</li>
+    <li>Indica el <strong>Hospital destino</strong> si aplica</li>
+</ol>
+
+<!-- 7 -->
+<h1>7. Añadir herramientas utilizadas</h1>
+<ol class="steps">
+    <li>En la sección <strong>"Herramientas Utilizadas"</strong>, haz clic en <strong>"+ Añadir Herramienta"</strong></li>
+    <li>Selecciona la <strong>Herramienta</strong> de la lista (hacha, manguera, escalera...)</li>
+    <li>Indica la <strong>Cantidad</strong></li>
+    <li>Agrega <strong>Observaciones</strong> si es necesario</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/04-herramientas.png" alt="Herramientas">
+    <div class="caption">Figura 4: Sección de herramientas utilizadas</div>
+</div>
+
+<!-- 8 -->
+<h1>8. Añadir insumos utilizados</h1>
+<ol class="steps">
+    <li>En la sección <strong>"7. Insumos Utilizados"</strong>, haz clic en <strong>"+ Añadir Insumo"</strong></li>
+    <li>Selecciona el <strong>Insumo</strong> de la lista</li>
+    <li>Indica la <strong>Cantidad</strong></li>
+    <li>Agrega <strong>Observaciones</strong></li>
+</ol>
+
+<!-- 9 -->
+<h1>9. Guardar la emergencia</h1>
+<ol class="steps">
+    <li>Al final del formulario, haz clic en <strong>"Guardar Emergencia"</strong></li>
+    <li>El sistema validará los datos</li>
+    <li>Si todo está bien, te redirigirá al <strong>detalle</strong></li>
+</ol>
+
+<div class="success">
+    Verás un mensaje verde: <strong>"Emergencia de fuego registrada correctamente"</strong>
+</div>
+
+<!-- 10 -->
+<h1>10. Ver el listado de emergencias</h1>
+<p>En el menú, haz clic en <strong>"Emergencias de Fuego"</strong> → <strong>"Lista de Emergencias"</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/05-lista.png" alt="Listado">
+    <div class="caption">Figura 5: Listado de emergencias de fuego</div>
+</div>
+
+<h3>Filtros disponibles</h3>
+<ul>
+    <li><strong>Buscar</strong> por código, dirección o motivo</li>
+    <li><strong>Estado:</strong> En curso, Controlado, Extinguido, etc.</li>
+    <li><strong>Tipo de fuego</strong></li>
+    <li><strong>Nivel de riesgo</strong></li>
+    <li><strong>Rango de fechas</strong></li>
+</ul>
+
+<!-- 11 -->
+<h1>11. Ver el detalle de una emergencia</h1>
+<p>Desde el listado, haz clic en el <strong>código</strong> o en el botón <strong>👁️ Ver</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/06-detalle.png" alt="Detalle">
+    <div class="caption">Figura 6: Detalle completo de la emergencia de fuego</div>
+</div>
+
+<h3>Secciones del detalle</h3>
+<ol>
+    <li><strong>Datos Generales</strong></li>
+    <li><strong>Magnitud y Recursos</strong> (área, pérdidas, agua, espuma, víctimas)</li>
+    <li><strong>Vehículos Utilizados</strong></li>
+    <li><strong>Personal que Atendió</strong></li>
+    <li><strong>Pacientes / Víctimas</strong></li>
+    <li><strong>Herramientas Utilizadas</strong></li>
+    <li><strong>Insumos Utilizados</strong></li>
+    <li><strong>Archivos Adjuntos</strong></li>
+</ol>
+
+<!-- 12 -->
+<h1>12. Editar una emergencia</h1>
+<ol class="steps">
+    <li>Desde el detalle, haz clic en <strong>"Editar"</strong></li>
+    <li>Modifica los campos que necesites</li>
+    <li>Puedes <strong>añadir</strong> o <strong>eliminar</strong> vehículos, personal, pacientes, herramientas e insumos</li>
+    <li>Haz clic en <strong>"Actualizar Emergencia"</strong></li>
+</ol>
+
+<div class="info">
+    Al guardar, el sistema <strong>restaura</strong> el stock de insumos anteriores y <strong>descuenta</strong> el de los nuevos.
+</div>
+
+<!-- 13 -->
+<h1>13. Adjuntar archivos (fotos del incendio)</h1>
+<ol class="steps">
+    <li>Ve al detalle de la emergencia</li>
+    <li>Busca la sección <strong>"Archivos Adjuntos"</strong></li>
+    <li>Haz clic en <strong>"Subir Archivos"</strong></li>
+    <li>Selecciona las fotos o documentos</li>
+    <li>Haz clic en <strong>"Subir"</strong></li>
+</ol>
+
+<h3>Límites</h3>
+<ul>
+    <li><strong>Máximo 10 MB por archivo</strong></li>
+    <li><strong>Máximo 50 MB por emergencia</strong></li>
+</ul>
+
+<!-- 14 -->
+<h1>14. Generar el PDF del parte de bomberos</h1>
+<ol class="steps">
+    <li>Ve al detalle de una emergencia</li>
+    <li>Haz clic en <strong>"Generar PDF"</strong> o <strong>"PDF Parte de Bomberos"</strong></li>
+    <li>Se abrirá el PDF en una nueva pestaña</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/07-pdf.png" alt="PDF">
+    <div class="caption">Figura 7: PDF del parte de bomberos</div>
+</div>
+
+<h3>Contenido del PDF</h3>
+<ol>
+    <li>Encabezado con logo y código</li>
+    <li>Datos Generales (fechas, dirección, parroquia, tipo, riesgo)</li>
+    <li>Recursos Utilizados (agua, espuma, químico, víctimas)</li>
+    <li>Vehículos Utilizados</li>
+    <li>Personal que Atendió</li>
+    <li>Pacientes / Víctimas</li>
+    <li>Herramientas Utilizadas</li>
+    <li>Insumos Utilizados</li>
+    <li>Observaciones Generales</li>
+    <li>Firmas (3 bloques con espacio para rúbrica)</li>
+</ol>
+
+<!-- 15 -->
+<h1>15. Eliminar una emergencia</h1>
+<ol class="steps">
+    <li>Desde el detalle o el listado, haz clic en <strong>"Eliminar"</strong></li>
+    <li>Confirma la acción</li>
+</ol>
+
+<div class="warning">
+    <strong>Cuidado:</strong> Esta acción no se puede deshacer. El stock de insumos se <strong>restaurará</strong>.
+</div>
+
+<!-- 16 -->
+<h1>16. Ver estadísticas</h1>
+<ol class="steps">
+    <li>En el menú, haz clic en <strong>"Emergencias de Fuego"</strong> → <strong>"Estadísticas"</strong></li>
+    <li>Ajusta el rango de fechas</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/08-estadisticas.png" alt="Estadísticas">
+    <div class="caption">Figura 8: Panel de estadísticas</div>
+</div>
+
+<h3>Qué verás</h3>
+<ul>
+    <li><strong>Tarjetas resumen:</strong> Total, En curso, Extinguidos, Agua usada, Heridos, Fallecidos, Pérdidas</li>
+    <li><strong>Gráficos:</strong> Tendencia, Por Tipo, Por Riesgo, Por Estado</li>
+    <li><strong>Top 5:</strong> Vehículos, Personal, Causas</li>
+</ul>
+
+<!-- 17 -->
+<h1>17. Preguntas frecuentes</h1>
+
+<h3>❓ ¿Cuál es la diferencia con el módulo prehospitalario?</h3>
+<p>El prehospitalario es para <strong>ambulancias y atención médica</strong>, mientras que el de fuego es para <strong>incendios y combate de fuego</strong>.</p>
+
+<h3>❓ ¿Puedo añadir varias herramientas?</h3>
+<p>Sí, haz clic en <strong>"+ Añadir Herramienta"</strong> cuantas veces necesites.</p>
+
+<h3>❓ ¿Qué pasa si la parroquia no está en la lista?</h3>
+<p>Contacta al administrador para que la agregue en <strong>Parametrización → Parroquias</strong>.</p>
+
+<h3>❓ ¿Las herramientas se descuentan del inventario?</h3>
+<p>No, las herramientas <strong>no se descuentan automáticamente</strong>. Solo se registran como "utilizadas".</p>
+
+<h3>❓ ¿Los insumos médicos sí se descuentan?</h3>
+<p>Sí, los insumos médicos <strong>sí se descuentan</strong> y se restauran al eliminar la emergencia.</p>
+
+<h3>❓ ¿Cómo veo las fotos del incendio?</h3>
+<p>En el detalle, sección <strong>"Archivos Adjuntos"</strong>. Haz clic en la miniatura.</p>
+
+<!-- FOOTER -->
+<div class="footer">
+    <strong>Manual de Usuario — Módulo Emergencias de Fuego</strong><br>
+    Sistema de Gestión de Bomberos · Firecontrol<br>
+    Versión 1.0 — Septiembre 2026<br>
+    <br>
+    📞 Soporte: juanfernandocoornel@gmail.com | (593) 0999 76 61 30
+</div>
+
+</body>
+</html>

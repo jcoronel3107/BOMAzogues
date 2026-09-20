@@ -28,60 +28,34 @@
         <?php echo trans('messages.operations'); ?>
 
     </div>
-
+---
+<!-- Nav Item - Movilizaciones -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMovilizaciones" aria-expanded="true" aria-controls="collapseMovilizaciones">
+            <i class="fas fa-fw fa-truck-moving"></i>
+            <span>Movilizaciones</span>
+        </a>
+        <div id="collapseMovilizaciones" class="collapse" aria-labelledby="headingMovilizaciones" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestión de Movilizaciones:</h6>
+                <a class="collapse-item" href="<?php echo e(route('movilizaciones.index')); ?>">Lista de Movilizaciones</a>
+                <a class="collapse-item" href="<?php echo e(route('movilizaciones.create')); ?>">Nueva Movilización</a>
+            </div>
+        </div>
+    </li>
     
-
-    <!-- Nav Item - Clave14 -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseClave14" aria-expanded="true" aria-controls="collapseClave14">
-            <i class="fas fa-fw fa-wallet"></i>
-            <span><?php echo trans('messages.Clave14'); ?></span>
-        </a>
-        <div id="collapseClave14" class="collapse" aria-labelledby="headingClave14" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header"><?php echo trans('messages.Choices'); ?></h6>
-                <a class="collapse-item" href="<?php echo e(route('clave.index')); ?>"><?php echo trans('messages.Index'); ?></a>
-            </div>
-        </div>
-    </li>
-
-    <!-- Nav Item - Servicios -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseServicios" aria-expanded="true" aria-controls="collapseServicios">
-            <i class="fas fa-clipboard-check"></i>
-            <span><?php echo trans('messages.Services'); ?></span>
-        </a>
-        <div id="collapseServicios" class="collapse" aria-labelledby="headingServicios" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header"><?php echo trans('messages.Choices'); ?></h6>
-                <a class="collapse-item" href="<?php echo e(url('/servicio')); ?>"><?php echo trans('messages.Index'); ?></a>
-            </div>
-        </div>
-    </li>
-
+----
     <!-- Divider -->
     <hr class="sidebar-divider">
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        <?php echo trans('messages.Prevention Unit'); ?>
+        <?php echo trans('messages.another'); ?>
 
     </div>
 
     <!-- Nav Item - Prevencion -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePrevencion" aria-expanded="true" aria-controls="collapsePrevencion">
-            <i class="fas fa-clipboard-check"></i>
-            <span><?php echo trans('messages.Mobilization'); ?></span>
-        </a>
-        <div id="collapsePrevencion" class="collapse" aria-labelledby="headingPrevencion" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header"><?php echo trans('messages.Choices'); ?></h6>
-                <a class="collapse-item" href="<?php echo e(url('/prevencion')); ?>"><?php echo trans('messages.Index'); ?></a>
-                <a class="collapse-item" href="<?php echo e(url('/consultaentrefechasmov')); ?>"><?php echo trans('messages.Search between dates'); ?></a>
-            </div>
-        </div>
-    </li>
+    
 
     
 
@@ -90,7 +64,11 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Addons
+        <!-- Heading -->
+        <div class="sidebar-heading">
+          <?php echo trans('messages.Prevention Unit'); ?>
+
+        </div>    
     </div>
     <!-- Nav Item - Inspeccion -->
     <li class="nav-item">
@@ -106,7 +84,15 @@
             </div>
         </div>
     </li>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">
+        <!-- Heading -->
+        <div class="sidebar-heading">
+          <?php echo trans('messages.emergency'); ?>
 
+        </div>    
+    </div>
 
     <!-- Nav Item - Emergencias -->
     <li class="nav-item">
@@ -122,8 +108,7 @@
             </div>
         </div>
     </li>
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+    
     <!-- Nav Item - Emergencias Prehospitalarias -->
     <li class="nav-item <?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? 'active' : ''); ?>">
         <a class="nav-link <?php echo e(request()->routeIs('emergencias-prehospitalarias.*') ? '' : 'collapsed'); ?>"
@@ -188,7 +173,8 @@
         </div>
     </li>
 
-
+    <!-- Divider -->
+    <hr class="sidebar-divider">
 
 
 
@@ -287,6 +273,30 @@
             </div>
         </div>
     </li>
+
+    <!-- Divider -->
+<hr class="sidebar-divider d-none d-md-block">
+
+<!-- Heading -->
+<div class="sidebar-heading">
+    Ayuda
+</div>
+
+<!-- Manual Prehospitalario -->
+<li class="nav-item">
+    <a class="nav-link" href="<?php echo e(asset('manuales/manual-prehospitalario.pdf')); ?>" target="_blank">
+        <i class="fas fa-book-medical"></i>
+        <span>Manual Prehospitalario</span>
+    </a>
+</li>
+
+<!-- Manual Fuego -->
+<li class="nav-item">
+    <a class="nav-link" href="<?php echo e(asset('manuales/manual-emergencias-fuego.pdf')); ?>" target="_blank">
+        <i class="fas fa-fire-extinguisher"></i>
+        <span>Manual de Fuego</span>
+    </a>
+</li>
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

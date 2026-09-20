@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual de Usuario — Emergencias Prehospitalarias</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .cover {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+        .cover h1 { font-size: 32pt; margin: 0; }
+        .cover h2 { font-size: 18pt; font-weight: normal; margin: 10px 0 30px; }
+        .cover .icon { font-size: 60pt; margin: 20px 0; }
+        .cover .version { font-size: 12pt; opacity: 0.9; }
+        
+        h1 { font-size: 20pt; color: #1e3a8a; border-bottom: 3px solid #1e3a8a; padding-bottom: 10px; margin-top: 40px; }
+        h2 { font-size: 15pt; color: #b91c1c; margin-top: 30px; }
+        h3 { font-size: 13pt; color: #333; margin-top: 20px; }
+        
+        .index {
+            background: #f3f4f6;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .index h2 { margin-top: 0; color: #1e3a8a; }
+        .index ol { margin: 0; padding-left: 20px; }
+        .index li { margin: 5px 0; }
+        
+        .tip {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .tip::before { content: "💡 "; font-weight: bold; }
+        
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning::before { content: "⚠️ "; font-weight: bold; }
+        
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info::before { content: "ℹ️ "; font-weight: bold; }
+        
+        .success {
+            background: #dcfce7;
+            border-left: 4px solid #16a34a;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success::before { content: "✅ "; font-weight: bold; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+        table th {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #1e3a8a;
+        }
+        table td {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+        }
+        table tr:nth-child(even) td { background: #f9fafb; }
+        
+        .screenshot {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin: 15px 0;
+            background: #f9fafb;
+            padding: 10px;
+            text-align: center;
+        }
+        .screenshot img {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .screenshot .caption {
+            font-size: 9pt;
+            color: #6b7280;
+            font-style: italic;
+            margin-top: 8px;
+        }
+        
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding-left: 45px;
+            position: relative;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: #1e3a8a;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-rojo { background: #dc2626; }
+        .badge-naranja { background: #ea580c; }
+        .badge-amarillo { background: #ca8a04; }
+        .badge-verde { background: #16a34a; }
+        .badge-azul { background: #2563eb; }
+        
+        .page-break { page-break-before: always; }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid #1e3a8a;
+            text-align: center;
+            font-size: 9pt;
+            color: #6b7280;
+        }
+        
+        @media print {
+            body { padding: 0; }
+            .cover { page-break-after: always; }
+            h1 { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+    <div class="icon">🚑</div>
+    <h1>MANUAL DE USUARIO</h1>
+    <h2>Módulo de Emergencias Prehospitalarias</h2>
+    <p class="version">
+        Sistema de Gestión de Bomberos<br>
+        <strong>BOM Azogues</strong><br>
+        Versión 1.0 — Septiembre 2026
+    </p>
+</div>
+
+<!-- ÍNDICE -->
+<div class="index">
+    <h2>📋 Índice de Contenidos</h2>
+    <ol>
+        <li>¿Qué es el módulo de Emergencias Prehospitalarias?</li>
+        <li>¿Cómo acceder al módulo?</li>
+        <li>Registrar una nueva emergencia</li>
+        <li>Añadir pacientes</li>
+        <li>Añadir personal que atiende</li>
+        <li>Añadir insumos utilizados</li>
+        <li>Guardar la emergencia</li>
+        <li>Ver el listado de emergencias</li>
+        <li>Ver el detalle de una emergencia</li>
+        <li>Editar una emergencia</li>
+        <li>Adjuntar archivos</li>
+        <li>Generar el PDF del parte de ambulancia</li>
+        <li>Eliminar una emergencia</li>
+        <li>Ver estadísticas</li>
+        <li>Preguntas frecuentes</li>
+    </ol>
+</div>
+
+<!-- 1 -->
+<h1>1. ¿Qué es el módulo de Emergencias Prehospitalarias?</h1>
+<p>Este módulo permite <strong>registrar las atenciones de ambulancias</strong> que realiza el cuerpo de bomberos. Cada emergencia puede incluir:</p>
+<ul>
+    <li><strong>Datos generales:</strong> fecha, hora, dirección, motivo</li>
+    <li><strong>Pacientes atendidos:</strong> nombre, edad, sexo, signos vitales</li>
+    <li><strong>Personal que atendió:</strong> bomberos, paramédicos, conductores</li>
+    <li><strong>Vehículo/ambulancia</strong> utilizada</li>
+    <li><strong>Insumos médicos</strong> usados (con descuento automático de stock)</li>
+    <li><strong>Archivos adjuntos:</strong> fotos, documentos del incidente</li>
+</ul>
+
+<!-- 2 -->
+<h1>2. ¿Cómo acceder al módulo?</h1>
+<ol class="steps">
+    <li>Inicia sesión en el sistema con tu <strong>usuario y contraseña</strong></li>
+    <li>En el menú lateral izquierdo, busca <strong>"Emergencias Prehospitalarias"</strong> 🚑</li>
+    <li>Haz clic para desplegar el submenú</li>
+    <li>Verás 3 opciones: <strong>Lista</strong>, <strong>Nueva</strong> y <strong>Estadísticas</strong></li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/01-menu.png" alt="Menú lateral">
+    <div class="caption">Figura 1: Ubicación del módulo en el menú lateral</div>
+</div>
+
+<!-- 3 -->
+<h1>3. Registrar una nueva emergencia</h1>
+
+<h2>Paso 1: Acceder al formulario</h2>
+<p>En el menú, haz clic en <strong>"Emergencias Prehospitalarias"</strong> → <strong>"Nueva Emergencia"</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/02-formulario.png" alt="Formulario de nueva emergencia">
+    <div class="caption">Figura 2: Formulario de nueva emergencia</div>
+</div>
+
+<h2>Paso 2: Completar Datos Generales</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Campo</th>
+            <th>Descripción</th>
+            <th>¿Obligatorio?</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Fecha/Hora Salida</td><td>Cuándo salió la ambulancia</td><td>✅ Sí</td></tr>
+        <tr><td>Llegada al sitio</td><td>Cuándo llegó al lugar</td><td>No</td></tr>
+        <tr><td>Salida del sitio</td><td>Cuándo salió del lugar</td><td>No</td></tr>
+        <tr><td>Llegada a base</td><td>Cuándo regresó</td><td>No</td></tr>
+        <tr><td>Dirección</td><td>Dirección exacta</td><td>✅ Sí</td></tr>
+        <tr><td>Referencia</td><td>Punto de referencia</td><td>No</td></tr>
+        <tr><td>Prioridad</td><td>Color del triage</td><td>✅ Sí</td></tr>
+        <tr><td>Motivo del llamado</td><td>Por qué se llamó</td><td>✅ Sí</td></tr>
+        <tr><td>Tipo de Emergencia</td><td>Accidente, Trauma, etc.</td><td>✅ Sí</td></tr>
+        <tr><td>Vehículo</td><td>Qué ambulancia se usó</td><td>✅ Sí</td></tr>
+    </tbody>
+</table>
+
+<div class="tip">
+    <strong>Prioridad del triage:</strong><br>
+    <span class="badge badge-rojo">Rojo</span> Crítico, riesgo de muerte<br>
+    <span class="badge badge-naranja">Naranja</span> Grave<br>
+    <span class="badge badge-amarillo">Amarillo</span> Urgencia moderada<br>
+    <span class="badge badge-verde">Verde</span> Menos urgente<br>
+    <span class="badge badge-azul">Azul</span> No urgente
+</div>
+
+<!-- 4 -->
+<h1>4. Añadir pacientes</h1>
+<p>Cada emergencia puede tener <strong>varios pacientes</strong>.</p>
+
+<ol class="steps">
+    <li>En la sección <strong>"3. Pacientes Atendidos"</strong>, haz clic en <strong>"+ Añadir Paciente"</strong></li>
+    <li>Se agregará una tarjeta con el formulario del paciente</li>
+    <li>Completa los datos (ver abajo)</li>
+    <li>Repite para añadir más pacientes</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/03-paciente.png" alt="Tarjeta de paciente">
+    <div class="caption">Figura 3: Tarjeta de paciente con signos vitales</div>
+</div>
+
+<h3>Datos básicos</h3>
+<ul>
+    <li><strong>Nombre completo</strong> (obligatorio)</li>
+    <li><strong>Edad</strong> (obligatorio)</li>
+    <li><strong>Sexo:</strong> Masculino, Femenino, Indefinido</li>
+    <li><strong>Cédula</strong> (opcional)</li>
+    <li><strong>Teléfono</strong> (opcional)</li>
+</ul>
+
+<h3>Signos vitales prehospitalarios</h3>
+<ul>
+    <li><strong>FC:</strong> Frecuencia cardíaca (lpm)</li>
+    <li><strong>FR:</strong> Frecuencia respiratoria (rpm)</li>
+    <li><strong>SatO₂:</strong> Saturación de oxígeno (%)</li>
+    <li><strong>Temp:</strong> Temperatura (°C)</li>
+    <li><strong>TA Sistólica / Diastólica:</strong> Presión arterial (mmHg)</li>
+    <li><strong>Glasgow:</strong> Escala de conciencia (3-15)</li>
+</ul>
+
+<h3>Evaluación</h3>
+<ul>
+    <li><strong>Motivo de atención</strong></li>
+    <li><strong>Evaluación</strong></li>
+    <li><strong>Procedimientos realizados</strong></li>
+    <li><strong>Observaciones</strong></li>
+</ul>
+
+<h3>Condición y destino</h3>
+<ul>
+    <li><strong>Condición:</strong> Estable, Crítico, Fallecido, Rechaza atención</li>
+    <li><strong>Destino:</strong> Trasladado, Alta en sitio, Fuga, etc.</li>
+    <li><strong>Hospital destino</strong></li>
+</ul>
+
+<div class="warning">
+    Para <strong>eliminar</strong> un paciente, haz clic en el botón rojo <strong>"Eliminar"</strong> de su tarjeta.
+</div>
+
+<!-- 5 -->
+<h1>5. Añadir personal que atiende</h1>
+<ol class="steps">
+    <li>En la sección <strong>"2. Personal que Atiende"</strong>, haz clic en <strong>"+ Añadir Personal"</strong></li>
+    <li>Selecciona el <strong>Funcionario</strong> de la lista</li>
+    <li>Escribe su <strong>Rol</strong> (Conductor, Paramédico, Médico...)</li>
+</ol>
+
+<!-- 6 -->
+<h1>6. Añadir insumos utilizados</h1>
+<ol class="steps">
+    <li>En la sección <strong>"4. Insumos Utilizados"</strong>, haz clic en <strong>"+ Añadir Insumo"</strong></li>
+    <li>Selecciona el <strong>Insumo</strong> de la lista</li>
+    <li>Escribe la <strong>Cantidad</strong> usada</li>
+    <li>Agrega <strong>Observaciones</strong> (opcional)</li>
+</ol>
+
+<div class="info">
+    Al guardar, el sistema <strong>descuenta automáticamente</strong> el stock del insumo. Si eliminas la emergencia, el stock se <strong>restaura</strong>.
+</div>
+
+<!-- 7 -->
+<h1>7. Guardar la emergencia</h1>
+<ol class="steps">
+    <li>Al final del formulario, haz clic en <strong>"Guardar Emergencia"</strong></li>
+    <li>El sistema validará los datos</li>
+    <li>Si todo está bien, te redirigirá al <strong>detalle</strong></li>
+</ol>
+
+<div class="success">
+    Verás un mensaje verde: <strong>"Emergencia prehospitalaria registrada correctamente"</strong>
+</div>
+
+<!-- 8 -->
+<h1>8. Ver el listado de emergencias</h1>
+<p>En el menú, haz clic en <strong>"Emergencias Prehospitalarias"</strong> → <strong>"Lista de Emergencias"</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/04-lista.png" alt="Listado de emergencias">
+    <div class="caption">Figura 4: Listado con filtros y paginación</div>
+</div>
+
+<h3>Filtros disponibles</h3>
+<ul>
+    <li><strong>Buscar:</strong> Por código, dirección o motivo</li>
+    <li><strong>Estado:</strong> En curso, Finalizada, Cancelada, Derivada</li>
+    <li><strong>Prioridad:</strong> Rojo, Naranja, Amarillo, Verde, Azul</li>
+    <li><strong>Tipo:</strong> Accidente, Trauma, etc.</li>
+    <li><strong>Vehículo</strong> y <strong>Personal</strong></li>
+    <li><strong>Rango de fechas</strong></li>
+    <li><strong>Registros por página:</strong> 10, 25, 50 o 100</li>
+</ul>
+
+<!-- 9 -->
+<h1>9. Ver el detalle de una emergencia</h1>
+<p>Desde el listado, haz clic en el <strong>código</strong> o en el botón <strong>👁️ Ver</strong>.</p>
+
+<div class="screenshot">
+    <img src="capturas/05-detalle.png" alt="Detalle de emergencia">
+    <div class="caption">Figura 5: Detalle completo de la emergencia</div>
+</div>
+
+<h3>Secciones del detalle</h3>
+<ol>
+    <li><strong>Datos Generales</strong></li>
+    <li><strong>Personal que Atendió</strong></li>
+    <li><strong>Pacientes Atendidos</strong> (con signos vitales)</li>
+    <li><strong>Insumos Utilizados</strong></li>
+    <li><strong>Archivos Adjuntos</strong></li>
+    <li><strong>Información de Registro</strong></li>
+</ol>
+
+<!-- 10 -->
+<h1>10. Editar una emergencia</h1>
+<ol class="steps">
+    <li>Desde el detalle, haz clic en <strong>"Editar"</strong></li>
+    <li>Modifica los campos que necesites</li>
+    <li>Puedes <strong>añadir</strong> o <strong>eliminar</strong> pacientes, personal e insumos</li>
+    <li>Haz clic en <strong>"Actualizar Emergencia"</strong></li>
+</ol>
+
+<div class="info">
+    Al guardar, el sistema <strong>restaura</strong> el stock de insumos anteriores y <strong>descuenta</strong> el de los nuevos.
+</div>
+
+<!-- 11 -->
+<h1>11. Adjuntar archivos</h1>
+
+<h2>Subir archivos</h2>
+<ol class="steps">
+    <li>Ve al detalle de una emergencia</li>
+    <li>Busca la sección <strong>"Archivos Adjuntos"</strong></li>
+    <li>Haz clic en <strong>"Subir Archivos"</strong></li>
+    <li>Selecciona los archivos (puedes seleccionar varios)</li>
+    <li>Haz clic en <strong>"Subir"</strong></li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/06-archivos.png" alt="Archivos adjuntos">
+    <div class="caption">Figura 6: Sección de archivos adjuntos con barra de progreso</div>
+</div>
+
+<h3>Tipos permitidos</h3>
+<p>📷 Imágenes · 📄 PDF · 📝 Word · 📊 Excel · 🎥 Video · 🎵 Audio · 📦 ZIP/RAR</p>
+
+<h3>Límites</h3>
+<ul>
+    <li><strong>Máximo 10 MB por archivo</strong></li>
+    <li><strong>Máximo 50 MB por emergencia</strong></li>
+</ul>
+
+<div class="tip">
+    La <strong>barra de progreso</strong> te muestra cuánto espacio llevas usado:
+    <br>🟢 Verde: menos del 70%
+    <br>🟡 Amarillo: 70% - 90%
+    <br>🔴 Rojo: más del 90%
+</div>
+
+<!-- 12 -->
+<h1>12. Generar el PDF del parte de ambulancia</h1>
+<ol class="steps">
+    <li>Ve al detalle de una emergencia</li>
+    <li>Haz clic en <strong>"Generar PDF"</strong></li>
+    <li>Se abrirá el PDF en una nueva pestaña</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/07-pdf.png" alt="PDF generado">
+    <div class="caption">Figura 7: PDF del parte de ambulancia</div>
+</div>
+
+<h3>Contenido del PDF</h3>
+<ol>
+    <li>Encabezado con logo y código</li>
+    <li>Datos Generales del servicio</li>
+    <li>Tiempos (respuesta, en sitio, traslado, total)</li>
+    <li>Personal que Atendió</li>
+    <li>Pacientes Atendidos con signos vitales</li>
+    <li>Insumos Utilizados</li>
+    <li>Observaciones Generales</li>
+    <li>Firmas (3 bloques)</li>
+</ol>
+
+<div class="tip">
+    Para <strong>imprimir</strong>, usa <code>Ctrl + P</code>. Para <strong>guardar</strong>, clic derecho → "Guardar como".
+</div>
+
+<!-- 13 -->
+<h1>13. Eliminar una emergencia</h1>
+<ol class="steps">
+    <li>Desde el detalle o el listado, haz clic en <strong>"Eliminar"</strong></li>
+    <li>Confirma la acción en el mensaje que aparece</li>
+</ol>
+
+<div class="warning">
+    <strong>Cuidado:</strong> Esta acción no se puede deshacer. El stock de insumos se <strong>restaurará automáticamente</strong>.
+</div>
+
+<!-- 14 -->
+<h1>14. Ver estadísticas</h1>
+<ol class="steps">
+    <li>En el menú, haz clic en <strong>"Emergencias Prehospitalarias"</strong> → <strong>"Estadísticas"</strong></li>
+    <li>Ajusta el rango de fechas si lo necesitas</li>
+</ol>
+
+<div class="screenshot">
+    <img src="capturas/08-estadisticas.png" alt="Estadísticas">
+    <div class="caption">Figura 8: Panel de estadísticas con gráficos</div>
+</div>
+
+<h3>Qué verás</h3>
+<ul>
+    <li><strong>Tarjetas resumen:</strong> Total, En curso, Finalizadas, del día</li>
+    <li><strong>Tendencia:</strong> Línea de emergencias por día</li>
+    <li><strong>Por Tipo, Prioridad, Estado:</strong> Gráficos de dona</li>
+    <li><strong>Por Sexo y Condición de pacientes:</strong> Gráficos de barras</li>
+    <li><strong>Promedios de Signos Vitales</strong></li>
+    <li><strong>Top 5:</strong> Vehículos, Personal, Insumos</li>
+</ul>
+
+<!-- 15 -->
+<h1>15. Preguntas frecuentes</h1>
+
+<h3>❓ ¿Qué pasa si me equivoco en un dato?</h3>
+<p>Puedes editar la emergencia en cualquier momento. Haz clic en <strong>"Editar"</strong> y corrige.</p>
+
+<h3>❓ ¿Puedo subir más de 50 MB de archivos?</h3>
+<p>No, hay un límite de 50 MB por emergencia. Si necesitas más, elimina archivos que ya no uses.</p>
+
+<h3>❓ ¿Por qué no puedo subir un archivo?</h3>
+<p>Verifica que: no exceda 10 MB, sea un tipo permitido y no hayas superado los 50 MB.</p>
+
+<h3>❓ ¿Qué pasa con el stock de insumos al eliminar una emergencia?</h3>
+<p>Se <strong>restaura automáticamente</strong> al valor que tenía antes.</p>
+
+<h3>❓ ¿Puedo adjuntar archivos desde el celular?</h3>
+<p>Sí, siempre que accedas al sistema desde el navegador del celular.</p>
+
+<h3>❓ ¿Los PDFs se guardan en el sistema?</h3>
+<p>No, el PDF se genera <strong>en el momento</strong> cada vez que lo solicitas.</p>
+
+<h3>❓ ¿Quién puede ver las emergencias?</h3>
+<p>Solo usuarios con permisos de <strong>operador, supervisor, admin o Super-Admin</strong>.</p>
+
+<!-- FOOTER -->
+<div class="footer">
+    <strong>Manual de Usuario — Módulo Emergencias de Fuego</strong><br>
+    Sistema de Gestión de Bomberos · Firecontrol<br>
+    Versión 1.0 — Septiembre 2026<br>
+    <br>
+    📞 Soporte: juanfernandocoornel@gmail.com | (593) 0999 76 61 30
+</div>
+
+</body>
+</html>
