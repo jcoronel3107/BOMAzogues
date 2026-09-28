@@ -56,8 +56,22 @@ class EmergenciaPrehospitalaria extends Model
     public static function generarCodigo()
     {
         $anio = date('Y');
-        $ultimo = self::whereYear('created_at', $anio)->count() + 1;
-        return 'EP-' . $anio . '-' . str_pad($ultimo, 4, '0', STR_PAD_LEFT);
+        
+        // Buscar el último código del año actual
+        $ultimo = self::whereYear('created_at', $anio)
+            ->where('codigo', 'LIKE', "EP-{$anio}-%")
+            ->orderBy('codigo', 'desc')
+            ->first();
+        
+        if ($ultimo) {
+            // Extraer el número del último código
+            $partes = explode('-', $ultimo->codigo);
+            $numero = intval(end($partes)) + 1;
+        } else {
+            $numero = 1;
+        }
+        
+        return 'EP-' . $anio . '-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
     }
 
     public function archivos()

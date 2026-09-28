@@ -128,7 +128,12 @@ class EmergenciaPrehospitalariaController extends Controller
     //  STORE
     // ============================================================
     public function store(Request $request)
-    {
+{
+    \Log::info('=== STORE EMERGENCIA INICIO ===');
+    \Log::info('Datos recibidos:', $request->all());
+
+    // ===== VALIDACIÓN =====
+    try {
         $request->validate([
             'fecha_salida' => 'required|date',
             'direccion' => 'required|string|max:255',
@@ -148,78 +153,104 @@ class EmergenciaPrehospitalariaController extends Controller
             'insumos.*.cantidad' => 'required|integer|min:1',
         ]);
 
-        DB::beginTransaction();
-        try {
-            $emergencia = EmergenciaPrehospitalaria::create([
-                'codigo' => EmergenciaPrehospitalaria::generarCodigo(),
-                'fecha_salida' => $request->fecha_salida,
-                'fecha_llegada_sitio' => $request->fecha_llegada_sitio,
-                'fecha_salida_sitio' => $request->fecha_salida_sitio,
-                'fecha_llegada_base' => $request->fecha_llegada_base,
-                'direccion' => $request->direccion,
-                'referencia' => $request->referencia,
-                'motivo_llamado' => $request->motivo_llamado,
-                'tipo_emergencia' => $request->tipo_emergencia,
-                'prioridad' => $request->prioridad,
-                'vehiculo_id' => $request->vehiculo_id,
-                'estacion_id' => auth()->user()->station_id,  // 🔒 ASIGNAR ESTACIÓN
-                'usuario_registra_id' => auth()->id(),
-                'observaciones_generales' => $request->observaciones_generales,
-                'estado' => 'En curso',
-            ]);
+        \Log::info('=== VALIDACIÓN OK ===');
 
-            foreach ($request->personal as $p) {
-                $emergencia->personal()->attach($p['user_id'], [
-                    'rol_en_emergencia' => $p['rol_en_emergencia']
-                ]);
-            }
-
-            foreach ($request->pacientes as $pac) {
-                PacienteEmergencia::create([
-                    'emergencia_prehospitalaria_id' => $emergencia->id,
-                    'nombre_completo' => $pac['nombre_completo'],
-                    'edad' => $pac['edad'],
-                    'sexo' => $pac['sexo'],
-                    'cedula' => $pac['cedula'] ?? null,
-                    'telefono' => $pac['telefono'] ?? null,
-                    'frecuencia_cardiaca' => $pac['frecuencia_cardiaca'] ?? null,
-                    'frecuencia_respiratoria' => $pac['frecuencia_respiratoria'] ?? null,
-                    'saturacion_oxigeno' => $pac['saturacion_oxigeno'] ?? null,
-                    'temperatura' => $pac['temperatura'] ?? null,
-                    'presion_sistolica' => $pac['presion_sistolica'] ?? null,
-                    'presion_diastolica' => $pac['presion_diastolica'] ?? null,
-                    'glasgow' => $pac['glasgow'] ?? null,
-                    'motivo_atencion' => $pac['motivo_atencion'] ?? null,
-                    'evaluacion' => $pac['evaluacion'] ?? null,
-                    'procedimientos_realizados' => $pac['procedimientos_realizados'] ?? null,
-                    'observaciones' => $pac['observaciones'] ?? null,
-                    'condicion' => $pac['condicion'] ?? 'Estable',
-                    'destino' => $pac['destino'] ?? null,
-                    'hospital_destino' => $pac['hospital_destino'] ?? null,
-                ]);
-            }
-
-            if ($request->has('insumos')) {
-                foreach ($request->insumos as $ins) {
-                    $emergencia->insumos()->attach($ins['insumo_medico_id'], [
-                        'cantidad' => $ins['cantidad'],
-                        'observaciones' => $ins['observaciones'] ?? null,
-                    ]);
-
-                    InsumoMedico::where('id', $ins['insumo_medico_id'])
-                                ->decrement('cantidad', $ins['cantidad']);
-                }
-            }
-
-            DB::commit();
-            return redirect()->route('emergencias-prehospitalarias.show', $emergencia)
-                            ->with('success', 'Emergencia prehospitalaria registrada');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error: ' . $e->getMessage());
-        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('=== ERROR DE VALIDACIÓN ===', $e->errors());
+        throw $e;
     }
+
+    // ===== GUARDADO =====
+    DB::beginTransaction();
+    try {
+        // Crear la emergencia
+        $emergencia = EmergenciaPrehospitalaria::create([
+            'codigo' => EmergenciaPrehospitalaria::generarCodigo(),
+            'fecha_salida' => $request->fecha_salida,
+            'fecha_llegada_sitio' => $request->fecha_llegada_sitio,
+            'fecha_salida_sitio' => $request->fecha_salida_sitio,
+            'fecha_llegada_base' => $request->fecha_llegada_base,
+            'direccion' => $request->direccion,
+            'referencia' => $request->referencia,
+            'motivo_llamado' => $request->motivo_llamado,
+            'tipo_emergencia' => $request->tipo_emergencia,
+            'prioridad' => $request->prioridad,
+            'vehiculo_id' => $request->vehiculo_id,
+            'estacion_id' => auth()->user()->station_id,
+            'usuario_registra_id' => auth()->id(),
+            'observaciones_generales' => $request->observaciones_generales,
+            'estado' => 'En curso',
+        ]);
+
+        \Log::info('=== EMERGENCIA CREADA ===', ['id' => $emergencia->id]);
+
+        // Personal
+        foreach ($request->personal as $p) {
+            $emergencia->personal()->attach($p['user_id'], [
+                'rol_en_emergencia' => $p['rol_en_emergencia']
+            ]);
+        }
+        \Log::info('=== PERSONAL AGREGADO ===');
+
+        // Pacientes
+        foreach ($request->pacientes as $pac) {
+            PacienteEmergencia::create([
+                'emergencia_prehospitalaria_id' => $emergencia->id,
+                'nombre_completo' => $pac['nombre_completo'],
+                'edad' => $pac['edad'],
+                'sexo' => $pac['sexo'],
+                'cedula' => $pac['cedula'] ?? null,
+                'telefono' => $pac['telefono'] ?? null,
+                'frecuencia_cardiaca' => $pac['frecuencia_cardiaca'] ?? null,
+                'frecuencia_respiratoria' => $pac['frecuencia_respiratoria'] ?? null,
+                'saturacion_oxigeno' => $pac['saturacion_oxigeno'] ?? null,
+                'temperatura' => $pac['temperatura'] ?? null,
+                'presion_sistolica' => $pac['presion_sistolica'] ?? null,
+                'presion_diastolica' => $pac['presion_diastolica'] ?? null,
+                'glasgow' => $pac['glasgow'] ?? null,
+                'motivo_atencion' => $pac['motivo_atencion'] ?? null,
+                'evaluacion' => $pac['evaluacion'] ?? null,
+                'procedimientos_realizados' => $pac['procedimientos_realizados'] ?? null,
+                'observaciones' => $pac['observaciones'] ?? null,
+                'condicion' => $pac['condicion'] ?? 'Estable',
+                'destino' => $pac['destino'] ?? null,
+                'hospital_destino' => $pac['hospital_destino'] ?? null,
+            ]);
+        }
+        \Log::info('=== PACIENTES AGREGADOS ===');
+
+        // Insumos
+        if ($request->has('insumos')) {
+            foreach ($request->insumos as $ins) {
+                $emergencia->insumos()->attach($ins['insumo_medico_id'], [
+                    'cantidad' => $ins['cantidad'],
+                    'observaciones' => $ins['observaciones'] ?? null,
+                ]);
+
+                InsumoMedico::where('id', $ins['insumo_medico_id'])
+                            ->decrement('cantidad', $ins['cantidad']);
+            }
+            \Log::info('=== INSUMOS AGREGADOS ===');
+        }
+
+        DB::commit();
+        \Log::info('=== COMMIT OK ===');
+
+        return redirect()->route('emergencias-prehospitalarias.show', $emergencia)
+                        ->with('success', 'Emergencia prehospitalaria registrada correctamente.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('=== ERROR EN STORE ===', [
+            'mensaje' => $e->getMessage(),
+            'archivo' => $e->getFile(),
+            'linea' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return back()->withInput()->with('error', 'Error al guardar: ' . $e->getMessage());
+    }
+}
 
     // ============================================================
     //  SHOW

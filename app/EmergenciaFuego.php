@@ -135,11 +135,23 @@ class EmergenciaFuego extends Model
 
     // ===== GENERACIÓN DE CÓDIGO =====
     public static function generarCodigo()
-    {
-        $anio = date('Y');
-        $ultimo = self::whereYear('created_at', $anio)->count() + 1;
-        return 'EF-' . $anio . '-' . str_pad($ultimo, 4, '0', STR_PAD_LEFT);
+{
+    $anio = date('Y');
+    
+    $ultimo = self::whereYear('created_at', $anio)
+        ->where('codigo', 'LIKE', "EF-{$anio}-%")
+        ->orderBy('codigo', 'desc')
+        ->first();
+    
+    if ($ultimo) {
+        $partes = explode('-', $ultimo->codigo);
+        $numero = intval(end($partes)) + 1;
+    } else {
+        $numero = 1;
     }
+    
+    return 'EF-' . $anio . '-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
+}
 
     // ===== UTILIDADES =====
     public static function getTiposFuego()
