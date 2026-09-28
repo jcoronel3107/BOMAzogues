@@ -72,6 +72,17 @@
     </div>
     <div class="card-body">
         <div class="row">
+            
+            <div class="col-md-3">
+                    <small class="text-muted">Estación</small>
+                    <p class="mb-1">
+                        <span class="badge badge-info">
+                            {{ $emergenciaPrehospitalaria->estacion->nombre ?? '—' }}
+                        </span>
+                    </p>
+            </div>
+
+
             <div class="col-md-3">
                 <small class="text-muted">Fecha/Hora Salida</small>
                 <p class="mb-1"><strong>{{ $emergenciaPrehospitalaria->fecha_salida->format('d/m/Y H:i') }}</strong></p>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Emergencia;
+use App\EmergenciaPrehospitalaria;
+use App\EmergenciaFuego;
 use App\EstacionNovedad;
 use App\Station;
 use App\User;
@@ -19,41 +21,51 @@ class WelcomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
-        // Estadísticas generales
+
+        // ===== ESTADÍSTICAS GENERALES =====
         $totalEmergencias = Emergencia::count();
         $totalNovedades = EstacionNovedad::count();
         $totalEstaciones = Station::count();
         $totalUsuarios = User::count();
-        
-        // Últimas 5 emergencias
+
+        // ===== EMERGENCIAS DE HOY =====
+        $emergenciasHoy = Emergencia::whereDate('fecha', today())->count();
+        $novedadesHoy = EstacionNovedad::whereDate('fecha', today())->count();
+
+        // ===== EMERGENCIAS PREHOSPITALARIAS =====
+        $totalEmergenciasPrehospitalarias = EmergenciaPrehospitalaria::count();
+        $emergenciasPrehospitalariasHoy = EmergenciaPrehospitalaria::whereDate('fecha_salida', today())->count();
+
+        // ===== EMERGENCIAS DE FUEGO =====
+        $totalEmergenciasFuego = EmergenciaFuego::count();
+        $emergenciasFuegoHoy = EmergenciaFuego::whereDate('fecha_salida', today())->count();
+
+        // ===== ÚLTIMAS 5 EMERGENCIAS =====
         $ultimasEmergencias = Emergencia::with(['tipoIncidente', 'estacion'])
             ->latest()
             ->limit(5)
             ->get();
-        
-        // Últimas 5 novedades
+
+        // ===== ÚLTIMAS 5 NOVEDADES =====
         $ultimasNovedades = EstacionNovedad::with(['estacion', 'usuarioElabora'])
             ->latest()
             ->limit(5)
             ->get();
-        
-        // Emergencias de hoy
-        $emergenciasHoy = Emergencia::whereDate('fecha', today())->count();
-        
-        // Novedades de hoy
-        $novedadesHoy = EstacionNovedad::whereDate('fecha', today())->count();
-        
+
         return view('welcome', compact(
             'user',
             'totalEmergencias',
             'totalNovedades',
             'totalEstaciones',
             'totalUsuarios',
-            'ultimasEmergencias',
-            'ultimasNovedades',
             'emergenciasHoy',
-            'novedadesHoy'
+            'novedadesHoy',
+            'totalEmergenciasPrehospitalarias',
+            'emergenciasPrehospitalariasHoy',
+            'totalEmergenciasFuego',
+            'emergenciasFuegoHoy',
+            'ultimasEmergencias',
+            'ultimasNovedades'
         ));
     }
 }

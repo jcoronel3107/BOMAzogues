@@ -16,6 +16,12 @@ use App\Http\Requests\CreateClaveRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Emergencia;
+use App\EmergenciaPrehospitalaria;
+use App\EmergenciaFuego;
+use App\EstacionNovedad;   // ⬅️ AGREGAR
+use App\Station;           // ⬅️ AGREGAR
+use App\User;              // ⬅️ AGREGAR
 
 class PagesController extends Controller
 {
@@ -30,6 +36,45 @@ class PagesController extends Controller
       $fechaComoEntero = strtotime($date);
       $mes = date("m", $fechaComoEntero);
   
+
+      $user = auth()->user();  // ⬅️ AGREGAR ESTA LÍNEA
+
+      // Totales de emergencias (todos los tipos)
+      $totalEmergencias = Emergencia::count();
+      $emergenciasHoy = Emergencia::whereDate('fecha', today())->count();
+
+      // Emergencias Prehospitalarias
+      $totalEmergenciasPrehospitalarias = EmergenciaPrehospitalaria::count();
+      $emergenciasPrehospitalariasHoy = EmergenciaPrehospitalaria::whereDate('fecha_salida', today())->count();
+
+      // Emergencias de Fuego
+      $totalEmergenciasFuego = EmergenciaFuego::count();
+      $emergenciasFuegoHoy = EmergenciaFuego::whereDate('fecha_salida', today())->count();
+      // ⬇️ AGREGAR ESTAS 4 CONSULTAS
+        // Novedades
+        $totalNovedades = \App\EstacionNovedad::count();
+        $novedadesHoy = \App\EstacionNovedad::whereDate('created_at', today())->count();
+
+        // Estaciones
+        $totalEstaciones = \App\Station::count();
+
+        // Usuarios
+        $totalUsuarios = \App\User::count();
+
+        // Últimas 5 emergencias
+        $ultimasEmergencias = Emergencia::with(['tipoIncidente', 'estacion'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // Últimas 5 novedades
+        $ultimasNovedades = EstacionNovedad::with(['estacion', 'usuarioElabora'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+
+
     	$mensualesInundacion= Inundacion::whereMonth('fecha', $mes)
         ->whereYear('fecha', '=', date('Y'))
         ->whereNull('inundacions.deleted_at')
@@ -113,7 +158,36 @@ class PagesController extends Controller
       $EventosMensuales = $EventosMensuales->merge($mensualesGasGraph);
       $EventosMensuales = $EventosMensuales->merge($mensualesDerramesGraph);
       $EventosxIncidente = $mensualesInundacion+$mensualesRescate+$mensualesIncendio+$mensualesSalud+$mensualesTransito+$mensualesFuga+$mensualesDerrame;
-     return view("welcome",compact("EventosMensuales","mensualesRescateGraph","EventosxIncidente","mensualesInundacion","mensualesRescate","mensualesIncendio","mensualesSalud","mensualesTransito","mensualesFuga","mensualesClave","mensualesServicio","mensualesDerrame"/* ,"loggedin_instances" */));	
+      return view("welcome", compact(
+        "user",
+        "totalEmergencias",
+        "emergenciasHoy",
+        "totalEmergenciasPrehospitalarias",     // ⬅️ NUEVO
+        "emergenciasPrehospitalariasHoy",       // ⬅️ NUEVO
+        "totalEmergenciasFuego",                // ⬅️ NUEVO
+        "emergenciasFuegoHoy",                  // ⬅️ NUEVO
+        "totalNovedades",                       // Asegúrate que esté
+        "novedadesHoy",                         // Asegúrate que esté
+        "totalEstaciones",                      // Asegúrate que esté
+        "totalUsuarios",                        // Asegúrate que esté
+        "ultimasEmergencias",     // ⬅️ AGREGAR
+         "ultimasNovedades",       // ⬅️ AGREGAR
+        "EventosMensuales",
+        "mensualesRescateGraph",
+        "EventosxIncidente",
+        "mensualesInundacion",
+        "mensualesRescate",
+        "mensualesIncendio",
+        "mensualesSalud",
+        "mensualesTransito",
+        "mensualesFuga",
+        "mensualesClave",
+        "mensualesServicio",
+        "mensualesDerrame"
+      ));
+
+
+     
     }
 
     public function dashboard(){

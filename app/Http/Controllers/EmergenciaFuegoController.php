@@ -8,6 +8,7 @@ use App\EmergenciaFuegoArchivo;
 use App\InsumoMedico;
 use App\Vehiculo;
 use App\User;
+use App\Station;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,12 +16,31 @@ use Carbon\Carbon;
 
 class EmergenciaFuegoController extends Controller
 {
+    /**
+     * 🔒 Verifica que el usuario pueda acceder a la emergencia
+     */
+    private function verificarAccesoEstacion($emergencia)
+    {
+        if (auth()->user()->hasRole('Super-Admin') || auth()->user()->hasRole('admin')) {
+            return;
+        }
+
+        if ($emergencia->estacion_id !== auth()->user()->station_id) {
+            abort(403, 'No tienes permiso para acceder a esta emergencia. Solo puedes ver las de tu estación.');
+        }
+    }
+
     // ============================================================
     //  INDEX
     // ============================================================
     public function index(Request $request)
     {
-        $query = EmergenciaFuego::with(['vehiculos', 'usuarioRegistra', 'pacientes', 'personal']);
+        $query = EmergenciaFuego::with(['vehiculos', 'usuarioRegistra', 'pacientes', 'personal', 'estacion']);
+
+        // 🔒 FILTRAR POR ESTACIÓN
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $query->where('estacion_id', auth()->user()->station_id);
+        }
 
         if ($request->filled('buscar')) {
             $buscar = $request->buscar;
@@ -35,6 +55,7 @@ class EmergenciaFuegoController extends Controller
         if ($request->filled('estado')) $query->where('estado', $request->estado);
         if ($request->filled('tipo_fuego')) $query->where('tipo_fuego', $request->tipo_fuego);
         if ($request->filled('nivel_riesgo')) $query->where('nivel_riesgo', $request->nivel_riesgo);
+        if ($request->filled('estacion_id')) $query->where('estacion_id', $request->estacion_id);
         if ($request->filled('fecha_desde')) $query->whereDate('fecha_salida', '>=', $request->fecha_desde);
         if ($request->filled('fecha_hasta')) $query->whereDate('fecha_salida', '<=', $request->fecha_hasta);
 
@@ -43,11 +64,17 @@ class EmergenciaFuegoController extends Controller
         $perPage = $request->get('per_page', 10);
         $emergencias = $query->paginate($perPage)->withQueryString();
 
+        // Resumen con filtro por estación
+        $resumenQuery = EmergenciaFuego::query();
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $resumenQuery->where('estacion_id', auth()->user()->station_id);
+        }
+
         $resumen = [
-            'total' => EmergenciaFuego::count(),
-            'en_curso' => EmergenciaFuego::where('estado', 'En curso')->count(),
-            'extinguidos' => EmergenciaFuego::where('estado', 'Extinguido')->count(),
-            'hoy' => EmergenciaFuego::whereDate('fecha_salida', today())->count(),
+            'total' => (clone $resumenQuery)->count(),
+            'en_curso' => (clone $resumenQuery)->where('estado', 'En curso')->count(),
+            'extinguidos' => (clone $resumenQuery)->where('estado', 'Extinguido')->count(),
+            'hoy' => (clone $resumenQuery)->whereDate('fecha_salida', today())->count(),
         ];
 
         $tipos = EmergenciaFuego::getTiposFuego();
@@ -55,9 +82,10 @@ class EmergenciaFuegoController extends Controller
         $estados = EmergenciaFuego::getEstados();
         $vehiculos = Vehiculo::orderBy('placa')->get();
         $personal = User::orderBy('name')->get();
+        $estaciones = Station::orderBy('nombre')->get();
 
         return view('emergencias_fuego.index', compact(
-            'emergencias', 'resumen', 'tipos', 'niveles', 'estados', 'vehiculos', 'personal'
+            'emergencias', 'resumen', 'tipos', 'niveles', 'estados', 'vehiculos', 'personal', 'estaciones'
         ));
     }
 
@@ -74,10 +102,11 @@ class EmergenciaFuegoController extends Controller
         $tipos = EmergenciaFuego::getTiposFuego();
         $niveles = EmergenciaFuego::getNivelesRiesgo();
         $estados = EmergenciaFuego::getEstados();
+        $estacionUsuario = auth()->user()->station;
 
         return view('emergencias_fuego.create', compact(
             'vehiculos', 'personal', 'insumos', 'parroquias', 'herramientas',
-            'tipos', 'niveles', 'estados'
+            'tipos', 'niveles', 'estados', 'estacionUsuario'
         ));
     }
 
@@ -131,19 +160,18 @@ class EmergenciaFuegoController extends Controller
                 'victimas_fallecidos' => $request->victimas_fallecidos ?? 0,
                 'requirio_apoyo_externo' => $request->has('requirio_apoyo_externo'),
                 'detalle_apoyo' => $request->detalle_apoyo,
+                'estacion_id' => auth()->user()->station_id,  // 🔒 ASIGNAR ESTACIÓN
                 'usuario_registra_id' => auth()->id(),
                 'observaciones_generales' => $request->observaciones_generales,
                 'estado' => 'En curso',
             ]);
 
-            // Personal
             foreach ($request->personal as $p) {
                 $emergencia->personal()->attach($p['user_id'], [
                     'rol_en_emergencia' => $p['rol_en_emergencia']
                 ]);
             }
 
-            // Vehículos
             foreach ($request->vehiculos as $v) {
                 $emergencia->vehiculos()->attach($v['vehiculo_id'], [
                     'rol_en_emergencia' => $v['rol_en_emergencia'] ?? null,
@@ -152,7 +180,6 @@ class EmergenciaFuegoController extends Controller
                 ]);
             }
 
-            // Pacientes (opcional)
             if ($request->has('pacientes')) {
                 foreach ($request->pacientes as $pac) {
                     if (empty($pac['nombre_completo'])) continue;
@@ -175,7 +202,6 @@ class EmergenciaFuegoController extends Controller
                 }
             }
 
-            // Insumos
             if ($request->has('insumos')) {
                 foreach ($request->insumos as $ins) {
                     $emergencia->insumos()->attach($ins['insumo_medico_id'], [
@@ -187,7 +213,7 @@ class EmergenciaFuegoController extends Controller
                                 ->decrement('cantidad', $ins['cantidad']);
                 }
             }
-            // Herramientas
+
             if ($request->has('herramientas')) {
                 foreach ($request->herramientas as $herr) {
                     if (empty($herr['herramienta_id'])) continue;
@@ -215,8 +241,10 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function show(EmergenciaFuego $emergenciaFuego)
     {
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         $emergenciaFuego->load([
-            'vehiculos', 'usuarioRegistra', 'personal', 'pacientes', 'insumos', 'archivos'
+            'vehiculos', 'usuarioRegistra', 'personal', 'pacientes', 'insumos', 'archivos', 'herramientas', 'estacion'
         ]);
 
         return view('emergencias_fuego.show', compact('emergenciaFuego'));
@@ -227,6 +255,8 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function edit(EmergenciaFuego $emergenciaFuego)
     {
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         $emergenciaFuego->load(['personal', 'pacientes', 'insumos', 'vehiculos', 'archivos', 'herramientas']);
 
         $vehiculos = Vehiculo::orderBy('placa')->get();
@@ -249,6 +279,8 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function update(Request $request, EmergenciaFuego $emergenciaFuego)
     {
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         $request->validate([
             'fecha_salida' => 'required|date',
             'direccion' => 'required|string|max:255',
@@ -270,7 +302,7 @@ class EmergenciaFuegoController extends Controller
                 'fecha_llegada_base' => $request->fecha_llegada_base,
                 'direccion' => $request->direccion,
                 'referencia' => $request->referencia,
-                'parroquia_id' => $request->parroquiia_id,
+                'parroquia_id' => $request->parroquia_id,
                 'sector' => $request->sector,
                 'motivo_llamado' => $request->motivo_llamado,
                 'tipo_fuego' => $request->tipo_fuego,
@@ -290,14 +322,12 @@ class EmergenciaFuegoController extends Controller
                 'estado' => $request->estado,
             ]);
 
-            // Personal
             $personalSync = [];
             foreach ($request->personal as $p) {
                 $personalSync[$p['user_id']] = ['rol_en_emergencia' => $p['rol_en_emergencia']];
             }
             $emergenciaFuego->personal()->sync($personalSync);
 
-            // Vehículos
             $vehiculosSync = [];
             foreach ($request->vehiculos as $v) {
                 $vehiculosSync[$v['vehiculo_id']] = [
@@ -308,7 +338,6 @@ class EmergenciaFuegoController extends Controller
             }
             $emergenciaFuego->vehiculos()->sync($vehiculosSync);
 
-            // Pacientes
             $emergenciaFuego->pacientes()->delete();
             if ($request->has('pacientes')) {
                 foreach ($request->pacientes as $pac) {
@@ -332,7 +361,6 @@ class EmergenciaFuegoController extends Controller
                 }
             }
 
-            // Insumos: restaurar y reinsertar
             foreach ($emergenciaFuego->insumos as $insumoViejo) {
                 InsumoMedico::where('id', $insumoViejo->id)
                             ->increment('cantidad', $insumoViejo->pivot->cantidad);
@@ -349,7 +377,7 @@ class EmergenciaFuegoController extends Controller
                                 ->decrement('cantidad', $ins['cantidad']);
                 }
             }
-            // Herramientas: re-sincronizar
+
             $emergenciaFuego->herramientas()->detach();
             if ($request->has('herramientas')) {
                 foreach ($request->herramientas as $herr) {
@@ -360,9 +388,6 @@ class EmergenciaFuegoController extends Controller
                     ]);
                 }
             }
-
-
-
 
             DB::commit();
 
@@ -381,12 +406,12 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function destroy(EmergenciaFuego $emergenciaFuego)
     {
-        // Restaurar stock de insumos
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         foreach ($emergenciaFuego->insumos as $ins) {
             InsumoMedico::where('id', $ins->id)->increment('cantidad', $ins->pivot->cantidad);
         }
 
-        // Eliminar archivos del storage
         foreach ($emergenciaFuego->archivos as $archivo) {
             if (Storage::disk('public')->exists($archivo->ruta)) {
                 Storage::disk('public')->delete($archivo->ruta);
@@ -405,6 +430,8 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function subirArchivos(Request $request, EmergenciaFuego $emergenciaFuego)
     {
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         $limiteTotalMb = config('filesystems.emergencias_archivos.limite_mb', 50);
         $limiteArchivoMb = config('filesystems.emergencias_archivos.max_archivo_mb', 10);
         $limiteTotalBytes = $limiteTotalMb * 1024 * 1024;
@@ -461,6 +488,11 @@ class EmergenciaFuegoController extends Controller
 
     public function eliminarArchivo(EmergenciaFuegoArchivo $archivo)
     {
+        $emergencia = EmergenciaFuego::find($archivo->emergencia_fuego_id);
+        if ($emergencia) {
+            $this->verificarAccesoEstacion($emergencia);
+        }
+
         $emergenciaId = $archivo->emergencia_fuego_id;
 
         if (Storage::disk('public')->exists($archivo->ruta)) {
@@ -475,6 +507,11 @@ class EmergenciaFuegoController extends Controller
 
     public function descargarArchivo(EmergenciaFuegoArchivo $archivo)
     {
+        $emergencia = EmergenciaFuego::find($archivo->emergencia_fuego_id);
+        if ($emergencia) {
+            $this->verificarAccesoEstacion($emergencia);
+        }
+
         $ruta = storage_path('app/public/' . $archivo->ruta);
         if (!file_exists($ruta)) {
             abort(404, 'El archivo no existe.');
@@ -487,10 +524,12 @@ class EmergenciaFuegoController extends Controller
     // ============================================================
     public function generarPdf(EmergenciaFuego $emergenciaFuego)
     {
+        $this->verificarAccesoEstacion($emergenciaFuego);
+
         require_once base_path('vendor/tecnickcom/tcpdf/tcpdf.php');
 
         $emergenciaFuego->load([
-            'vehiculos', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
+            'vehiculos', 'usuarioRegistra', 'personal', 'pacientes', 'insumos', 'herramientas', 'estacion'
         ]);
 
         $tiempos = $this->calcularTiempos($emergenciaFuego);
@@ -556,6 +595,11 @@ class EmergenciaFuegoController extends Controller
 
         $baseQuery = EmergenciaFuego::whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
 
+        // 🔒 FILTRAR POR ESTACIÓN
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $baseQuery->where('estacion_id', auth()->user()->station_id);
+        }
+
         $resumen = [
             'total' => (clone $baseQuery)->count(),
             'en_curso' => (clone $baseQuery)->where('estado', 'En curso')->count(),
@@ -613,6 +657,9 @@ class EmergenciaFuegoController extends Controller
             ->join('emergencias_fuego', 'emergencias_fuego.id', '=', 'emergencia_fuego_personal.emergencia_fuego_id')
             ->join('users', 'users.id', '=', 'emergencia_fuego_personal.user_id')
             ->whereBetween('emergencias_fuego.fecha_salida', [$fechaDesde, $fechaHasta])
+            ->when(!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin'), function ($q) {
+                $q->where('emergencias_fuego.estacion_id', auth()->user()->station_id);
+            })
             ->select('users.name', DB::raw('count(*) as total'))
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total')

@@ -30,7 +30,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Emergencias</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalEmergencias }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalEmergencias ?? 0 }}</div>
                             <div class="small text-success">+{{ $emergenciasHoy }} hoy</div>
                         </div>
                         <div class="col-auto">
@@ -90,7 +90,41 @@
             </div>
         </div>
     </div>
+    {{-- ===== Emergencias Prehospitalarias ===== --}}
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-danger shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Emergencias Prehospitalarias</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalEmergenciasPrehospitalarias }}</div>
+                    <div class="small text-success">+{{ $emergenciasPrehospitalariasHoy ?? 0 }} hoy</div>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-ambulance fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+    {{-- ===== Emergencias de Fuego ===== --}}
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Emergencias de Fuego</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalEmergenciasFuego}}</div>
+                        <div class="small text-success">+{{ $emergenciasFuegoHoy ?? 0 }} hoy</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-fire fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Últimas emergencias y novedades -->
     <div class="row">
         <div class="col-lg-6">

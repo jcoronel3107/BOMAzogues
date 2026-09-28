@@ -18,6 +18,7 @@ class EmergenciaFuego extends Model
         'agua_utilizada_litros', 'espuma_utilizada_litros', 'quimico_utilizado_litros',
         'victimas_ilesos', 'victimas_heridos', 'victimas_fallecidos',
         'requirio_apoyo_externo', 'detalle_apoyo',
+         'estacion_id',  // ⬅️ AGREGAR
         'usuario_registra_id', 'observaciones_generales', 'estado'
     ];
 
@@ -167,5 +168,10 @@ class EmergenciaFuego extends Model
         return $this->belongsToMany(Herramienta::class, 'emergencia_fuego_herramientas')
                     ->withPivot('cantidad', 'observaciones')
                     ->withTimestamps();
+    }
+
+    public function estacion()
+    {
+        return $this->belongsTo(Station::class, 'estacion_id');
     }
 }

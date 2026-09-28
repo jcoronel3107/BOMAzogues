@@ -293,7 +293,13 @@
         <span>Manual de Fuego</span>
     </a>
 </li>
-
+<!-- Guía de Filtrado por Estación -->
+<li class="nav-item">
+    <a class="nav-link" href="{{ asset('manuales/📘guiauserfiltroestac.pdf') }}" target="_blank">
+        <i class="fas fa-book"></i>
+        <span>Guía de Filtrado por Estación</span>
+    </a>
+</li>
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

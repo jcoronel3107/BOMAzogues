@@ -1,3 +1,32 @@
+Actualiacion 26/09/2026
+---
+
+## 🔒 Filtrado por Estación
+
+El módulo implementa **control de acceso por estación** para garantizar que cada usuario solo vea y gestione las emergencias de su propia estación.
+
+### Reglas de acceso
+
+| Rol del usuario | Acceso |
+|-----------------|--------|
+| **Super-Admin** | Ve **todas** las emergencias de todas las estaciones |
+| **admin** | Ve **todas** las emergencias de todas las estaciones |
+| **Cualquier otro rol** | Ve **solo** las emergencias de **su estación** |
+
+### Cómo funciona
+
+#### 1. Asignación automática de estación
+
+Cuando un usuario registra una emergencia, el sistema **asigna automáticamente** la estación del usuario:
+
+```php
+// En el controlador store()
+'estacion_id' => auth()->user()->station_id,  
+  
+
+
+
+  
   Actuaizacion 17/09/2026
 # Módulo de Emergencias Prehospitalarias
 
@@ -230,7 +259,32 @@ Este módulo permite registrar **novedades de estación** (reportes diarios de t
 - personal()              → hasMany(EstacionNovedadPersonal::class)
 - integrantes()           → hasMany(EstacionNovedadIntegrante::class)
 
+## 🔒 Control de Acceso por Estación
 
+Varios módulos del sistema implementan **control de acceso por estación**. Esto garantiza que:
+
+- **Cada usuario ve y gestiona solo las emergencias de su estación**
+- **Los Super-Admin y admins ven todas las estaciones**
+- **No se puede acceder a datos de otras estaciones ni por URL directa**
+
+### Módulos con filtrado por estación
+
+| Módulo | Estado |
+|--------|--------|
+| Emergencias Prehospitalarias | ✅ |
+| Emergencias de Fuego | ✅ |
+| Novedades de Estación | ✅ (ya existente) |
+
+### Configuración
+
+- Cada usuario tiene un `station_id` en la tabla `users`
+- Cada emergencia tiene un `estacion_id` en su tabla
+- La estación se asigna automáticamente al registrar
+- Los roles `Super-Admin` y `admin` pueden ver todo
+
+### Documentación detallada
+
+Ver el README de cada módulo para más detalles sobre la implementación.
 
 
 

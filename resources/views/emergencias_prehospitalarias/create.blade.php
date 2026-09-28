@@ -1,5 +1,18 @@
 @extends('layouts.plantilla')
-
+{{-- ===== INFO DE ESTACIÓN ===== --}}
+@if($estacionUsuario)
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Estación:</strong> {{ $estacionUsuario->nombre }}
+        <br>
+        <small class="text-muted">La emergencia se registrará automáticamente en tu estación.</small>
+    </div>
+@else
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Atención:</strong> No tienes una estación asignada. Contacta al administrador.
+    </div>
+@endif
 @section('cuerpo')
 <div class="card shadow mb-4">
     <div class="card-header py-3">

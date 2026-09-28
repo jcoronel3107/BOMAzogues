@@ -486,7 +486,7 @@ Route::get('qrcode',                                'MenuController@qrcode_blade
 /* ---------------------------------------------------------------------------------
 /                        Rutas para Emergencias Prehospitalarias
 / --------------------------------------------------------------------------------- */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'estacion'])->group(function () {
 
     // ⚠️ IMPORTANTE: las rutas sin parámetro van ANTES que las que llevan {id}
 
@@ -535,18 +535,18 @@ Route::middleware('auth')->group(function () {
         [EmergenciaPrehospitalariaController::class, 'destroy'])
         ->name('emergencias-prehospitalarias.destroy');
 
-        // Archivos adjuntos
-        Route::post('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}/archivos',
-            'EmergenciaPrehospitalariaController@subirArchivos')
-            ->name('emergencias-prehospitalarias.archivos.subir');
+    // Archivos adjuntos
+    Route::post('/emergencias-prehospitalarias/{emergenciaPrehospitalaria}/archivos',
+        [EmergenciaPrehospitalariaController::class, 'subirArchivos'])
+        ->name('emergencias-prehospitalarias.archivos.subir');
 
-        Route::delete('/emergencias-prehospitalarias/archivos/{archivo}',
-            'EmergenciaPrehospitalariaController@eliminarArchivo')
-            ->name('emergencias-prehospitalarias.archivos.eliminar');
+    Route::delete('/emergencias-prehospitalarias/archivos/{archivo}',
+        [EmergenciaPrehospitalariaController::class, 'eliminarArchivo'])
+        ->name('emergencias-prehospitalarias.archivos.eliminar');
 
-        Route::get('/emergencias-prehospitalarias/archivos/{archivo}/descargar',
-            'EmergenciaPrehospitalariaController@descargarArchivo')
-            ->name('emergencias-prehospitalarias.archivos.descargar');
+    Route::get('/emergencias-prehospitalarias/archivos/{archivo}/descargar',
+        [EmergenciaPrehospitalariaController::class, 'descargarArchivo'])
+        ->name('emergencias-prehospitalarias.archivos.descargar');
 });
 
 // Rutas para Emergencias
@@ -564,7 +564,7 @@ Route::post('herramientas/{id}/cambiar-estado', 'HerramientaController@cambiarEs
 /* ---------------------------------------------------------------------------------
 /                        Rutas para Emergencias de Fuego
 / --------------------------------------------------------------------------------- */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'estacion'])->group(function () {
 
     // ⚠️ IMPORTANTE: las rutas sin parámetro van ANTES que las que llevan {id}
 
@@ -613,7 +613,7 @@ Route::middleware('auth')->group(function () {
         [App\Http\Controllers\EmergenciaFuegoController::class, 'destroy'])
         ->name('emergencias-fuego.destroy');
 
-    // ===== ARCHIVOS ADJUNTOS =====
+    // Archivos adjuntos
     Route::post('/emergencias-fuego/{emergenciaFuego}/archivos',
         [App\Http\Controllers\EmergenciaFuegoController::class, 'subirArchivos'])
         ->name('emergencias-fuego.archivos.subir');
@@ -625,6 +625,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/emergencias-fuego/archivos/{archivo}/descargar',
         [App\Http\Controllers\EmergenciaFuegoController::class, 'descargarArchivo'])
         ->name('emergencias-fuego.archivos.descargar');
-
-    
 });

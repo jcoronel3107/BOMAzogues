@@ -93,3 +93,35 @@ Este módulo permite registrar **emergencias de fuego** (incendios estructurales
 
 // Herramienta
 - emergenciasFuego() → belongsToMany(EmergenciaFuego::class, 'emergencia_fuego_herramientas')
+
+
+---
+
+## 📄 Para agregar al `README_EMERGENCIAS_FUEGO.md`
+
+Copia y pega esta sección **al final del README** (antes de la última línea):
+
+```markdown
+---
+
+## 🔒 Filtrado por Estación
+
+El módulo implementa **control de acceso por estación** para garantizar que cada usuario solo vea y gestione las emergencias de fuego de su propia estación.
+
+### Reglas de acceso
+
+| Rol del usuario | Acceso |
+|-----------------|--------|
+| **Super-Admin** | Ve **todas** las emergencias de todas las estaciones |
+| **admin** | Ve **todas** las emergencias de todas las estaciones |
+| **Cualquier otro rol** | Ve **solo** las emergencias de **su estación** |
+
+### Cómo funciona
+
+#### 1. Asignación automática de estación
+
+Cuando un usuario registra una emergencia de fuego, el sistema **asigna automáticamente** la estación del usuario:
+
+```php
+// En el controlador store()
+'estacion_id' => auth()->user()->station_id,

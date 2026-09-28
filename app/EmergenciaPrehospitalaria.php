@@ -11,6 +11,7 @@ class EmergenciaPrehospitalaria extends Model
         'codigo', 'fecha_salida', 'fecha_llegada_sitio', 'fecha_salida_sitio',
         'fecha_llegada_base', 'direccion', 'referencia', 'motivo_llamado',
         'tipo_emergencia', 'prioridad', 'vehiculo_id', 'usuario_registra_id',
+        'estacion_id',  // ⬅️ AGREGAR
         'observaciones_generales', 'estado'
     ];
 
@@ -118,5 +119,10 @@ public function getEspacioUsadoMbAttribute()
         if ($porcentaje >= 90) return 'danger';
         if ($porcentaje >= 70) return 'warning';
         return 'success';
+    }
+
+    public function estacion()
+    {
+       return $this->belongsTo(Station::class, 'estacion_id');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\EmergenciaPrehospitalaria;
@@ -6,20 +7,44 @@ use App\PacienteEmergencia;
 use App\InsumoMedico;
 use App\Vehiculo;
 use App\User;
-use App\EmergenciaArchivo;                     // ⬅️ AGREGAR
+use App\EmergenciaArchivo;
+use App\Station;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;       // ⬅️ AGREGAR
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
-
 
 class EmergenciaPrehospitalariaController extends Controller
 {
+    /**
+     * 🔒 Verifica que el usuario pueda acceder a la emergencia
+     */
+    private function verificarAccesoEstacion($emergencia)
+    {
+        // Super-Admin y admin pueden ver todo
+        if (auth()->user()->hasRole('Super-Admin') || auth()->user()->hasRole('admin')) {
+            return;
+        }
+
+        // Otros usuarios solo pueden ver emergencias de su estación
+        if ($emergencia->estacion_id !== auth()->user()->station_id) {
+            abort(403, 'No tienes permiso para acceder a esta emergencia. Solo puedes ver las de tu estación.');
+        }
+    }
+
+    // ============================================================
+    //  INDEX
+    // ============================================================
     public function index(Request $request)
     {
         $query = EmergenciaPrehospitalaria::with([
-            'vehiculo', 'usuarioRegistra', 'pacientes', 'personal'
+            'vehiculo', 'usuarioRegistra', 'pacientes', 'personal', 'estacion'
         ]);
+
+        // 🔒 FILTRAR POR ESTACIÓN
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $query->where('estacion_id', auth()->user()->station_id);
+        }
 
         if ($request->filled('buscar')) {
             $buscar = $request->buscar;
@@ -35,6 +60,7 @@ class EmergenciaPrehospitalariaController extends Controller
         if ($request->filled('prioridad')) $query->where('prioridad', $request->prioridad);
         if ($request->filled('tipo_emergencia')) $query->where('tipo_emergencia', $request->tipo_emergencia);
         if ($request->filled('vehiculo_id')) $query->where('vehiculo_id', $request->vehiculo_id);
+        if ($request->filled('estacion_id')) $query->where('estacion_id', $request->estacion_id);
 
         if ($request->filled('user_id')) {
             $query->whereHas('personal', function ($q) use ($request) {
@@ -58,35 +84,49 @@ class EmergenciaPrehospitalariaController extends Controller
         $perPage = $request->get('per_page', 10);
         $emergencias = $query->paginate($perPage)->withQueryString();
 
+        // Resumen con filtro por estación
+        $resumenQuery = EmergenciaPrehospitalaria::query();
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $resumenQuery->where('estacion_id', auth()->user()->station_id);
+        }
+
         $resumen = [
-            'total' => EmergenciaPrehospitalaria::count(),
-            'en_curso' => EmergenciaPrehospitalaria::where('estado', 'En curso')->count(),
-            'finalizadas' => EmergenciaPrehospitalaria::where('estado', 'Finalizada')->count(),
-            'hoy' => EmergenciaPrehospitalaria::whereDate('fecha_salida', today())->count(),
+            'total' => (clone $resumenQuery)->count(),
+            'en_curso' => (clone $resumenQuery)->where('estado', 'En curso')->count(),
+            'finalizadas' => (clone $resumenQuery)->where('estado', 'Finalizada')->count(),
+            'hoy' => (clone $resumenQuery)->whereDate('fecha_salida', today())->count(),
         ];
 
         $vehiculos = Vehiculo::orderBy('placa')->get();
         $personal = User::orderBy('name')->get();
+        $estaciones = Station::orderBy('nombre')->get();
         $tipos = ['Accidente de tránsito', 'Emergencia médica', 'Trauma', 'Obstétrica', 'Pediatrica', 'Psiquiatrica', 'Otra'];
         $estados = ['En curso', 'Finalizada', 'Cancelada', 'Derivada'];
         $prioridades = ['Rojo', 'Naranja', 'Amarillo', 'Verde', 'Azul'];
 
         return view('emergencias_prehospitalarias.index', compact(
-            'emergencias', 'resumen', 'vehiculos', 'personal',
+            'emergencias', 'resumen', 'vehiculos', 'personal', 'estaciones',
             'tipos', 'estados', 'prioridades'
         ));
     }
 
+    // ============================================================
+    //  CREATE
+    // ============================================================
     public function create()
-{
-    $vehiculos = Vehiculo::orderBy('placa')->get();
-    $personal = User::orderBy('name')->get();
-    $insumos = InsumoMedico::orderBy('descripcion')->get();
+    {
+        $vehiculos = Vehiculo::orderBy('placa')->get();
+        $personal = User::orderBy('name')->get();
+        $insumos = InsumoMedico::orderBy('descripcion')->get();
+        $estacionUsuario = auth()->user()->station;
 
-    return view('emergencias_prehospitalarias.create', 
-        compact('vehiculos', 'personal', 'insumos'));
-}
+        return view('emergencias_prehospitalarias.create',
+            compact('vehiculos', 'personal', 'insumos', 'estacionUsuario'));
+    }
 
+    // ============================================================
+    //  STORE
+    // ============================================================
     public function store(Request $request)
     {
         $request->validate([
@@ -122,6 +162,7 @@ class EmergenciaPrehospitalariaController extends Controller
                 'tipo_emergencia' => $request->tipo_emergencia,
                 'prioridad' => $request->prioridad,
                 'vehiculo_id' => $request->vehiculo_id,
+                'estacion_id' => auth()->user()->station_id,  // 🔒 ASIGNAR ESTACIÓN
                 'usuario_registra_id' => auth()->id(),
                 'observaciones_generales' => $request->observaciones_generales,
                 'estado' => 'En curso',
@@ -165,14 +206,12 @@ class EmergenciaPrehospitalariaController extends Controller
                         'observaciones' => $ins['observaciones'] ?? null,
                     ]);
 
-                    // ✅ CAMBIO: 'cantidad' en lugar de 'stock'
                     InsumoMedico::where('id', $ins['insumo_medico_id'])
                                 ->decrement('cantidad', $ins['cantidad']);
                 }
             }
 
             DB::commit();
-            //dd('¡GUARDADO EXITOSO!', $emergencia->id);  // ⬅️ AGREGA ESTA LÍNEA TEMPORAL
             return redirect()->route('emergencias-prehospitalarias.show', $emergencia)
                             ->with('success', 'Emergencia prehospitalaria registrada');
 
@@ -182,17 +221,27 @@ class EmergenciaPrehospitalariaController extends Controller
         }
     }
 
+    // ============================================================
+    //  SHOW
+    // ============================================================
     public function show(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
         $emergenciaPrehospitalaria->load([
-            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
+            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos', 'estacion', 'archivos'
         ]);
         return view('emergencias_prehospitalarias.show', compact('emergenciaPrehospitalaria'));
     }
 
+    // ============================================================
+    //  EDIT
+    // ============================================================
     public function edit(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
-        $emergenciaPrehospitalaria->load(['personal', 'pacientes', 'insumos']);
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
+        $emergenciaPrehospitalaria->load(['personal', 'pacientes', 'insumos', 'archivos']);
         $vehiculos = Vehiculo::orderBy('placa')->get();
         $personal = User::orderBy('name')->get();
         $insumos = InsumoMedico::orderBy('descripcion')->get();
@@ -202,8 +251,13 @@ class EmergenciaPrehospitalariaController extends Controller
         ));
     }
 
+    // ============================================================
+    //  UPDATE
+    // ============================================================
     public function update(Request $request, EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
         $request->validate([
             'fecha_salida' => 'required|date',
             'direccion' => 'required|string|max:255',
@@ -241,14 +295,12 @@ class EmergenciaPrehospitalariaController extends Controller
                 'estado' => $request->estado,
             ]);
 
-            // Personal
             $personalSync = [];
             foreach ($request->personal as $p) {
                 $personalSync[$p['user_id']] = ['rol_en_emergencia' => $p['rol_en_emergencia']];
             }
             $emergenciaPrehospitalaria->personal()->sync($personalSync);
 
-            // Pacientes
             $emergenciaPrehospitalaria->pacientes()->delete();
 
             foreach ($request->pacientes as $pac) {
@@ -276,9 +328,7 @@ class EmergenciaPrehospitalariaController extends Controller
                 ]);
             }
 
-            // Insumos: restaurar y reinsertar
             foreach ($emergenciaPrehospitalaria->insumos as $insumoViejo) {
-                // ✅ CAMBIO: 'cantidad' en lugar de 'stock'
                 InsumoMedico::where('id', $insumoViejo->id)
                             ->increment('cantidad', $insumoViejo->pivot->cantidad);
             }
@@ -292,7 +342,6 @@ class EmergenciaPrehospitalariaController extends Controller
                         'observaciones' => $ins['observaciones'] ?? null,
                     ]);
 
-                    // ✅ CAMBIO: 'cantidad' en lugar de 'stock'
                     InsumoMedico::where('id', $ins['insumo_medico_id'])
                                 ->decrement('cantidad', $ins['cantidad']);
                 }
@@ -308,10 +357,14 @@ class EmergenciaPrehospitalariaController extends Controller
         }
     }
 
+    // ============================================================
+    //  DESTROY
+    // ============================================================
     public function destroy(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
         foreach ($emergenciaPrehospitalaria->insumos as $ins) {
-            // ✅ CAMBIO: 'cantidad' en lugar de 'stock'
             InsumoMedico::where('id', $ins->id)->increment('cantidad', $ins->pivot->cantidad);
         }
 
@@ -320,51 +373,41 @@ class EmergenciaPrehospitalariaController extends Controller
                         ->with('success', 'Emergencia eliminada');
     }
 
+    // ============================================================
+    //  PDF
+    // ============================================================
     public function generarPdf(EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
-        // ⬇️ CARGAR TCPDF MANUALMENTE
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
         require_once base_path('vendor/tecnickcom/tcpdf/tcpdf.php');
 
-        // Cargar relaciones
         $emergenciaPrehospitalaria->load([
-            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos'
+            'vehiculo', 'usuarioRegistra', 'personal', 'pacientes', 'insumos', 'estacion'
         ]);
 
-        // Calcular tiempos
         $tiempos = $this->calcularTiempos($emergenciaPrehospitalaria);
 
-        // Renderizar la vista a HTML
         $html = view('emergencias_prehospitalarias.pdf.parte_tcpdf',
             compact('emergenciaPrehospitalaria', 'tiempos'))->render();
 
-        // Crear el PDF con TCPDF
-        // ⚠️ TCPDF 7.x usa namespace tecnickcom\tcpdf\TCPDF
         $pdf = new \TCPDF('L', 'mm', 'LETTER', true, 'UTF-8', false);
 
-        // Configuración del documento
         $pdf->SetCreator('Sistema de Emergencias');
         $pdf->SetAuthor($emergenciaPrehospitalaria->usuarioRegistra->name ?? 'Sistema');
         $pdf->SetTitle('Parte de Ambulancia - ' . $emergenciaPrehospitalaria->codigo);
         $pdf->SetSubject('Parte de Atención Prehospitalaria');
 
-        // Quitar header y footer por defecto
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
 
-        // Márgenes
         $pdf->SetMargins(8, 8, 8);
         $pdf->SetAutoPageBreak(TRUE, 15);
 
-        // Agregar página
         $pdf->AddPage();
-
-        // Escribir el HTML
         $pdf->writeHTML($html, true, false, true, false, '');
 
-        // Nombre del archivo
         $nombreArchivo = 'Parte_Ambulancia_' . $emergenciaPrehospitalaria->codigo . '.pdf';
-
-        // Salida: 'I' = inline (ver en navegador), 'D' = descargar
         return $pdf->Output($nombreArchivo, 'I');
     }
 
@@ -393,6 +436,9 @@ class EmergenciaPrehospitalariaController extends Controller
         return $tiempos;
     }
 
+    // ============================================================
+    //  ESTADÍSTICAS
+    // ============================================================
     public function estadisticas(Request $request)
     {
         $fechaDesde = $request->filled('fecha_desde')
@@ -405,6 +451,11 @@ class EmergenciaPrehospitalariaController extends Controller
 
         $baseQuery = EmergenciaPrehospitalaria::whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
 
+        // 🔒 FILTRAR POR ESTACIÓN
+        if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+            $baseQuery->where('estacion_id', auth()->user()->station_id);
+        }
+
         $resumen = [
             'total' => (clone $baseQuery)->count(),
             'en_curso' => (clone $baseQuery)->where('estado', 'En curso')->count(),
@@ -412,10 +463,16 @@ class EmergenciaPrehospitalariaController extends Controller
             'canceladas' => (clone $baseQuery)->where('estado', 'Cancelada')->count(),
             'total_pacientes' => PacienteEmergencia::whereHas('emergencia', function ($q) use ($fechaDesde, $fechaHasta) {
                 $q->whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
+                if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+                    $q->where('estacion_id', auth()->user()->station_id);
+                }
             })->count(),
             'promedio_pacientes' => round(
                 PacienteEmergencia::whereHas('emergencia', function ($q) use ($fechaDesde, $fechaHasta) {
                     $q->whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
+                    if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+                        $q->where('estacion_id', auth()->user()->station_id);
+                    }
                 })->count() / max((clone $baseQuery)->count(), 1),
                 2
             ),
@@ -489,21 +546,23 @@ class EmergenciaPrehospitalariaController extends Controller
             ->join('emergencias_prehospitalarias', 'emergencias_prehospitalarias.id', '=', 'emergencia_personal.emergencia_prehospitalaria_id')
             ->join('users', 'users.id', '=', 'emergencia_personal.user_id')
             ->whereBetween('emergencias_prehospitalarias.fecha_salida', [$fechaDesde, $fechaHasta])
+            ->when(!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin'), function ($q) {
+                $q->where('emergencias_prehospitalarias.estacion_id', auth()->user()->station_id);
+            })
             ->select('users.name', DB::raw('count(*) as total'))
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total')
             ->limit(5)
             ->get();
 
-        // ✅ CAMBIO: 'descripcion' en lugar de 'nombre'
         $topInsumos = DB::table('emergencia_insumos')
             ->join('emergencias_prehospitalarias', 'emergencias_prehospitalarias.id', '=', 'emergencia_insumos.emergencia_prehospitalaria_id')
             ->join('insumos_medicos', 'insumos_medicos.id', '=', 'emergencia_insumos.insumo_medico_id')
             ->whereBetween('emergencias_prehospitalarias.fecha_salida', [$fechaDesde, $fechaHasta])
-            ->select(
-                'insumos_medicos.descripcion',
-                DB::raw('SUM(emergencia_insumos.cantidad) as total')
-            )
+            ->when(!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin'), function ($q) {
+                $q->where('emergencias_prehospitalarias.estacion_id', auth()->user()->station_id);
+            })
+            ->select('insumos_medicos.descripcion', DB::raw('SUM(emergencia_insumos.cantidad) as total'))
             ->groupBy('insumos_medicos.id', 'insumos_medicos.descripcion')
             ->orderByDesc('total')
             ->limit(5)
@@ -511,6 +570,9 @@ class EmergenciaPrehospitalariaController extends Controller
 
         $porSexo = PacienteEmergencia::whereHas('emergencia', function ($q) use ($fechaDesde, $fechaHasta) {
                 $q->whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
+                if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+                    $q->where('estacion_id', auth()->user()->station_id);
+                }
             })
             ->select('sexo', DB::raw('count(*) as total'))
             ->groupBy('sexo')
@@ -518,6 +580,9 @@ class EmergenciaPrehospitalariaController extends Controller
 
         $porCondicion = PacienteEmergencia::whereHas('emergencia', function ($q) use ($fechaDesde, $fechaHasta) {
                 $q->whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
+                if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+                    $q->where('estacion_id', auth()->user()->station_id);
+                }
             })
             ->select('condicion', DB::raw('count(*) as total'))
             ->groupBy('condicion')
@@ -525,6 +590,9 @@ class EmergenciaPrehospitalariaController extends Controller
 
         $promediosSignos = PacienteEmergencia::whereHas('emergencia', function ($q) use ($fechaDesde, $fechaHasta) {
                 $q->whereBetween('fecha_salida', [$fechaDesde, $fechaHasta]);
+                if (!auth()->user()->hasRole('Super-Admin') && !auth()->user()->hasRole('admin')) {
+                    $q->where('estacion_id', auth()->user()->station_id);
+                }
             })
             ->selectRaw('
                 ROUND(AVG(frecuencia_cardiaca), 1) as fc_promedio,
@@ -545,59 +613,44 @@ class EmergenciaPrehospitalariaController extends Controller
         ));
     }
 
-        /**
-     * Subir archivos adjuntos a una emergencia
-     */
+    // ============================================================
+    //  ARCHIVOS
+    // ============================================================
     public function subirArchivos(Request $request, EmergenciaPrehospitalaria $emergenciaPrehospitalaria)
     {
-        // ===== CONFIGURACIÓN =====
+        $this->verificarAccesoEstacion($emergenciaPrehospitalaria);
+
         $limiteTotalMb = config('filesystems.emergencias_archivos.limite_mb', 50);
         $limiteArchivoMb = config('filesystems.emergencias_archivos.max_archivo_mb', 10);
         $limiteTotalBytes = $limiteTotalMb * 1024 * 1024;
         $extensionesPermitidas = config('filesystems.emergencias_archivos.extensiones_permitidas', []);
 
-        // ===== VALIDACIÓN BÁSICA =====
         $request->validate([
             'archivos' => 'required|array|min:1',
-            'archivos.*' => 'file|max:' . ($limiteArchivoMb * 1024), // max en KB
+            'archivos.*' => 'file|max:' . ($limiteArchivoMb * 1024),
         ], [
             'archivos.*.max' => "Cada archivo no puede superar los {$limiteArchivoMb}MB.",
-            'archivos.*.file' => 'El archivo no es válido.',
         ]);
 
-        // ===== VALIDAR EXTENSIONES =====
         foreach ($request->file('archivos') as $archivo) {
             $extension = strtolower($archivo->getClientOriginalExtension());
             if (!in_array($extension, $extensionesPermitidas)) {
-                return back()->with('error', "El archivo '{$archivo->getClientOriginalName()}' tiene una extensión no permitida ({$extension}).");
+                return back()->with('error', "El archivo '{$archivo->getClientOriginalName()}' tiene una extensión no permitida.");
             }
         }
 
-        // ===== CALCULAR ESPACIO USADO ACTUAL =====
         $espacioUsado = $emergenciaPrehospitalaria->archivos()->sum('tamano') ?? 0;
-
-        // ===== CALCULAR TAMAÑO DE NUEVOS ARCHIVOS =====
         $tamanoNuevos = 0;
         foreach ($request->file('archivos') as $archivo) {
             $tamanoNuevos += $archivo->getSize();
         }
 
-        // ===== VERIFICAR LÍMITE TOTAL =====
         if (($espacioUsado + $tamanoNuevos) > $limiteTotalBytes) {
-            $espacioDisponible = $limiteTotalBytes - $espacioUsado;
-            $espacioDisponibleMb = round($espacioDisponible / 1024 / 1024, 2);
-            $tamanoNuevosMb = round($tamanoNuevos / 1024 / 1024, 2);
-
-            return back()->with('error',
-                "❌ No hay espacio suficiente. " .
-                "Intentas subir {$tamanoNuevosMb}MB pero solo quedan {$espacioDisponibleMb}MB disponibles " .
-                "de los {$limiteTotalMb}MB permitidos para esta emergencia."
-            );
+            $disponible = round(($limiteTotalBytes - $espacioUsado) / 1024 / 1024, 2);
+            return back()->with('error', "❌ No hay espacio suficiente. Disponible: {$disponible}MB.");
         }
 
-        // ===== SUBIR ARCHIVOS =====
         $subidos = 0;
-
         DB::beginTransaction();
         try {
             foreach ($request->file('archivos') as $archivo) {
@@ -609,7 +662,6 @@ class EmergenciaPrehospitalariaController extends Controller
                 $nombreOriginal = $archivo->getClientOriginalName();
                 $extension = $archivo->getClientOriginalExtension();
                 $nombreArchivo = time() . '_' . uniqid() . '.' . $extension;
-
                 $ruta = $archivo->storeAs($carpeta, $nombreArchivo, 'public');
 
                 EmergenciaArchivo::create([
@@ -627,10 +679,8 @@ class EmergenciaPrehospitalariaController extends Controller
             }
 
             DB::commit();
-
-            return redirect()
-                ->route('emergencias-prehospitalarias.show', $emergenciaPrehospitalaria)
-                ->with('success', "{$subidos} archivo(s) subido(s) correctamente.");
+            return redirect()->route('emergencias-prehospitalarias.show', $emergenciaPrehospitalaria)
+                            ->with('success', "{$subidos} archivo(s) subido(s) correctamente.");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -638,19 +688,19 @@ class EmergenciaPrehospitalariaController extends Controller
         }
     }
 
-    /**
-     * Eliminar un archivo adjunto
-     */
     public function eliminarArchivo(EmergenciaArchivo $archivo)
     {
-        $emergenciaId = $archivo->emergencia_prehospitalaria_id;
-
-        // Eliminar del storage
-        if (\Storage::disk('public')->exists($archivo->ruta)) {
-            \Storage::disk('public')->delete($archivo->ruta);
+        $emergencia = EmergenciaPrehospitalaria::find($archivo->emergencia_prehospitalaria_id);
+        if ($emergencia) {
+            $this->verificarAccesoEstacion($emergencia);
         }
 
-        // Eliminar de BD
+        $emergenciaId = $archivo->emergencia_prehospitalaria_id;
+
+        if (Storage::disk('public')->exists($archivo->ruta)) {
+            Storage::disk('public')->delete($archivo->ruta);
+        }
+
         $archivo->delete();
 
         return redirect()
@@ -658,11 +708,13 @@ class EmergenciaPrehospitalariaController extends Controller
             ->with('success', 'Archivo eliminado correctamente.');
     }
 
-    /**
-     * Descargar un archivo adjunto
-     */
     public function descargarArchivo(EmergenciaArchivo $archivo)
     {
+        $emergencia = EmergenciaPrehospitalaria::find($archivo->emergencia_prehospitalaria_id);
+        if ($emergencia) {
+            $this->verificarAccesoEstacion($emergencia);
+        }
+
         $ruta = storage_path('app/public/' . $archivo->ruta);
 
         if (!file_exists($ruta)) {
@@ -671,6 +723,4 @@ class EmergenciaPrehospitalariaController extends Controller
 
         return response()->download($ruta, $archivo->nombre_original);
     }
-
-    
 }

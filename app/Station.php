@@ -27,5 +27,14 @@ class Station extends Model
 	return $this->belongsTo(Inundacion::class);
 }
 
+public function emergenciasPrehospitalarias()
+{
+    return $this->hasMany(EmergenciaPrehospitalaria::class, 'estacion_id');
+}
+
+public function emergenciasFuego()
+{
+    return $this->hasMany(EmergenciaFuego::class, 'estacion_id');
+}
 
 }
