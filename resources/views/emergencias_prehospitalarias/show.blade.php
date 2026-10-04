@@ -127,7 +127,7 @@
                 <small class="text-muted">Vehículo (Ambulancia)</small>
                 <p class="mb-1">
                     <i class="fas fa-ambulance text-primary"></i>
-                    <strong>{{ $emergenciaPrehospitalaria->vehiculo->placa ?? 'N/A' }}</strong>
+                    <strong>{{ $emergenciaPrehospitalaria->vehiculo->codigodis  ?? 'N/A' }}</strong>
                     — {{ $emergenciaPrehospitalaria->vehiculo->marca ?? '' }}
                 </p>
             </div>

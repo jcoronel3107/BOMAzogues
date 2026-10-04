@@ -262,7 +262,7 @@
                         <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
                             <option value="">Seleccione...</option>
                             @foreach($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->id }}">{{ $vehiculo->placa }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
+                                <option value="{{ $vehiculo->id }}">{{ $vehiculo->codigodis  }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
                             @endforeach
                         </select>
                     </div>

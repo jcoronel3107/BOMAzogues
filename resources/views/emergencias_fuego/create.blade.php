@@ -341,7 +341,7 @@ let insumoCount = 0;
 let herramientaCount = 0;
 
 const personalOptions = `@foreach($personal as $u)<option value="{{ $u->id }}">{{ $u->name }}</option>@endforeach`;
-const vehiculosOptions = `@foreach($vehiculos as $v)<option value="{{ $v->id }}">{{ $v->placa }} - {{ $v->marca ?? '' }}</option>@endforeach`;
+const vehiculosOptions = `@foreach($vehiculos as $v)<option value="{{ $v->id }}">{{ $v->codigodis  }} - {{ $v->marca ?? '' }}</option>@endforeach`;
 const insumosOptions = `@foreach($insumos as $i)<option value="{{ $i->id }}">{{ $i->descripcion }}</option>@endforeach`;
 const herramientasOptions = `@foreach($herramientas as $h)<option value="{{ $h->id }}">{{ $h->descripcion }} {{ $h->codigo ? '(' . $h->codigo . ')' : '' }}</option>@endforeach`;
 

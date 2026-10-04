@@ -221,6 +221,7 @@
                     <thead class="thead-light">
                         <tr>
                             <th>#</th>
+                            <th>Indicativo</th>
                             <th>Placa</th>
                             <th>Marca / Modelo</th>
                             <th>Rol</th>
@@ -232,6 +233,7 @@
                         @foreach($emergenciaFuego->vehiculos as $i => $v)
                             <tr>
                                 <td>{{ $i + 1 }}</td>
+                                <td><strong>{{ $v->codigodis  }}</strong></td>
                                 <td><strong>{{ $v->placa }}</strong></td>
                                 <td>{{ $v->marca ?? '' }} {{ $v->modelo ?? '' }}</td>
                                 <td><span class="badge badge-info">{{ $v->pivot->rol_en_emergencia ?? '—' }}</span></td>
