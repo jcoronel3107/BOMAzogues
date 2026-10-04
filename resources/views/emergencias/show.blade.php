@@ -172,7 +172,7 @@
                                 @foreach($emergencia->vehiculos as $key => $vehiculo)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>{{ $vehiculo->placa }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</td>
+                                        <td>{{ $vehiculo->codigodis  }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</td>
                                         <td>{{ $vehiculo->pivot->conductor_id ? App\User::find($vehiculo->pivot->conductor_id)->name ?? 'N/A' : 'N/A' }}</td>
                                         <td>{{ $vehiculo->pivot->km_salida ?? 'N/A' }}</td>
                                         <td>{{ $vehiculo->pivot->km_retorno ?? 'N/A' }}</td>
