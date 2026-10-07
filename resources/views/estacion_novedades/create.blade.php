@@ -9,6 +9,7 @@
         <form action="{{ route('estacion-novedades.store') }}" method="POST" id="formNovedad">
             @csrf
 
+            {{-- ===== DATOS GENERALES ===== --}}
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -48,50 +49,47 @@
 
             <hr>
 
-            <!-- Emergencias -->
+            {{-- ===== EMERGENCIAS MANUALES ===== --}}
             <div class="row">
                 <div class="col-md-12">
-                    <h5 class="text-primary">Emergencias Atendidas</h5>
+                    <h5 class="text-primary">Emergencias Atendidas (Manual)</h5>
                     <button type="button" class="btn btn-success btn-sm mb-2" onclick="agregarEmergencia()">
                         <i class="fas fa-plus"></i> Agregar Emergencia
                     </button>
-                    <div id="emergencias-container">
-                        <!-- Se agregarán dinámicamente -->
-                    </div>
+                    <div id="emergencias-container"></div>
                 </div>
             </div>
 
             <hr>
 
-            <!-- Novedades de Vehículos -->
+            {{-- ===== NOVEDADES DE VEHÍCULOS ===== --}}
             <div class="row">
                 <div class="col-md-12">
                     <h5 class="text-primary">Novedades de Vehículos</h5>
                     <button type="button" class="btn btn-success btn-sm mb-2" onclick="agregarVehiculo()">
                         <i class="fas fa-plus"></i> Agregar Novedad de Vehículo
                     </button>
-                    <div id="vehiculos-container">
-                        <!-- Se agregarán dinámicamente -->
-                    </div>
+                    <div id="vehiculos-container"></div>
                 </div>
             </div>
 
             <hr>
 
-            <!-- Personal -->
+            {{-- ===== NOVEDADES DEL PERSONAL ===== --}}
             <div class="row">
                 <div class="col-md-12">
-                    <h5 class="text-primary"> Agregar Novedades del Personal</h5>
+                    <h5 class="text-primary">Novedades del Personal</h5>
                     <button type="button" class="btn btn-success btn-sm mb-2" onclick="agregarPersonal()">
-                        <i class="fas fa-plus"></i> Agregar Novedades del Personal
+                        <i class="fas fa-plus"></i> Agregar Novedad del Personal
                     </button>
-                    <div id="personal-container">
-                        <!-- Se agregarán dinámicamente -->
-                    </div>
+                    <div id="personal-container"></div>
                 </div>
             </div>
+
             <hr>
-            <h5 class="text-primary">Emergencias de la Estación</h5>
+
+            {{-- ===== EMERGENCIAS DEL DÍA (BÚSQUEDA) ===== --}}
+            <h5 class="text-primary">Emergencias del Día</h5>
 
             <div class="row">
                 <div class="col-md-12">
@@ -130,25 +128,63 @@
                 </div>
             </div>
 
-<div id="emergencias-listado" style="display: none;">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-list"></i> Emergencias Encontradas
-                    <span id="total-emergencias" class="badge badge-light float-right">0</span>
+            {{-- ===== CONTENEDORES DE EMERGENCIAS SELECCIONADAS ===== --}}
+            <div id="emergencias-asociadas-container" class="mb-2"></div>
+            <div id="prehospitalarias-asociadas-container" class="mb-2"></div>
+            <div id="fuego-asociadas-container" class="mb-2"></div>
+
+            {{-- ===== RESULTADOS DE LA BÚSQUEDA ===== --}}
+            <div id="emergencias-listado" style="display: none;">
+
+                {{-- SECCIÓN 1: EMERGENCIAS (MÓDULO GENERAL) --}}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <i class="fas fa-ambulance"></i> Emergencias (Módulo General)
+                                <span id="total-emergencias" class="badge badge-light float-right">0</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" id="emergencias-table-container"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive" id="emergencias-table-container">
-                        <!-- Se llenará con JavaScript -->
+
+                {{-- SECCIÓN 2: EMERGENCIAS PREHOSPITALARIAS --}}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white">
+                                <i class="fas fa-ambulance"></i> Emergencias Prehospitalarias
+                                <span id="total-prehospitalarias" class="badge badge-light float-right">0</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" id="prehospitalarias-table-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECCIÓN 3: EMERGENCIAS DE FUEGO --}}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="fas fa-fire"></i> Emergencias de Fuego
+                                <span id="total-fuego" class="badge badge-dark float-right">0</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" id="fuego-table-container"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
             <hr>
+
+            {{-- ===== INTEGRANTES DE GUARDIA ===== --}}
             <h5 class="text-primary">Integrantes de la Guardia Bomberil</h5>
 
             <div class="row">
@@ -156,15 +192,11 @@
                     <button type="button" class="btn btn-success btn-sm mb-2" onclick="agregarIntegranteGuardia()">
                         <i class="fas fa-plus"></i> Agregar Integrante
                     </button>
-                    <div id="integrantes-guardia-container">
-                        <!-- Se agregarán dinámicamente -->
-                    </div>
+                    <div id="integrantes-guardia-container"></div>
                 </div>
             </div>
 
-
-
-
+            {{-- ===== BOTONES ===== --}}
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Guardar Novedad
@@ -178,234 +210,248 @@
 </div>
 
 <script>
-    let emergenciaCount = 0;
-    let vehiculoCount = 0;
-    let personalCount = 0;
+// ============================================================
+//  VARIABLES GLOBALES
+// ============================================================
+let emergenciaCount = 0;
+let vehiculoCount = 0;
+let personalCount = 0;
+let integranteGuardiaCount = 0;
 
-    function agregarEmergencia() {
-        emergenciaCount++;
-        const container = document.getElementById('emergencias-container');
-        const div = document.createElement('div');
-        div.className = 'card mb-2 p-3';
-        div.id = 'emergencia-' + emergenciaCount;
-        div.innerHTML = `
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Tipo Emergencia</label>
-                        <select name="emergencias[${emergenciaCount}][tipo]" class="form-control">
-                            <option value="incendio">Incendio</option>
-                            <option value="rescate">Rescate</option>
-                            <option value="inundacion">Inundación</option>
-                            <option value="transito">Tránsito</option>
-                            <option value="fuga">Fuga</option>
-                            <option value="salud">Salud</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Lugar</label>
-                        <input type="text" name="emergencias[${emergenciaCount}][lugar]" class="form-control" placeholder="Lugar">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Hora Ingreso</label>
-                        <input type="time" name="emergencias[${emergenciaCount}][hora_ingreso]" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Hora Salida</label>
-                        <input type="time" name="emergencias[${emergenciaCount}][hora_salida]" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarEmergencia(${emergenciaCount})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+// ============================================================
+//  AGREGAR EMERGENCIA MANUAL
+// ============================================================
+function agregarEmergencia() {
+    emergenciaCount++;
+    const container = document.getElementById('emergencias-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-3';
+    div.id = 'emergencia-' + emergenciaCount;
+    div.innerHTML = `
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Tipo Emergencia</label>
+                    <select name="emergencias[${emergenciaCount}][tipo]" class="form-control">
+                        <option value="incendio">Incendio</option>
+                        <option value="rescate">Rescate</option>
+                        <option value="inundacion">Inundación</option>
+                        <option value="transito">Tránsito</option>
+                        <option value="fuga">Fuga</option>
+                        <option value="salud">Salud</option>
+                        <option value="otro">Otro</option>
+                    </select>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="emergencias[${emergenciaCount}][descripcion]" class="form-control" rows="2"></textarea>
-                    </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Lugar</label>
+                    <input type="text" name="emergencias[${emergenciaCount}][lugar]" class="form-control" placeholder="Lugar">
                 </div>
             </div>
-        `;
-        container.appendChild(div);
-    }
-
-    function eliminarEmergencia(id) {
-        const element = document.getElementById('emergencia-' + id);
-        if (element) element.remove();
-    }
-
-    function agregarVehiculo() {
-        vehiculoCount++;
-        const container = document.getElementById('vehiculos-container');
-        const div = document.createElement('div');
-        div.className = 'card mb-2 p-3';
-        div.id = 'vehiculo-' + vehiculoCount;
-        div.innerHTML = `
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Vehículo</label>
-                        <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
-                            <option value="">Seleccione...</option>
-                            @foreach($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->id }}">{{ $vehiculo->codigodis  }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="vehiculos[${vehiculoCount}][estado]" class="form-control">
-                            <option value="operativo">Operativo</option>
-                            <option value="mantenimiento">Mantenimiento</option>
-                            <option value="averiado">Averiado</option>
-                            <option value="fuera_servicio">Fuera de Servicio</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Tipo Novedad</label>
-                        <input type="text" name="vehiculos[${vehiculoCount}][tipo_novedad]" class="form-control" placeholder="Ej: Mantenimiento, Avería">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarVehiculo(${vehiculoCount})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Hora Ingreso</label>
+                    <input type="time" name="emergencias[${emergenciaCount}][hora_ingreso]" class="form-control">
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Fecha Reporte</label>
-                        <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="{{ date('Y-m-d') }}">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Fecha Solución</label>
-                        <input type="date" name="vehiculos[${vehiculoCount}][fecha_solucion]" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Kilometraje</label>
-                        <input type="number" name="vehiculos[${vehiculoCount}][kilometraje]" class="form-control" placeholder="Km">
-                    </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Hora Salida</label>
+                    <input type="time" name="emergencias[${emergenciaCount}][hora_salida]" class="form-control">
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="vehiculos[${vehiculoCount}][descripcion]" class="form-control" rows="2"></textarea>
-                    </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarEmergencia(${emergenciaCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
-        `;
-        container.appendChild(div);
-    }
-
-    function eliminarVehiculo(id) {
-        const element = document.getElementById('vehiculo-' + id);
-        if (element) element.remove();
-    }
-
-    function agregarPersonal() {
-        personalCount++;
-        const container = document.getElementById('personal-container');
-        const div = document.createElement('div');
-        div.className = 'card mb-2 p-3';
-        div.id = 'personal-' + personalCount;
-        div.innerHTML = `
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Funcionario</label>
-                        <select name="personal[${personalCount}][user_id]" class="form-control">
-                            <option value="">Seleccione...</option>
-                            @foreach($personal as $persona)
-                                <option value="{{ $persona->id }}">{{ $persona->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Cargo</label>
-                        <input type="text" name="personal[${personalCount}][cargo]" class="form-control" placeholder="Cargo">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Turno</label>
-                        <select name="personal[${personalCount}][turno]" class="form-control">
-                            <option value="mañana">Mañana</option>
-                            <option value="tarde">Tarde</option>
-                            <option value="noche">Noche</option>
-                            <option value="descanso">Descanso</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <select name="personal[${personalCount}][estado]" class="form-control">
-                            <option value="presente">Presente</option>
-                            <option value="ausente">Ausente</option>
-                            <option value="permiso">Permiso</option>
-                            <option value="licencia">Licencia</option>
-                            <option value="comision">Comisión</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarPersonal(${personalCount})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="emergencias[${emergenciaCount}][descripcion]" class="form-control" rows="2"></textarea>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label>Observaciones</label>
-                        <textarea name="personal[${personalCount}][observaciones]" class="form-control" rows="1"></textarea>
-                    </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function eliminarEmergencia(id) {
+    const element = document.getElementById('emergencia-' + id);
+    if (element) element.remove();
+}
+
+// ============================================================
+//  AGREGAR VEHÍCULO
+// ============================================================
+function agregarVehiculo() {
+    vehiculoCount++;
+    const container = document.getElementById('vehiculos-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-3';
+    div.id = 'vehiculo-' + vehiculoCount;
+    div.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Vehículo</label>
+                    <select name="vehiculos[${vehiculoCount}][vehiculo_id]" class="form-control">
+                        <option value="">Seleccione...</option>
+                        @foreach($vehiculos as $vehiculo)
+                            <option value="{{ $vehiculo->id }}">{{ $vehiculo->codigodis }} - {{ $vehiculo->marca }} {{ $vehiculo->modelo }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
-        `;
-        container.appendChild(div);
-    }
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="vehiculos[${vehiculoCount}][estado]" class="form-control">
+                        <option value="operativo">Operativo</option>
+                        <option value="mantenimiento">Mantenimiento</option>
+                        <option value="averiado">Averiado</option>
+                        <option value="fuera_servicio">Fuera de Servicio</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Tipo Novedad</label>
+                    <input type="text" name="vehiculos[${vehiculoCount}][tipo_novedad]" class="form-control" placeholder="Ej: Mantenimiento, Avería">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarVehiculo(${vehiculoCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Fecha Reporte</label>
+                    <input type="date" name="vehiculos[${vehiculoCount}][fecha_reporte]" class="form-control" value="{{ date('Y-m-d') }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Fecha Solución</label>
+                    <input type="date" name="vehiculos[${vehiculoCount}][fecha_solucion]" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Kilometraje</label>
+                    <input type="number" name="vehiculos[${vehiculoCount}][kilometraje]" class="form-control" placeholder="Km">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="vehiculos[${vehiculoCount}][descripcion]" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
 
-    function eliminarPersonal(id) {
-        const element = document.getElementById('personal-' + id);
-        if (element) element.remove();
-    }
+function eliminarVehiculo(id) {
+    const element = document.getElementById('vehiculo-' + id);
+    if (element) element.remove();
+}
 
-    let integranteGuardiaCount = 0;
+// ============================================================
+//  AGREGAR PERSONAL
+// ============================================================
+function agregarPersonal() {
+    personalCount++;
+    const container = document.getElementById('personal-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-3';
+    div.id = 'personal-' + personalCount;
+    div.innerHTML = `
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Funcionario</label>
+                    <select name="personal[${personalCount}][user_id]" class="form-control">
+                        <option value="">Seleccione...</option>
+                        @foreach($personal as $persona)
+                            <option value="{{ $persona->id }}">{{ $persona->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <input type="text" name="personal[${personalCount}][cargo]" class="form-control" placeholder="Cargo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Turno</label>
+                    <select name="personal[${personalCount}][turno]" class="form-control">
+                        <option value="mañana">Mañana</option>
+                        <option value="tarde">Tarde</option>
+                        <option value="noche">Noche</option>
+                        <option value="descanso">Descanso</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="personal[${personalCount}][estado]" class="form-control">
+                        <option value="presente">Presente</option>
+                        <option value="ausente">Ausente</option>
+                        <option value="permiso">Permiso</option>
+                        <option value="licencia">Licencia</option>
+                        <option value="comision">Comisión</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarPersonal(${personalCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea name="personal[${personalCount}][observaciones]" class="form-control" rows="1"></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
 
+function eliminarPersonal(id) {
+    const element = document.getElementById('personal-' + id);
+    if (element) element.remove();
+}
+
+// ============================================================
+//  AGREGAR INTEGRANTE DE GUARDIA
+// ============================================================
 function agregarIntegranteGuardia() {
     integranteGuardiaCount++;
     const container = document.getElementById('integrantes-guardia-container');
@@ -469,185 +515,269 @@ function eliminarIntegranteGuardia(id) {
     if (element) element.remove();
 }
 
-
-
-</script>
-<script>
+// ============================================================
+//  BUSCAR EMERGENCIAS DEL DÍA
+// ============================================================
 function buscarEmergencias() {
     const fecha = document.getElementById('buscar_fecha').value;
     const estacionId = document.getElementById('buscar_estacion').value;
-    
+
     if (!fecha || !estacionId) {
         alert('Por favor, seleccione fecha y estación.');
         return;
     }
-    
-    // Mostrar loading
-    const container = document.getElementById('emergencias-table-container');
-    container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando emergencias...</p></div>';
-    document.getElementById('emergencias-listado').style.display = 'block';
-    
-    // Usar la ruta de prueba que funciona
-    const url = `/test-buscar?fecha=${fecha}&estacion_id=${estacionId}`;
-    console.log('URL:', url);
-    
-    // Realizar la petición AJAX
-    fetch(url)
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error('HTTP error ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Datos recibidos:', data);
-            document.getElementById('total-emergencias').textContent = data.total;
-            
-            if (data.error) {
-                container.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${data.error}</div>`;
-                return;
-            }
-            
-            if (data.total === 0) {
-                container.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> No se encontraron emergencias en esta fecha y estación.</div>';
-                return;
-            }
-            
-            let html = `
-                <table class="table table-bordered table-sm">
-                    <thead class="thead-light">
-                        <tr>
-                            <th><input type="checkbox" id="seleccionar-todas" onchange="seleccionarTodas(this)"></th>
-                            <th>ID</th>
-                            <th>Incidente</th>
-                            <th>Hora Salida</th>
-                            <th>Hora Llegada</th>
-                            <th>Personal</th>
-                            <th>Vehículos</th>
-                            <th>Detalle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            data.emergencias.forEach(emergencia => {
-                const personalCount = emergencia.usuarios ? emergencia.usuarios.length : 0;
-                const vehiculosCount = emergencia.vehiculos ? emergencia.vehiculos.length : 0;
-                
-                // Verificar si tipo_incidente existe
-                const nombreIncidente = emergencia.tipo_incidente ? emergencia.tipo_incidente.nombre_incidente : 'N/A';
-                
-                html += `
-                    <tr>
-                        <td><input type="checkbox" class="seleccionar-emergencia" value="${emergencia.id}" data-incidente="${nombreIncidente}" data-hora-salida="${emergencia.hora_salida_emergencia || ''}" data-hora-llegada="${emergencia.hora_llegada_emergencia || ''}" data-personal="${personalCount}" data-vehiculos="${vehiculosCount}" data-detalle="${emergencia.detalle_emergencia || ''}"></td>
-                        <td>${emergencia.id}</td>
-                        <td>${nombreIncidente}</td>
-                        <td>${emergencia.hora_salida_emergencia || 'N/A'}</td>
-                        <td>${emergencia.hora_llegada_emergencia || 'N/A'}</td>
-                        <td>${personalCount}</td>
-                        <td>${vehiculosCount}</td>
-                        <td>
-                            <button type="button" class="btn btn-info btn-sm" onclick="verDetalleEmergencia(${emergencia.id})" title="Ver detalle">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                    </tbody>
-                </table>
-                <div class="mt-2">
-                    <button type="button" class="btn btn-success btn-sm" onclick="agregarEmergenciasSeleccionadas()">
-                        <i class="fas fa-plus"></i> Agregar Emergencias Seleccionadas
-                    </button>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error completo:', error);
-            container.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</div>`;
-        });
-}
 
-function seleccionarTodas(checkbox) {
-    document.querySelectorAll('.seleccionar-emergencia').forEach(cb => {
-        cb.checked = checkbox.checked;
+    document.getElementById('emergencias-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('prehospitalarias-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('fuego-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('emergencias-listado').style.display = 'block';
+
+    fetch(`/novedades/buscar-emergencias?fecha=${fecha}&estacion_id=${estacionId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('total-emergencias').textContent = data.totales.emergencias;
+        renderTablaEmergencias(data.emergencias);
+
+        document.getElementById('total-prehospitalarias').textContent = data.totales.prehospitalarias;
+        renderTablaPrehospitalarias(data.prehospitalarias);
+
+        document.getElementById('total-fuego').textContent = data.totales.fuego;
+        renderTablaFuego(data.fuego);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('emergencias-table-container').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        document.getElementById('prehospitalarias-table-container').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        document.getElementById('fuego-table-container').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
     });
 }
 
-function agregarEmergenciasSeleccionadas() {
-    const seleccionadas = document.querySelectorAll('.seleccionar-emergencia:checked');
-    
-    if (seleccionadas.length === 0) {
-        alert('Por favor, seleccione al menos una emergencia.');
+// ============================================================
+//  RENDER TABLA EMERGENCIAS
+// ============================================================
+function renderTablaEmergencias(emergencias) {
+    const container = document.getElementById('emergencias-table-container');
+
+    if (emergencias.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias.</div>';
         return;
     }
-    
-    const container = document.getElementById('emergencias-container');
-    let count = document.querySelectorAll('#emergencias-container .card').length;
-    
-    seleccionadas.forEach(cb => {
-        const id = cb.value;
-        const incidente = cb.dataset.incidente || 'Sin incidente';
-        const horaSalida = cb.dataset.horaSalida || 'N/A';
-        const horaLlegada = cb.dataset.horaLlegada || 'N/A';
-        const personal = cb.dataset.personal || 0;
-        const vehiculos = cb.dataset.vehiculos || 0;
-        const detalle = cb.dataset.detalle || '';
-        
-        count++;
-        const div = document.createElement('div');
-        div.className = 'card mb-2 p-3';
-        div.id = 'emergencia-seleccionada-' + count;
-        div.innerHTML = `
-            <div class="row">
-                <div class="col-md-8">
-                    <input type="hidden" name="emergencias[${count}][id]" value="${id}">
-                    <input type="hidden" name="emergencias[${count}][tipo]" value="${incidente}">
-                    <input type="hidden" name="emergencias[${count}][hora_ingreso]" value="${horaSalida}">
-                    <input type="hidden" name="emergencias[${count}][hora_salida]" value="${horaLlegada}">
-                    <strong>${incidente}</strong>
-                    <br>
-                    <small>Hora Salida: ${horaSalida} | Hora Llegada: ${horaLlegada} | Personal: ${personal} | Vehículos: ${vehiculos}</small>
-                    <br>
-                    <small class="text-muted">${detalle.substring(0, 100)}${detalle.length > 100 ? '...' : ''}</small>
-                </div>
-                <div class="col-md-4 text-right">
-                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarEmergenciaSeleccionada(${count})">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
-                </div>
-            </div>
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodas(this, 'emergencia')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Personal</th>
+                    <th>Vehículos</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    emergencias.forEach(e => {
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="emergencia"
+                           onchange="toggleAsociada(this, 'emergencias_asociadas[]', 'emergencias-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.personal}</td>
+                <td>${e.vehiculos}</td>
+            </tr>
         `;
-        container.appendChild(div);
-        
-        // Desmarcar checkbox
-        cb.checked = false;
     });
-    
-    // Desmarcar el checkbox de "seleccionar todas"
-    const selectAll = document.getElementById('seleccionar-todas');
-    if (selectAll) selectAll.checked = false;
-    
-    // Mostrar mensaje
-    alert(`✅ ${seleccionadas.length} emergencia(s) agregada(s) correctamente.`);
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = html;
 }
 
-function eliminarEmergenciaSeleccionada(id) {
-    const element = document.getElementById('emergencia-seleccionada-' + id);
-    if (element) {
-        element.remove();
+// ============================================================
+//  RENDER TABLA PREHOSPITALARIAS
+// ============================================================
+function renderTablaPrehospitalarias(prehospitalarias) {
+    const container = document.getElementById('prehospitalarias-table-container');
+
+    if (prehospitalarias.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias prehospitalarias.</div>';
+        return;
     }
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodas(this, 'prehospitalaria')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Pacientes</th>
+                    <th>Personal</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    prehospitalarias.forEach(e => {
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="prehospitalaria"
+                           onchange="toggleAsociada(this, 'prehospitalarias_asociadas[]', 'prehospitalarias-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td><span class="badge badge-secondary">${e.prioridad || '—'}</span></td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.pacientes}</td>
+                <td>${e.personal}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = html;
 }
 
-function verDetalleEmergencia(id) {
-    // Aquí puedes abrir un modal o redirigir a la vista de detalle
-    window.open(`/emergencias/${id}`, '_blank');
+// ============================================================
+//  RENDER TABLA FUEGO
+// ============================================================
+function renderTablaFuego(fuego) {
+    const container = document.getElementById('fuego-table-container');
+
+    if (fuego.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias de fuego.</div>';
+        return;
+    }
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodas(this, 'fuego')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Riesgo</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Pacientes</th>
+                    <th>Personal</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    fuego.forEach(e => {
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="fuego"
+                           onchange="toggleAsociada(this, 'fuego_asociadas[]', 'fuego-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td><span class="badge badge-warning">${e.nivel_riesgo || '—'}</span></td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.pacientes}</td>
+                <td>${e.personal}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = html;
+}
+
+// ============================================================
+//  SELECCIONAR TODAS
+// ============================================================
+function seleccionarTodas(checkbox, tipo) {
+    const checkboxes = document.querySelectorAll(`.seleccionar-emergencia[data-tipo="${tipo}"]`);
+    checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+        // Disparar el evento change para que se agregue/elimine el input hidden
+        cb.dispatchEvent(new Event('change'));
+    });
+}
+
+// ============================================================
+//  TOGGLE ASOCIADA (agrega o elimina el input hidden)
+// ============================================================
+function toggleAsociada(checkbox, inputName, containerId) {
+    const id = checkbox.value;
+    let container = document.getElementById(containerId);
+
+    // Si el contenedor no existe, crearlo
+    if (!container) {
+        const div = document.createElement('div');
+        div.id = containerId;
+        div.className = 'mb-2';
+        document.getElementById('formNovedad').appendChild(div);
+        container = div;
+    }
+
+    if (checkbox.checked) {
+        // Agregar el input hidden si no existe
+        if (!container.querySelector(`input[value="${id}"]`)) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = inputName;
+            hidden.value = id;
+            container.appendChild(hidden);
+        }
+    } else {
+        // Eliminar el input hidden si existe
+        const existing = container.querySelector(`input[value="${id}"]`);
+        if (existing) {
+            existing.remove();
+        }
+    }
 }
 </script>
 @endsection

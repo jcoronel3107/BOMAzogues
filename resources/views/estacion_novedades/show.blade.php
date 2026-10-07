@@ -7,8 +7,7 @@
         <div>
             <a href="{{ route('estacion-novedades.export.emergencias', $novedad) }}" class="btn btn-success btn-sm">
                 <i class="fas fa-file-excel"></i> Exportar Emergencias
-             </a>
-            <!-- Botón Enviar Correo -->
+            </a>
             <a href="{{ route('estacion-novedades.enviar-correo', $novedad) }}" class="btn btn-info btn-sm" title="Enviar por Correo">
                 <i class="fas fa-envelope"></i> Enviar Correo
             </a>
@@ -35,10 +34,6 @@
                     </form>
                 @endif
             @endcan
-
-           
-
-            
             <a href="{{ route('estacion-novedades.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>
@@ -52,6 +47,7 @@
             </div>
         </div>
 
+        {{-- ===== DATOS GENERALES ===== --}}
         <div class="row">
             <div class="col-md-6">
                 <table class="table table-bordered">
@@ -118,76 +114,62 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Flujo de estados -->
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <h5 class="text-primary">Flujo de la Novedad</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Estado</th>
-                                    <th>Responsable</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Elaboración -->
-                                <tr>
-                                    <td>
-                                        <span class="badge badge-secondary">Elaboración</span>
-                                        @if($novedad->estado == 'elaboracion')
-                                            <span class="badge badge-warning">Actual</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $novedad->usuarioElabora->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_elaboracion ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : 'N/A' }}</td>
-                                </tr>
-
-                                <!-- Revisión -->
-                                <tr>
-                                    <td>
-                                        <span class="badge badge-info">Revisión</span>
-                                        @if($novedad->estado == 'revision')
-                                            <span class="badge badge-warning">Actual</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $novedad->usuarioRevisa->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_revision ? $novedad->fecha_revision->format('d/m/Y H:i') : 'N/A' }}</td>
-                                </tr>
-
-                                <!-- Aprobación -->
-                                <tr>
-                                    <td>
-                                        <span class="badge badge-success">Aprobado</span>
-                                        @if($novedad->estado == 'aprobado')
-                                            <span class="badge badge-warning">Actual</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $novedad->usuarioAprueba->name ?? 'N/A' }}</td>
-                                    <td>{{ $novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
-                                </tr>
-
-                                
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            /*================================
-
-
-            */=================================
-
-
-            
         </div>
 
-        <!-- Emergencias -->
+        {{-- ===== FLUJO DE ESTADOS ===== --}}
         <div class="row mt-4">
             <div class="col-md-12">
-                <h5 class="text-primary">Emergencias Atendidas</h5>
+                <h5 class="text-primary">Flujo de la Novedad</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Estado</th>
+                                <th>Responsable</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="badge badge-secondary">Elaboración</span>
+                                    @if($novedad->estado == 'elaboracion')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $novedad->usuarioElabora->name ?? 'N/A' }}</td>
+                                <td>{{ $novedad->fecha_elaboracion ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="badge badge-info">Revisión</span>
+                                    @if($novedad->estado == 'revision')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $novedad->usuarioRevisa->name ?? 'N/A' }}</td>
+                                <td>{{ $novedad->fecha_revision ? $novedad->fecha_revision->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="badge badge-success">Aprobado</span>
+                                    @if($novedad->estado == 'aprobado')
+                                        <span class="badge badge-warning">Actual</span>
+                                    @endif
+                                </td>
+                                <td>{{ $novedad->usuarioAprueba->name ?? 'N/A' }}</td>
+                                <td>{{ $novedad->fecha_aprobacion ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- ===== EMERGENCIAS MANUALES ===== --}}
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h5 class="text-primary">Emergencias Atendidas (Manual)</h5>
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
                         <thead class="thead-light">
@@ -225,7 +207,151 @@
             </div>
         </div>
 
-        <!-- Vehículos -->
+        {{-- ===== EMERGENCIAS ASOCIADAS (MÓDULO GENERAL) ===== --}}
+        @if($novedad->emergenciasAsociadas->count() > 0)
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-primary">
+                        <i class="fas fa-ambulance"></i> Emergencias Asociadas (Módulo General)
+                        <span class="badge badge-primary">{{ $novedad->emergenciasAsociadas->count() }}</span>
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Tipo</th>
+                                    <th>Hora Salida</th>
+                                    <th>Hora Llegada</th>
+                                    <th>Personal</th>
+                                    <th>Vehículos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($novedad->emergenciasAsociadas as $key => $emergencia)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>
+                                            <a href="{{ url('/emergencias/' . $emergencia->id) }}" target="_blank">
+                                                {{ 'EMG-' . str_pad($emergencia->id, 4, '0', STR_PAD_LEFT) }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $emergencia->tipoIncidente->nombre_incidente ?? 'Sin tipo' }}</td>
+                                        <td>{{ $emergencia->hora_salida_emergencia ?? '—' }}</td>
+                                        <td>{{ $emergencia->hora_llegada_emergencia ?? '—' }}</td>
+                                        <td>{{ $emergencia->usuarios->count() ?? 0 }}</td>
+                                        <td>{{ $emergencia->vehiculos->count() ?? 0 }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- ===== EMERGENCIAS PREHOSPITALARIAS ASOCIADAS ===== --}}
+        @if($novedad->prehospitalariasAsociadas->count() > 0)
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-danger">
+                        <i class="fas fa-ambulance"></i> Emergencias Prehospitalarias Asociadas
+                        <span class="badge badge-danger">{{ $novedad->prehospitalariasAsociadas->count() }}</span>
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Tipo</th>
+                                    <th>Prioridad</th>
+                                    <th>Hora Salida</th>
+                                    <th>Hora Llegada</th>
+                                    <th>Pacientes</th>
+                                    <th>Personal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($novedad->prehospitalariasAsociadas as $key => $emergencia)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>
+                                            <a href="{{ route('emergencias-prehospitalarias.show', $emergencia) }}" target="_blank">
+                                                {{ $emergencia->codigo }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $emergencia->tipo_emergencia }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $emergencia->color_prioridad }}">
+                                                {{ $emergencia->prioridad }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $emergencia->fecha_salida?->format('H:i') ?? '—' }}</td>
+                                        <td>{{ $emergencia->fecha_llegada_base?->format('H:i') ?? '—' }}</td>
+                                        <td>{{ $emergencia->pacientes->count() }}</td>
+                                        <td>{{ $emergencia->personal->count() }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- ===== EMERGENCIAS DE FUEGO ASOCIADAS ===== --}}
+        @if($novedad->fuegoAsociadas->count() > 0)
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <h5 class="text-warning">
+                        <i class="fas fa-fire"></i> Emergencias de Fuego Asociadas
+                        <span class="badge badge-warning">{{ $novedad->fuegoAsociadas->count() }}</span>
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Tipo</th>
+                                    <th>Riesgo</th>
+                                    <th>Hora Salida</th>
+                                    <th>Hora Llegada</th>
+                                    <th>Pacientes</th>
+                                    <th>Personal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($novedad->fuegoAsociadas as $key => $emergencia)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>
+                                            <a href="{{ route('emergencias-fuego.show', $emergencia) }}" target="_blank">
+                                                {{ $emergencia->codigo }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $emergencia->tipo_fuego }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $emergencia->color_prioridad }}">
+                                                {{ $emergencia->nivel_riesgo }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $emergencia->fecha_salida?->format('H:i') ?? '—' }}</td>
+                                        <td>{{ $emergencia->fecha_llegada_base?->format('H:i') ?? '—' }}</td>
+                                        <td>{{ $emergencia->pacientes->count() }}</td>
+                                        <td>{{ $emergencia->personal->count() }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- ===== VEHÍCULOS ===== --}}
         <div class="row mt-4">
             <div class="col-md-12">
                 <h5 class="text-primary">Novedades de Vehículos</h5>
@@ -264,7 +390,7 @@
             </div>
         </div>
 
-        <!-- Personal -->
+        {{-- ===== PERSONAL ===== --}}
         <div class="row mt-4">
             <div class="col-md-12">
                 <h5 class="text-primary">Novedades de Personal</h5>
@@ -316,8 +442,8 @@
             </div>
         </div>
 
-        <!-- Integrantes de la Guardia -->
-            @if($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0)
+        {{-- ===== INTEGRANTES DE LA GUARDIA ===== --}}
+        @if($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0)
             <div class="row mt-4">
                 <div class="col-md-12">
                     <h5 class="text-primary">Integrantes de la Guardia Bomberil</h5>
@@ -347,8 +473,7 @@
                     </div>
                 </div>
             </div>
-            @endif
-        
+        @endif
     </div>
 </div>
 @endsection

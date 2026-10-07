@@ -144,4 +144,22 @@ class EstacionNovedad extends Model
         
         return view('estacion_novedades.index', compact('novedades'));
     }
+
+    public function emergenciasAsociadas()
+    {
+        return $this->belongsToMany(Emergencia::class, 'estacion_novedad_emergencias', 'estacion_novedad_id', 'emergencia_id')
+                    ->withTimestamps();
+    }
+
+    public function prehospitalariasAsociadas()
+    {
+        return $this->belongsToMany(EmergenciaPrehospitalaria::class, 'estacion_novedad_prehospitalarias', 'estacion_novedad_id', 'emergencia_prehospitalaria_id')
+                    ->withTimestamps();
+    }
+
+    public function fuegoAsociadas()
+    {
+        return $this->belongsToMany(EmergenciaFuego::class, 'estacion_novedad_fuego', 'estacion_novedad_id', 'emergencia_fuego_id')
+                    ->withTimestamps();
+    }
 }

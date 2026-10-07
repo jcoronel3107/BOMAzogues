@@ -357,20 +357,10 @@ Route::get('test-buscar', function() {
     ]);
 });
 
-Route::get('estacion-novedades/buscar-emergencias-json', function() {
-    $fecha = request()->input('fecha');
-    $estacionId = request()->input('estacion_id');
-    
-    $emergencias = App\Emergencia::where('estacion_id', $estacionId)
-        ->whereDate('fecha', $fecha)
-        ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
-        ->get();
-    
-    return response()->json([
-        'emergencias' => $emergencias,
-        'total' => $emergencias->count()
-    ]);
-})->middleware('auth');
+Route::get('novedades/buscar-emergencias',
+    [App\Http\Controllers\EstacionNovedadController::class, 'buscarEmergencias'])
+    ->name('novedades.buscar-emergencias')
+    ->middleware('auth');
 
 
 Route::get('estacion-novedades/buscar-emergencias', [App\Http\Controllers\EstacionNovedadController::class, 'buscarEmergencias'])->name('estacion-novedades.buscar-emergencias')->middleware('auth');

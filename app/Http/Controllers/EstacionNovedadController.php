@@ -16,7 +16,8 @@ use App\Notifications\NovedadEnRevision;
 use App\Notifications\NovedadAprobada;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
-
+use App\EmergenciaPrehospitalaria;   // ⬅️ AGREGAR SI FALTA
+use App\EmergenciaFuego;              // ⬅️ AGREGAR SI FALTA
 
 class EstacionNovedadController extends Controller
 {
@@ -95,34 +96,93 @@ class EstacionNovedadController extends Controller
 
     // Buscar emergencias por fecha
     public function buscarEmergencias(Request $request)
-    {
+{
         try {
             $fecha = $request->input('fecha');
             $estacionId = $request->input('estacion_id');
 
             \Log::info('Buscando emergencias - Fecha: ' . $fecha . ' - Estación: ' . $estacionId);
 
+            // ===== 1. EMERGENCIAS (módulo antiguo) =====
             $emergencias = Emergencia::where('estacion_id', $estacionId)
                 ->whereDate('fecha', $fecha)
                 ->with(['tipoIncidente', 'estacion', 'usuarios', 'vehiculos'])
-                ->get();
+                ->get()
+                ->map(function ($e) {
+                    return [
+                        'id' => $e->id,
+                        'codigo' => 'EMG-' . str_pad($e->id, 4, '0', STR_PAD_LEFT),
+                        'tipo' => $e->tipoIncidente->nombre_incidente ?? 'Sin tipo',
+                        'hora_salida' => $e->hora_salida_emergencia,
+                        'hora_llegada' => $e->hora_llegada_emergencia,
+                        'detalle' => $e->detalle_emergencia,
+                        'personal' => $e->usuarios->count(),
+                        'vehiculos' => $e->vehiculos->count(),
+                    ];
+                });
 
-            \Log::info('Emergencias encontradas: ' . $emergencias->count());
+            // ===== 2. EMERGENCIAS PREHOSPITALARIAS =====
+            $prehospitalarias = EmergenciaPrehospitalaria::where('estacion_id', $estacionId)
+                ->whereDate('fecha_salida', $fecha)
+                ->with(['vehiculo', 'personal', 'pacientes'])
+                ->get()
+                ->map(function ($e) {
+                    return [
+                        'id' => $e->id,
+                        'codigo' => $e->codigo,
+                        'tipo' => $e->tipo_emergencia,
+                        'hora_salida' => $e->fecha_salida ? $e->fecha_salida->format('H:i') : null,
+                        'hora_llegada' => $e->fecha_llegada_base ? $e->fecha_llegada_base->format('H:i') : null,
+                        'detalle' => $e->motivo_llamado . ' - ' . $e->direccion,
+                        'personal' => $e->personal->count(),
+                        'vehiculos' => $e->vehiculo ? 1 : 0,
+                        'pacientes' => $e->pacientes->count(),
+                        'prioridad' => $e->prioridad,
+                    ];
+                });
+
+            // ===== 3. EMERGENCIAS DE FUEGO =====
+            $fuego = EmergenciaFuego::where('estacion_id', $estacionId)
+                ->whereDate('fecha_salida', $fecha)
+                ->with(['vehiculos', 'personal', 'pacientes'])
+                ->get()
+                ->map(function ($e) {
+                    return [
+                        'id' => $e->id,
+                        'codigo' => $e->codigo,
+                        'tipo' => $e->tipo_fuego,
+                        'hora_salida' => $e->fecha_salida ? $e->fecha_salida->format('H:i') : null,
+                        'hora_llegada' => $e->fecha_llegada_base ? $e->fecha_llegada_base->format('H:i') : null,
+                        'detalle' => $e->motivo_llamado . ' - ' . $e->direccion,
+                        'personal' => $e->personal->count(),
+                        'vehiculos' => $e->vehiculos->count(),
+                        'pacientes' => $e->pacientes->count(),
+                        'nivel_riesgo' => $e->nivel_riesgo,
+                    ];
+                });
 
             return response()->json([
                 'emergencias' => $emergencias,
-                'total' => $emergencias->count()
+                'prehospitalarias' => $prehospitalarias,
+                'fuego' => $fuego,
+                'totales' => [
+                    'emergencias' => $emergencias->count(),
+                    'prehospitalarias' => $prehospitalarias->count(),
+                    'fuego' => $fuego->count(),
+                    'total' => $emergencias->count() + $prehospitalarias->count() + $fuego->count(),
+                ],
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error al buscar emergencias: ' . $e->getMessage());
             return response()->json([
                 'error' => $e->getMessage(),
                 'emergencias' => [],
-                'total' => 0
+                'prehospitalarias' => [],
+                'fuego' => [],
             ], 500);
         }
-    }
+}
 
     public function store(Request $request)
     {
@@ -171,6 +231,23 @@ class EstacionNovedadController extends Controller
                     ]);
                 }
             }
+        }
+        
+        // ===== ASOCIAR EMERGENCIAS EXISTENTES =====
+
+        // Emergencias (módulo antiguo)
+        if ($request->has('emergencias_asociadas')) {
+            $novedad->emergenciasAsociadas()->sync($request->emergencias_asociadas);
+        }
+
+        // Emergencias Prehospitalarias
+        if ($request->has('prehospitalarias_asociadas')) {
+            $novedad->prehospitalariasAsociadas()->sync($request->prehospitalarias_asociadas);
+        }
+
+        // Emergencias de Fuego
+        if ($request->has('fuego_asociadas')) {
+            $novedad->fuegoAsociadas()->sync($request->fuego_asociadas);
         }
 
         // Guardar novedades de vehículos
@@ -237,39 +314,45 @@ class EstacionNovedadController extends Controller
     }
 
     public function show($id)
-    {
-        $novedad = EstacionNovedad::with([
-            'estacion',
-            'usuarioElabora',
-            'usuarioRevisa',
-            'usuarioAprueba',
-            'emergencias',
-            'vehiculos.vehiculo',
-            'personal.user'
-        ])->findOrFail($id);
+{
+    $novedad = EstacionNovedad::with([
+        'estacion',
+        'usuarioElabora',
+        'usuarioRevisa',
+        'usuarioAprueba',
+        'emergencias',
+        'emergenciasAsociadas',           // ⬅️ NUEVA
+        'prehospitalariasAsociadas',      // ⬅️ NUEVA
+        'fuegoAsociadas',                 // ⬅️ NUEVA
+        'vehiculos',
+        'personal'
+    ])->findOrFail($id);
 
-        return view('estacion_novedades.show', compact('novedad'));
-    }
+    return view('estacion_novedades.show', compact('novedad'));
+}
 
     public function edit($id)
-    {
-        $novedad = EstacionNovedad::with([
-            'emergencias',
-            'vehiculos',
-            'personal'
-        ])->findOrFail($id);
+{
+    $novedad = EstacionNovedad::with([
+        'emergencias',
+        'emergenciasAsociadas',           // ⬅️ NUEVA
+        'prehospitalariasAsociadas',      // ⬅️ NUEVA
+        'fuegoAsociadas',                 // ⬅️ NUEVA
+        'vehiculos',
+        'personal'
+    ])->findOrFail($id);
 
-        if (!$novedad->puedeEditar()) {
-            return redirect()->route('estacion-novedades.index')
-                ->with('error', 'Esta novedad no puede ser editada porque ya fue aprobada.');
-        }
-
-        $estaciones = Station::all();
-        $personal = User::all();
-        $vehiculos = Vehiculo::all();
-
-        return view('estacion_novedades.edit', compact('novedad', 'estaciones', 'personal', 'vehiculos'));
+    if (!$novedad->puedeEditar()) {
+        return redirect()->route('estacion-novedades.index')
+            ->with('error', 'Esta novedad no puede ser editada porque ya fue aprobada.');
     }
+
+    $estaciones = Station::all();
+    $personal = User::all();
+    $vehiculos = Vehiculo::all();
+
+    return view('estacion_novedades.edit', compact('novedad', 'estaciones', 'personal', 'vehiculos'));
+}
 
     public function update(Request $request, $id)
     {
@@ -313,6 +396,29 @@ class EstacionNovedadController extends Controller
                 }
             }
         }
+
+       
+        // ===== RE-SINCRONIZAR EMERGENCIAS ASOCIADAS =====
+
+        if ($request->has('emergencias_asociadas')) {
+            $novedad->emergenciasAsociadas()->sync($request->emergencias_asociadas);
+        } else {
+            $novedad->emergenciasAsociadas()->detach();
+        }
+
+        if ($request->has('prehospitalarias_asociadas')) {
+            $novedad->prehospitalariasAsociadas()->sync($request->prehospitalarias_asociadas);
+        } else {
+            $novedad->prehospitalariasAsociadas()->detach();
+        }
+
+        if ($request->has('fuego_asociadas')) {
+            $novedad->fuegoAsociadas()->sync($request->fuego_asociadas);
+        } else {
+            $novedad->fuegoAsociadas()->detach();
+        }
+
+
 
         // Guardar novedades de vehículos
         if ($request->has('vehiculos')) {
@@ -463,324 +569,324 @@ class EstacionNovedadController extends Controller
 
     public function exportPdf($id)
     {
-    try {
-        $novedad = EstacionNovedad::with([
-            'estacion',
-            'usuarioElabora',
-            'usuarioRevisa',
-            'usuarioAprueba',
-            'emergencias',
-            'vehiculos.vehiculo',
-            'personal.user'
-        ])->findOrFail($id);
+        try {
+            $novedad = EstacionNovedad::with([
+                'estacion',
+                'usuarioElabora',
+                'usuarioRevisa',
+                'usuarioAprueba',
+                'emergencias',
+                'vehiculos.vehiculo',
+                'personal.user'
+            ])->findOrFail($id);
 
-        $pdf = new \FPDF('P', 'mm', 'A4');
-        $pdf->AddPage();
-        $pdf->SetMargins(15, 15, 15);
+            $pdf = new \FPDF('P', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetMargins(15, 15, 15);
 
-        // Título
-        $pdf->SetFont('Arial', 'B', 16);
-        $pdf->Cell(180, 10, 'NOVEDAD DE ESTACION', 0, 1, 'C');
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(180, 8, 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT), 0, 1, 'C');
-        $pdf->Ln(5);
+            // Título
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(180, 10, 'NOVEDAD DE ESTACION', 0, 1, 'C');
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(180, 8, 'NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT), 0, 1, 'C');
+            $pdf->Ln(5);
 
-        // Línea separadora
-        $pdf->SetDrawColor(0, 0, 0);
-        $pdf->Line(15, 40, 195, 40);
-        $pdf->Ln(5);
+            // Línea separadora
+            $pdf->SetDrawColor(0, 0, 0);
+            $pdf->Line(15, 40, 195, 40);
+            $pdf->Ln(5);
 
-        // INFORMACION GENERAL
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(180, 8, 'INFORMACION GENERAL', 0, 1, 'L');
-        $pdf->SetFont('Arial', '', 11);
-
-        $pdf->Cell(50, 8, 'Fecha:', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(130, 8, $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('d/m/Y') : date('d/m/Y', strtotime($novedad->fecha)), 0, 1);
-        
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(50, 8, 'Estacion:', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(130, 8, $novedad->estacion->nombre ?? 'N/A', 0, 1);
-
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(50, 8, 'Estado:', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(130, 8, ucfirst($novedad->estado), 0, 1);
-
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(50, 8, 'Elaborado por:', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(130, 8, $novedad->usuarioElabora->name ?? 'N/A', 0, 1);
-
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(50, 8, 'Fecha Elaboracion:', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(130, 8, $novedad->fecha_elaboracion instanceof \Carbon\Carbon ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_elaboracion)), 0, 1);
-
-        if ($novedad->usuarioRevisa) {
+            // INFORMACION GENERAL
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(180, 8, 'INFORMACION GENERAL', 0, 1, 'L');
             $pdf->SetFont('Arial', '', 11);
-            $pdf->Cell(50, 8, 'Revisado por:', 0, 0);
+
+            $pdf->Cell(50, 8, 'Fecha:', 0, 0);
             $pdf->SetFont('Arial', 'B', 11);
-            $pdf->Cell(130, 8, $novedad->usuarioRevisa->name, 0, 1);
-
+            $pdf->Cell(130, 8, $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('d/m/Y') : date('d/m/Y', strtotime($novedad->fecha)), 0, 1);
+            
             $pdf->SetFont('Arial', '', 11);
-            $pdf->Cell(50, 8, 'Fecha Revision:', 0, 0);
+            $pdf->Cell(50, 8, 'Estacion:', 0, 0);
             $pdf->SetFont('Arial', 'B', 11);
-            $pdf->Cell(130, 8, $novedad->fecha_revision instanceof \Carbon\Carbon ? $novedad->fecha_revision->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_revision)), 0, 1);
-        }
+            $pdf->Cell(130, 8, $novedad->estacion->nombre ?? 'N/A', 0, 1);
 
-        if ($novedad->usuarioAprueba) {
             $pdf->SetFont('Arial', '', 11);
-            $pdf->Cell(50, 8, 'Aprobado por:', 0, 0);
+            $pdf->Cell(50, 8, 'Estado:', 0, 0);
             $pdf->SetFont('Arial', 'B', 11);
-            $pdf->Cell(130, 8, $novedad->usuarioAprueba->name, 0, 1);
+            $pdf->Cell(130, 8, ucfirst($novedad->estado), 0, 1);
 
             $pdf->SetFont('Arial', '', 11);
-            $pdf->Cell(50, 8, 'Fecha Aprobacion:', 0, 0);
+            $pdf->Cell(50, 8, 'Elaborado por:', 0, 0);
             $pdf->SetFont('Arial', 'B', 11);
-            $pdf->Cell(130, 8, $novedad->fecha_aprobacion instanceof \Carbon\Carbon ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_aprobacion)), 0, 1);
-        }
+            $pdf->Cell(130, 8, $novedad->usuarioElabora->name ?? 'N/A', 0, 1);
 
-        // Observaciones
-        if ($novedad->observaciones) {
-            $pdf->Ln(3);
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(180, 8, 'OBSERVACIONES GENERALES', 0, 1, 'L');
             $pdf->SetFont('Arial', '', 11);
-            $pdf->MultiCell(180, 6, $novedad->observaciones, 0, 'L');
-        }
+            $pdf->Cell(50, 8, 'Fecha Elaboracion:', 0, 0);
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(130, 8, $novedad->fecha_elaboracion instanceof \Carbon\Carbon ? $novedad->fecha_elaboracion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_elaboracion)), 0, 1);
 
-        $pdf->Ln(3);
+            if ($novedad->usuarioRevisa) {
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->Cell(50, 8, 'Revisado por:', 0, 0);
+                $pdf->SetFont('Arial', 'B', 11);
+                $pdf->Cell(130, 8, $novedad->usuarioRevisa->name, 0, 1);
 
-        // EMERGENCIAS
-        if ($novedad->emergencias->count() > 0) {
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(180, 8, 'EMERGENCIAS ATENDIDAS', 0, 1, 'L');
-            $pdf->SetFont('Arial', 'B', 10);
-            
-            // Encabezados
-            $pdf->Cell(10, 6, '#', 1, 0, 'C');
-            $pdf->Cell(30, 6, 'Tipo', 1, 0, 'C');
-            $pdf->Cell(40, 6, 'Lugar', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Hora Ingreso', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Hora Salida', 1, 0, 'C');
-            $pdf->Cell(20, 6, 'Afectados', 1, 0, 'C');
-            $pdf->Cell(20, 6, 'Vehículos', 1, 0, 'C');
-            $pdf->Cell(20, 6, 'Bomberos', 1, 1, 'C');
-
-            $pdf->SetFont('Arial', '', 9);
-            foreach ($novedad->emergencias as $key => $emergencia) {
-                $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
-                $pdf->Cell(30, 6, ucfirst($emergencia->tipo_emergencia), 1, 0, 'L');
-                $pdf->Cell(40, 6, $emergencia->lugar, 1, 0, 'L');
-                $pdf->Cell(25, 6, $emergencia->hora_ingreso, 1, 0, 'C');
-                $pdf->Cell(25, 6, $emergencia->hora_salida ?? '-', 1, 0, 'C');
-                $pdf->Cell(20, 6, $emergencia->numero_afectados, 1, 0, 'C');
-                $pdf->Cell(20, 6, $emergencia->numero_vehiculos, 1, 0, 'C');
-                $pdf->Cell(20, 6, $emergencia->numero_bomberos, 1, 1, 'C');
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->Cell(50, 8, 'Fecha Revision:', 0, 0);
+                $pdf->SetFont('Arial', 'B', 11);
+                $pdf->Cell(130, 8, $novedad->fecha_revision instanceof \Carbon\Carbon ? $novedad->fecha_revision->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_revision)), 0, 1);
             }
-            $pdf->Ln(3);
-        }
 
-        // VEHICULOS
-        if ($novedad->vehiculos->count() > 0) {
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(180, 8, 'NOVEDADES DE VEHICULOS', 0, 1, 'L');
-            $pdf->SetFont('Arial', 'B', 10);
-            
-            // Encabezados
-            $pdf->Cell(10, 6, '#', 1, 0, 'C');
-            $pdf->Cell(30, 6, 'Vehículo', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Estado', 1, 0, 'C');
-            $pdf->Cell(35, 6, 'Tipo Novedad', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Fecha Reporte', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Fecha Solución', 1, 0, 'C');
-            $pdf->Cell(20, 6, 'Kilometraje', 1, 1, 'C');
+            if ($novedad->usuarioAprueba) {
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->Cell(50, 8, 'Aprobado por:', 0, 0);
+                $pdf->SetFont('Arial', 'B', 11);
+                $pdf->Cell(130, 8, $novedad->usuarioAprueba->name, 0, 1);
 
-            $pdf->SetFont('Arial', '', 9);
-            foreach ($novedad->vehiculos as $key => $vehiculo) {
-                $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
-                $pdf->Cell(30, 6, $vehiculo->vehiculo->placa ?? 'N/A', 1, 0, 'L');
-                $pdf->Cell(25, 6, ucfirst($vehiculo->estado), 1, 0, 'L');
-                $pdf->Cell(35, 6, $vehiculo->tipo_novedad, 1, 0, 'L');
-                $pdf->Cell(25, 6, $vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_reporte)), 1, 0, 'C');
-                $pdf->Cell(25, 6, $vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_solucion))) : '-', 1, 0, 'C');
-                $pdf->Cell(20, 6, $vehiculo->kilometraje ?? '-', 1, 1, 'C');
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->Cell(50, 8, 'Fecha Aprobacion:', 0, 0);
+                $pdf->SetFont('Arial', 'B', 11);
+                $pdf->Cell(130, 8, $novedad->fecha_aprobacion instanceof \Carbon\Carbon ? $novedad->fecha_aprobacion->format('d/m/Y H:i') : date('d/m/Y H:i', strtotime($novedad->fecha_aprobacion)), 0, 1);
             }
-            $pdf->Ln(3);
-        }
 
-        // PERSONAL
-        if ($novedad->personal->count() > 0) {
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(180, 8, 'PERSONAL', 0, 1, 'L');
-            $pdf->SetFont('Arial', 'B', 10);
-            
-            // Encabezados
-            $pdf->Cell(10, 6, '#', 1, 0, 'C');
-            $pdf->Cell(35, 6, 'Nombre', 1, 0, 'C');
-            $pdf->Cell(30, 6, 'Cargo', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Turno', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Hora Entrada', 1, 0, 'C');
-            $pdf->Cell(25, 6, 'Hora Salida', 1, 0, 'C');
-            $pdf->Cell(30, 6, 'Estado', 1, 1, 'C');
-
-            $pdf->SetFont('Arial', '', 9);
-            foreach ($novedad->personal as $key => $persona) {
-                $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
-                $pdf->Cell(35, 6, $persona->user->name ?? 'N/A', 1, 0, 'L');
-                $pdf->Cell(30, 6, $persona->cargo, 1, 0, 'L');
-                $pdf->Cell(25, 6, ucfirst($persona->turno), 1, 0, 'L');
-                $pdf->Cell(25, 6, $persona->hora_entrada ?? '-', 1, 0, 'C');
-                $pdf->Cell(25, 6, $persona->hora_salida ?? '-', 1, 0, 'C');
-                $pdf->Cell(30, 6, ucfirst($persona->estado), 1, 1, 'L');
+            // Observaciones
+            if ($novedad->observaciones) {
+                $pdf->Ln(3);
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(180, 8, 'OBSERVACIONES GENERALES', 0, 1, 'L');
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->MultiCell(180, 6, $novedad->observaciones, 0, 'L');
             }
+
             $pdf->Ln(3);
-        }
 
-        // ============================================
-        // INTEGRANTES DE LA GUARDIA BOMBERIL
-        // ============================================
-        if ($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0) {
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(180, 8, 'INTEGRANTES DE LA GUARDIA BOMBERIL', 0, 1, 'L');
-            $pdf->SetFont('Arial', 'B', 10);
-            
-            // Encabezados
-            $pdf->Cell(10, 6, '#', 1, 0, 'C');
-            $pdf->Cell(60, 6, 'Nombres y Apellidos', 1, 0, 'C');
-            $pdf->Cell(35, 6, 'Cédula', 1, 0, 'C');
-            $pdf->Cell(35, 6, 'Cargo', 1, 0, 'C');
-            $pdf->Cell(40, 6, 'Observaciones', 1, 1, 'C');
+            // EMERGENCIAS
+            if ($novedad->emergencias->count() > 0) {
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(180, 8, 'EMERGENCIAS ATENDIDAS', 0, 1, 'L');
+                $pdf->SetFont('Arial', 'B', 10);
+                
+                // Encabezados
+                $pdf->Cell(10, 6, '#', 1, 0, 'C');
+                $pdf->Cell(30, 6, 'Tipo', 1, 0, 'C');
+                $pdf->Cell(40, 6, 'Lugar', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Hora Ingreso', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Hora Salida', 1, 0, 'C');
+                $pdf->Cell(20, 6, 'Afectados', 1, 0, 'C');
+                $pdf->Cell(20, 6, 'Vehículos', 1, 0, 'C');
+                $pdf->Cell(20, 6, 'Bomberos', 1, 1, 'C');
 
-            $pdf->SetFont('Arial', '', 9);
-            foreach ($novedad->integrantes_guardia as $key => $integrante) {
-                $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
-                $pdf->Cell(60, 6, $integrante['nombre'] ?? 'N/A', 1, 0, 'L');
-                $pdf->Cell(35, 6, $integrante['cedula'] ?? 'N/A', 1, 0, 'C');
-                $pdf->Cell(35, 6, $integrante['cargo'] ?? 'N/A', 1, 0, 'L');
-                $pdf->Cell(40, 6, $integrante['observaciones'] ?? '-', 1, 1, 'L');
+                $pdf->SetFont('Arial', '', 9);
+                foreach ($novedad->emergencias as $key => $emergencia) {
+                    $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
+                    $pdf->Cell(30, 6, ucfirst($emergencia->tipo_emergencia), 1, 0, 'L');
+                    $pdf->Cell(40, 6, $emergencia->lugar, 1, 0, 'L');
+                    $pdf->Cell(25, 6, $emergencia->hora_ingreso, 1, 0, 'C');
+                    $pdf->Cell(25, 6, $emergencia->hora_salida ?? '-', 1, 0, 'C');
+                    $pdf->Cell(20, 6, $emergencia->numero_afectados, 1, 0, 'C');
+                    $pdf->Cell(20, 6, $emergencia->numero_vehiculos, 1, 0, 'C');
+                    $pdf->Cell(20, 6, $emergencia->numero_bomberos, 1, 1, 'C');
+                }
+                $pdf->Ln(3);
             }
-            $pdf->Ln(3);
-        }
 
-        // SECCION DE FIRMAS
-        $pdf->Ln(8);
-        $pdf->SetDrawColor(0, 0, 0);
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->Cell(180, 8, 'FIRMAS DE RESPONSABLES', 0, 1, 'C');
-        $pdf->Ln(5);
+            // VEHICULOS
+            if ($novedad->vehiculos->count() > 0) {
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(180, 8, 'NOVEDADES DE VEHICULOS', 0, 1, 'L');
+                $pdf->SetFont('Arial', 'B', 10);
+                
+                // Encabezados
+                $pdf->Cell(10, 6, '#', 1, 0, 'C');
+                $pdf->Cell(30, 6, 'Vehículo', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Estado', 1, 0, 'C');
+                $pdf->Cell(35, 6, 'Tipo Novedad', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Fecha Reporte', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Fecha Solución', 1, 0, 'C');
+                $pdf->Cell(20, 6, 'Kilometraje', 1, 1, 'C');
 
-        // Líneas de firma
-        $pdf->SetFont('Arial', '', 11);
+                $pdf->SetFont('Arial', '', 9);
+                foreach ($novedad->vehiculos as $key => $vehiculo) {
+                    $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
+                    $pdf->Cell(30, 6, $vehiculo->vehiculo->placa ?? 'N/A', 1, 0, 'L');
+                    $pdf->Cell(25, 6, ucfirst($vehiculo->estado), 1, 0, 'L');
+                    $pdf->Cell(35, 6, $vehiculo->tipo_novedad, 1, 0, 'L');
+                    $pdf->Cell(25, 6, $vehiculo->fecha_reporte instanceof \Carbon\Carbon ? $vehiculo->fecha_reporte->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_reporte)), 1, 0, 'C');
+                    $pdf->Cell(25, 6, $vehiculo->fecha_solucion ? ($vehiculo->fecha_solucion instanceof \Carbon\Carbon ? $vehiculo->fecha_solucion->format('d/m/Y') : date('d/m/Y', strtotime($vehiculo->fecha_solucion))) : '-', 1, 0, 'C');
+                    $pdf->Cell(20, 6, $vehiculo->kilometraje ?? '-', 1, 1, 'C');
+                }
+                $pdf->Ln(3);
+            }
 
-        // Elaborado por
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, '_________________________', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'Firma', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(60, 10, $novedad->usuarioElabora->name ?? '_________________________', 0, 0);
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'ELABORADO POR', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Ln(5);
+            // PERSONAL
+            if ($novedad->personal->count() > 0) {
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(180, 8, 'PERSONAL', 0, 1, 'L');
+                $pdf->SetFont('Arial', 'B', 10);
+                
+                // Encabezados
+                $pdf->Cell(10, 6, '#', 1, 0, 'C');
+                $pdf->Cell(35, 6, 'Nombre', 1, 0, 'C');
+                $pdf->Cell(30, 6, 'Cargo', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Turno', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Hora Entrada', 1, 0, 'C');
+                $pdf->Cell(25, 6, 'Hora Salida', 1, 0, 'C');
+                $pdf->Cell(30, 6, 'Estado', 1, 1, 'C');
 
-        // Revisado por
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, '_________________________', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'Firma', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(60, 10, $novedad->usuarioRevisa->name ?? '_________________________', 0, 0);
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'REVISADO POR', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Ln(5);
+                $pdf->SetFont('Arial', '', 9);
+                foreach ($novedad->personal as $key => $persona) {
+                    $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
+                    $pdf->Cell(35, 6, $persona->user->name ?? 'N/A', 1, 0, 'L');
+                    $pdf->Cell(30, 6, $persona->cargo, 1, 0, 'L');
+                    $pdf->Cell(25, 6, ucfirst($persona->turno), 1, 0, 'L');
+                    $pdf->Cell(25, 6, $persona->hora_entrada ?? '-', 1, 0, 'C');
+                    $pdf->Cell(25, 6, $persona->hora_salida ?? '-', 1, 0, 'C');
+                    $pdf->Cell(30, 6, ucfirst($persona->estado), 1, 1, 'L');
+                }
+                $pdf->Ln(3);
+            }
 
-        // Aprobado por
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, '_________________________', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'Firma', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(60, 10, $novedad->usuarioAprueba->name ?? '_________________________', 0, 0);
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->Cell(60, 10, '', 0, 1);
-        $pdf->Cell(60, 10, '', 0, 0);
-        $pdf->Cell(60, 10, 'APROBADO POR', 0, 0);
-        $pdf->Cell(60, 10, '', 0, 1);
+            // ============================================
+            // INTEGRANTES DE LA GUARDIA BOMBERIL
+            // ============================================
+            if ($novedad->integrantes_guardia && count($novedad->integrantes_guardia) > 0) {
+                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->Cell(180, 8, 'INTEGRANTES DE LA GUARDIA BOMBERIL', 0, 1, 'L');
+                $pdf->SetFont('Arial', 'B', 10);
+                
+                // Encabezados
+                $pdf->Cell(10, 6, '#', 1, 0, 'C');
+                $pdf->Cell(60, 6, 'Nombres y Apellidos', 1, 0, 'C');
+                $pdf->Cell(35, 6, 'Cédula', 1, 0, 'C');
+                $pdf->Cell(35, 6, 'Cargo', 1, 0, 'C');
+                $pdf->Cell(40, 6, 'Observaciones', 1, 1, 'C');
 
-        // Pie de página
-        $pdf->SetY(-15);
-        $pdf->SetFont('Arial', 'I', 8);
-        $pdf->Cell(180, 5, 'Documento generado por el Sistema Fire Control - ' . date('Y'), 0, 0, 'C');
+                $pdf->SetFont('Arial', '', 9);
+                foreach ($novedad->integrantes_guardia as $key => $integrante) {
+                    $pdf->Cell(10, 6, $key + 1, 1, 0, 'C');
+                    $pdf->Cell(60, 6, $integrante['nombre'] ?? 'N/A', 1, 0, 'L');
+                    $pdf->Cell(35, 6, $integrante['cedula'] ?? 'N/A', 1, 0, 'C');
+                    $pdf->Cell(35, 6, $integrante['cargo'] ?? 'N/A', 1, 0, 'L');
+                    $pdf->Cell(40, 6, $integrante['observaciones'] ?? '-', 1, 1, 'L');
+                }
+                $pdf->Ln(3);
+            }
 
-        // Guardar en archivo temporal
-        $tempFile = storage_path('app/temp_pdf_' . uniqid() . '.pdf');
-        $pdf->Output('F', $tempFile);
-        
-        $content = file_get_contents($tempFile);
-        @unlink($tempFile);
-        
-        return response($content, 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="novedad-NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . '.pdf"');
+            // SECCION DE FIRMAS
+            $pdf->Ln(8);
+            $pdf->SetDrawColor(0, 0, 0);
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(180, 8, 'FIRMAS DE RESPONSABLES', 0, 1, 'C');
+            $pdf->Ln(5);
+
+            // Líneas de firma
+            $pdf->SetFont('Arial', '', 11);
+
+            // Elaborado por
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, '_________________________', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'Firma', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(60, 10, $novedad->usuarioElabora->name ?? '_________________________', 0, 0);
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'ELABORADO POR', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Ln(5);
+
+            // Revisado por
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, '_________________________', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'Firma', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(60, 10, $novedad->usuarioRevisa->name ?? '_________________________', 0, 0);
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'REVISADO POR', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Ln(5);
+
+            // Aprobado por
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, '_________________________', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'Firma', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(60, 10, $novedad->usuarioAprueba->name ?? '_________________________', 0, 0);
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Cell(60, 10, '', 0, 1);
+            $pdf->Cell(60, 10, '', 0, 0);
+            $pdf->Cell(60, 10, 'APROBADO POR', 0, 0);
+            $pdf->Cell(60, 10, '', 0, 1);
+
+            // Pie de página
+            $pdf->SetY(-15);
+            $pdf->SetFont('Arial', 'I', 8);
+            $pdf->Cell(180, 5, 'Documento generado por el Sistema Fire Control - ' . date('Y'), 0, 0, 'C');
+
+            // Guardar en archivo temporal
+            $tempFile = storage_path('app/temp_pdf_' . uniqid() . '.pdf');
+            $pdf->Output('F', $tempFile);
             
-    } catch (\Exception $e) {
-        return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
-    }
+            $content = file_get_contents($tempFile);
+            @unlink($tempFile);
+            
+            return response($content, 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="novedad-NOV-' . str_pad($novedad->id, 6, '0', STR_PAD_LEFT) . '.pdf"');
+                
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
+        }
     }
 
     
 
     public function enviarCorreo($id)
-{
-    try {
-        $novedad = EstacionNovedad::with([
-            'estacion',
-            'usuarioElabora',
-            'usuarioRevisa',
-            'usuarioAprueba',
-            'usuarioRatifica'
-        ])->findOrFail($id);
-        
-        // Log para verificar
-        \Log::info('Intentando enviar correo para novedad ID: ' . $id);
-        
-        // Enviar correo al usuario que elaboró
-        if ($novedad->usuarioElabora) {
-            $novedad->usuarioElabora->notify(new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
-            \Log::info('Correo enviado al elaborador: ' . $novedad->usuarioElabora->name);
+    {
+        try {
+            $novedad = EstacionNovedad::with([
+                'estacion',
+                'usuarioElabora',
+                'usuarioRevisa',
+                'usuarioAprueba',
+                'usuarioRatifica'
+            ])->findOrFail($id);
+            
+            // Log para verificar
+            \Log::info('Intentando enviar correo para novedad ID: ' . $id);
+            
+            // Enviar correo al usuario que elaboró
+            if ($novedad->usuarioElabora) {
+                $novedad->usuarioElabora->notify(new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+                \Log::info('Correo enviado al elaborador: ' . $novedad->usuarioElabora->name);
+            }
+            
+            // Enviar a los revisores
+            $revisores = User::role(['Revisor', 'Aprobador', 'Ratificador', 'Super-Admin', 'admin'])->get();
+            if ($revisores->count() > 0) {
+                \Illuminate\Support\Facades\Notification::send($revisores, new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
+                \Log::info('Correo enviado a ' . $revisores->count() . ' revisores');
+            }
+            
+            return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al enviar correo: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
         }
-        
-        // Enviar a los revisores
-        $revisores = User::role(['Revisor', 'Aprobador', 'Ratificador', 'Super-Admin', 'admin'])->get();
-        if ($revisores->count() > 0) {
-            \Illuminate\Support\Facades\Notification::send($revisores, new \App\Notifications\NovedadEnRevision($novedad, Auth::user()));
-            \Log::info('Correo enviado a ' . $revisores->count() . ' revisores');
-        }
-        
-        return redirect()->back()->with('success', '✅ Correo enviado exitosamente.');
-        
-    } catch (\Exception $e) {
-        \Log::error('Error al enviar correo: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Error al enviar correo: ' . $e->getMessage());
     }
-}
 }

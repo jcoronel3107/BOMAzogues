@@ -276,6 +276,116 @@
             </div>
 
             <hr>
+            <hr>
+            {{-- ===== EMERGENCIAS DEL DÍA (BÚSQUEDA) ===== --}}
+                <h5 class="text-primary">Emergencias del Día</h5>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Fecha</label>
+                                            <input type="date" id="buscar_fecha" class="form-control" value="{{ $novedad->fecha instanceof \Carbon\Carbon ? $novedad->fecha->format('Y-m-d') : date('Y-m-d', strtotime($novedad->fecha)) }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Estación</label>
+                                            <select id="buscar_estacion" class="form-control">
+                                                @foreach($estaciones as $estacion)
+                                                    <option value="{{ $estacion->id }}" {{ $novedad->estacion_id == $estacion->id ? 'selected' : '' }}>
+                                                        {{ $estacion->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <button type="button" class="btn btn-info btn-block" onclick="buscarEmergencias()">
+                                                <i class="fas fa-search"></i> Buscar Emergencias
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ===== EMERGENCIAS SELECCIONADAS ACTUALMENTE ===== --}}
+                <div id="emergencias-asociadas-container" class="mb-2">
+                    @foreach($novedad->emergenciasAsociadas as $emergencia)
+                        <input type="hidden" name="emergencias_asociadas[]" value="{{ $emergencia->id }}">
+                    @endforeach
+                </div>
+
+                <div id="prehospitalarias-asociadas-container" class="mb-2">
+                    @foreach($novedad->prehospitalariasAsociadas as $emergencia)
+                        <input type="hidden" name="prehospitalarias_asociadas[]" value="{{ $emergencia->id }}">
+                    @endforeach
+                </div>
+
+                <div id="fuego-asociadas-container" class="mb-2">
+                    @foreach($novedad->fuegoAsociadas as $emergencia)
+                        <input type="hidden" name="fuego_asociadas[]" value="{{ $emergencia->id }}">
+                    @endforeach
+                </div>
+
+                {{-- ===== RESULTADOS DE LA BÚSQUEDA ===== --}}
+                <div id="emergencias-listado" style="display: none;">
+
+                    {{-- SECCIÓN 1: EMERGENCIAS (MÓDULO GENERAL) --}}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="fas fa-ambulance"></i> Emergencias (Módulo General)
+                                    <span id="total-emergencias" class="badge badge-light float-right">0</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" id="emergencias-table-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- SECCIÓN 2: EMERGENCIAS PREHOSPITALARIAS --}}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-danger text-white">
+                                    <i class="fas fa-ambulance"></i> Emergencias Prehospitalarias
+                                    <span id="total-prehospitalarias" class="badge badge-light float-right">0</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" id="prehospitalarias-table-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- SECCIÓN 3: EMERGENCIAS DE FUEGO --}}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <i class="fas fa-fire"></i> Emergencias de Fuego
+                                    <span id="total-fuego" class="badge badge-dark float-right">0</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" id="fuego-table-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
 
             <!-- Integrantes de la Guardia Bomberil -->
             <div class="row">
@@ -650,5 +760,312 @@ function eliminarIntegranteGuardia(id) {
     const element = document.getElementById('integrante-guardia-' + id);
     if (element) element.remove();
 }
+
+// ============================================================
+//  BUSCAR EMERGENCIAS DEL DÍA (para el edit)
+// ============================================================
+function buscarEmergencias() {
+    const fecha = document.getElementById('buscar_fecha').value;
+    const estacionId = document.getElementById('buscar_estacion').value;
+
+    if (!fecha || !estacionId) {
+        alert('Por favor, seleccione fecha y estación.');
+        return;
+    }
+
+    document.getElementById('emergencias-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('prehospitalarias-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('fuego-table-container').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Cargando...</p></div>';
+    document.getElementById('emergencias-listado').style.display = 'block';
+
+    fetch(`/novedades/buscar-emergencias?fecha=${fecha}&estacion_id=${estacionId}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('total-emergencias').textContent = data.totales.emergencias;
+        renderTablaEmergenciasEdit(data.emergencias);
+
+        document.getElementById('total-prehospitalarias').textContent = data.totales.prehospitalarias;
+        renderTablaPrehospitalariasEdit(data.prehospitalarias);
+
+        document.getElementById('total-fuego').textContent = data.totales.fuego;
+        renderTablaFuegoEdit(data.fuego);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// ============================================================
+//  RENDER TABLAS EN EDIT (con checkboxes pre-marcados)
+// ============================================================
+   function renderTablaEmergenciasEdit(emergencias) {
+    const container = document.getElementById('emergencias-table-container');
+    if (emergencias.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias.</div>';
+        return;
+    }
+
+    const asociadas = getIdsAsociados('emergencias_asociadas[]');
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodasEdit(this, 'emergencia')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Personal</th>
+                    <th>Vehículos</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    emergencias.forEach(e => {
+        const checked = asociadas.includes(e.id.toString()) ? 'checked' : '';
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="emergencia" 
+                           ${checked}
+                           onchange="toggleAsociada(this, 'emergencias_asociadas[]', 'emergencias-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.personal}</td>
+                <td>${e.vehiculos}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary btn-sm" onclick="agregarSeleccionadasEdit('emergencia')">
+            <i class="fas fa-plus"></i> Agregar Emergencias Seleccionadas
+        </button>
+    `;
+
+    container.innerHTML = html;
+}
+
+function renderTablaPrehospitalariasEdit(prehospitalarias) 
+{
+    const container = document.getElementById('prehospitalarias-table-container');
+    if (prehospitalarias.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias prehospitalarias.</div>';
+        return;
+    }
+
+    const asociadas = getIdsAsociados('prehospitalarias_asociadas[]');
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodasEdit(this, 'prehospitalaria')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Pacientes</th>
+                    <th>Personal</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    prehospitalarias.forEach(e => {
+        const checked = asociadas.includes(e.id.toString()) ? 'checked' : '';
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="prehospitalaria" 
+                           ${checked}
+                           onchange="toggleAsociada(this, 'prehospitalarias_asociadas[]', 'prehospitalarias-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td><span class="badge badge-secondary">${e.prioridad || '—'}</span></td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.pacientes}</td>
+                <td>${e.personal}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-danger btn-sm" onclick="agregarSeleccionadasEdit('prehospitalaria')">
+            <i class="fas fa-plus"></i> Agregar Prehospitalarias Seleccionadas
+        </button>
+    `;
+
+    container.innerHTML = html;
+}
+
+function renderTablaFuegoEdit(fuego) 
+{
+    const container = document.getElementById('fuego-table-container');
+    if (fuego.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No se encontraron emergencias de fuego.</div>';
+        return;
+    }
+
+    const asociadas = getIdsAsociados('fuego_asociadas[]');
+
+    let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th><input type="checkbox" onclick="seleccionarTodasEdit(this, 'fuego')"></th>
+                    <th>Código</th>
+                    <th>Tipo</th>
+                    <th>Riesgo</th>
+                    <th>Hora Salida</th>
+                    <th>Hora Llegada</th>
+                    <th>Pacientes</th>
+                    <th>Personal</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    fuego.forEach(e => {
+        const checked = asociadas.includes(e.id.toString()) ? 'checked' : '';
+        html += `
+            <tr>
+                <td>
+                    <input type="checkbox" 
+                           class="seleccionar-emergencia" 
+                           value="${e.id}" 
+                           data-tipo="fuego" 
+                           ${checked}
+                           onchange="toggleAsociada(this, 'fuego_asociadas[]', 'fuego-asociadas-container')">
+                </td>
+                <td>${e.codigo}</td>
+                <td>${e.tipo}</td>
+                <td><span class="badge badge-warning">${e.nivel_riesgo || '—'}</span></td>
+                <td>${e.hora_salida || '—'}</td>
+                <td>${e.hora_llegada || '—'}</td>
+                <td>${e.pacientes}</td>
+                <td>${e.personal}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-warning btn-sm" onclick="agregarSeleccionadasEdit('fuego')">
+            <i class="fas fa-plus"></i> Agregar Emergencias de Fuego Seleccionadas
+        </button>
+    `;
+
+    container.innerHTML = html;
+}
+
+    // ============================================================
+    //  HELPERS
+    // ============================================================
+    function getIdsAsociados(inputName) {
+        const inputs = document.querySelectorAll(`input[name="${inputName}"]`);
+        return Array.from(inputs).map(inp => inp.value);
+    }
+
+    function seleccionarTodasEdit(checkbox, tipo) {
+        const checkboxes = document.querySelectorAll(`.seleccionar-emergencia[data-tipo="${tipo}"]`);
+        checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    }
+
+    function agregarSeleccionadasEdit(tipo) {
+        const seleccionadas = document.querySelectorAll(`.seleccionar-emergencia[data-tipo="${tipo}"]:checked`);
+
+        if (seleccionadas.length === 0) {
+            alert('Por favor, seleccione al menos una emergencia.');
+            return;
+        }
+
+        let containerId = '';
+        let inputName = '';
+
+        switch (tipo) {
+            case 'emergencia':
+                containerId = 'emergencias-asociadas-container';
+                inputName = 'emergencias_asociadas[]';
+                break;
+            case 'prehospitalaria':
+                containerId = 'prehospitalarias-asociadas-container';
+                inputName = 'prehospitalarias_asociadas[]';
+                break;
+            case 'fuego':
+                containerId = 'fuego-asociadas-container';
+                inputName = 'fuego_asociadas[]';
+                break;
+        }
+
+        const container = document.getElementById(containerId);
+
+        seleccionadas.forEach(cb => {
+            const id = cb.value;
+            if (container.querySelector(`input[value="${id}"]`)) return;
+
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = inputName;
+            hidden.value = id;
+            container.appendChild(hidden);
+
+            cb.checked = false;
+        });
+
+        alert(`✅ ${seleccionadas.length} emergencia(s) agregada(s).`);
+    }
+
+    // ============================================================
+//  TOGGLE ASOCIADA (agrega o elimina el input hidden)
+// ============================================================
+function toggleAsociada(checkbox, inputName, containerId) 
+{
+    const id = checkbox.value;
+    const container = document.getElementById(containerId);
+
+    if (checkbox.checked) {
+        // Agregar el input hidden si no existe
+        if (!container.querySelector(`input[value="${id}"]`)) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = inputName;
+            hidden.value = id;
+            container.appendChild(hidden);
+        }
+    } else {
+        // Eliminar el input hidden si existe
+        const existing = container.querySelector(`input[value="${id}"]`);
+        if (existing) {
+            existing.remove();
+        }
+    }
+}
+
 </script>
 @endsection
