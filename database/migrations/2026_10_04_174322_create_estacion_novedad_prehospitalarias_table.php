@@ -10,12 +10,22 @@ class CreateEstacionNovedadPrehospitalariasTable extends Migration
     {
         Schema::create('estacion_novedad_prehospitalarias', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('estacion_novedad_id')
-                  ->constrained('estacion_novedades')
+            
+            // Columnas
+            $table->unsignedBigInteger('estacion_novedad_id');
+            $table->unsignedBigInteger('emergencia_prehospitalaria_id');
+            
+            // Foreign keys con nombres cortos
+            $table->foreign('estacion_novedad_id', 'fk_nov_preh_novedad')
+                  ->references('id')
+                  ->on('estacion_novedades')
                   ->onDelete('cascade');
-            $table->foreignId('emergencia_prehospitalaria_id')
-                  ->constrained('emergencias_prehospitalarias')
+                  
+            $table->foreign('emergencia_prehospitalaria_id', 'fk_nov_preh_emergencia')
+                  ->references('id')
+                  ->on('emergencias_prehospitalarias')
                   ->onDelete('cascade');
+            
             $table->timestamps();
         });
     }

@@ -10,12 +10,20 @@ class CreateEstacionNovedadFuegoTable extends Migration
     {
         Schema::create('estacion_novedad_fuego', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('estacion_novedad_id')
-                  ->constrained('estacion_novedades')
+            
+            $table->unsignedBigInteger('estacion_novedad_id');
+            $table->unsignedBigInteger('emergencia_fuego_id');
+            
+            $table->foreign('estacion_novedad_id', 'fk_nov_fuego_novedad')
+                  ->references('id')
+                  ->on('estacion_novedades')
                   ->onDelete('cascade');
-            $table->foreignId('emergencia_fuego_id')
-                  ->constrained('emergencias_fuego')
+                  
+            $table->foreign('emergencia_fuego_id', 'fk_nov_fuego_emergencia')
+                  ->references('id')
+                  ->on('emergencias_fuego')
                   ->onDelete('cascade');
+            
             $table->timestamps();
         });
     }
