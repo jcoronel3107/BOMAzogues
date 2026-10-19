@@ -137,4 +137,102 @@
                     </button>
                     <div id="integrantes-container">
                         @if($movilizacion->integrantes)
-                            @foreach($moviliz
+                            @foreach($movilizacion->integrantes as $key => $integrante)
+                                <div class="card mb-2 p-3" id="integrante-{{ $key }}">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Nombres y Apellidos</label>
+                                                <input type="text" name="integrantes[{{ $key }}][nombre]" class="form-control" value="{{ $integrante['nombre'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Cédula</label>
+                                                <input type="text" name="integrantes[{{ $key }}][cedula]" class="form-control" value="{{ $integrante['cedula'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Cargo</label>
+                                                <input type="text" name="integrantes[{{ $key }}][cargo]" class="form-control" value="{{ $integrante['cargo'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegrante({{ $key }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Actualizar Movilización
+                </button>
+                <a href="{{ route('movilizaciones.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let integranteCount = {{ $movilizacion->integrantes ? count($movilizacion->integrantes) : 0 }};
+
+function agregarIntegrante() {
+    integranteCount++;
+    const container = document.getElementById('integrantes-container');
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-3';
+    div.id = 'integrante-' + integranteCount;
+    div.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Nombres y Apellidos</label>
+                    <input type="text" name="integrantes[${integranteCount}][nombre]" class="form-control" placeholder="Nombre completo">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" name="integrantes[${integranteCount}][cedula]" class="form-control" placeholder="Cédula">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <input type="text" name="integrantes[${integranteCount}][cargo]" class="form-control" placeholder="Cargo">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-sm form-control" onclick="eliminarIntegrante(${integranteCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function eliminarIntegrante(id) {
+    const element = document.getElementById('integrante-' + id);
+    if (element) element.remove();
+}
+</script>
+@endsection
